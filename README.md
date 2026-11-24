@@ -82,8 +82,8 @@ Each preset changes fonts, color schemes, buttons, radii, card layout, image rat
 | Product labels with rules (tag, collection, vendor, product type), colors and priority, without an app | Native | `snippets/badges.liquid`, Theme settings > Product labels |
 | Featured product section: gallery with video and 3D, variant picker, quantity, buy buttons, app blocks and Custom Liquid | Native | `sections/featured-product.liquid` |
 | Before/after image slider: drag, swipe or arrow keys, labels, four image ratios | Native | `sections/before-after.liquid` |
-| Editorial grid: magazine, collage or mosaic on desktop; swipeable carousel, mosaic grid or one per row on phones and tablets | Native | `sections/editorial-grid.liquid` |
-| Image size (Original image ratio, X-Small, Small, Medium, Large) in collection lists, blog posts, image with text, lookbook, articles, editorial grid, shop the look, promo banner, newsletter, before/after and video; slideshow and hero add X-Small and Original image ratio to their sizes | Native | `.media--size-*` in `assets/base.css`, size rules in `assets/sections.css` |
+| Editorial grid: free placement on a 12-column desktop and 6-column mobile grid. Each *Grid item* has automatic or custom placement (start row, start column, span columns, span rows), horizontal and vertical shift, text on the image, bring to front and show on desktop/mobile only, set separately for desktop and mobile. Items hold Image (desktop and mobile image, shape, link, caption, custom width with desktop and mobile maximum width), Heading, Text, Button, Spacer and Custom Liquid blocks. Phones can use the grid, a swipeable carousel or one per row | Native | `sections/editorial-grid.liquid`, `blocks/_editorial-item.liquid`, `blocks/_editorial-image.liquid` |
+| Image size (Original image ratio, X-Small, Small, Medium, Large; the editorial grid sets a shape per image) in collection lists, blog posts, image with text, lookbook, articles, shop the look, promo banner, newsletter, before/after and video; slideshow and hero add X-Small and Original image ratio to their sizes | Native | `.media--size-*` in `assets/base.css`, size rules in `assets/sections.css` |
 | Cart drawer, free-shipping bar, gift message, cart upsell | Native | Cart AJAX API + Section Rendering API |
 | Product cards (4 layouts), hover image, swatches, badges, quick add, quick view | Native | `snippets/product-card.liquid`, `sections/quick-view.liquid` |
 | Variant picker with swatches, sold-out states, combined listings | Native | `option_values` + Section Rendering API |
@@ -110,7 +110,7 @@ Each preset changes fonts, color schemes, buttons, radii, card layout, image rat
 ```
 assets/      base.css, components.css, sections.css, product.css, collection.css, pages.css
              theme.js (core), product.js, sections.js, facets.js
-blocks/      reusable theme blocks for the Custom section
+blocks/      reusable theme blocks for the Custom section; _editorial-item and _editorial-image for the Editorial grid
 config/      settings_schema.json, settings_data.json (5 presets)
 layout/      theme.liquid, password.liquid
 locales/     en.default.json

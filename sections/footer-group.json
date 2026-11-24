@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "type": "footer",
   "name": "Footer group",
@@ -42,13 +51,15 @@
         "newsletter"
       ],
       "settings": {
+        "color_scheme": "scheme-3",
+        "layout": "columns",
         "show_payment_icons": true,
         "show_policies": true,
         "show_country": true,
         "show_language": true,
         "copyright_text": "",
+        "enable_follow_on_shop": true,
         "show_powered_by": false,
-        "color_scheme": "scheme-3",
         "padding_top": 64,
         "padding_bottom": 32
       }
@@ -56,10 +67,11 @@
     "newsletter-popup": {
       "type": "newsletter-popup",
       "settings": {
+        "color_scheme": "scheme-1",
         "enable": true,
         "show_on": "all",
-        "delay": 8,
-        "frequency": 14,
+        "delay": 3,
+        "frequency": 1,
         "exit_intent": true,
         "show_on_mobile": true,
         "image": "shopify://shop_images/home-newsletter.jpg",
@@ -69,8 +81,7 @@
         "text": "<p>New arrivals, restocks and early access to the sale, straight to your inbox.</p>",
         "button_label": "Subscribe",
         "discount_code": "",
-        "disclaimer": "<p>You can unsubscribe at any time.</p>",
-        "color_scheme": "scheme-1"
+        "disclaimer": "<p>You can unsubscribe at any time.</p>"
       }
     }
   },

@@ -1,7 +1,4 @@
-{%- liquid
-  assign s = section.settings
-  assign gap = s.gap
--%}
+{%- assign s = section.settings -%}
 <div
   class="section editorial-grid-section color-{{ s.color_scheme }}{% unless s.image_zoom %} zoom-off{% endunless %}"
   style="--pt: {{ s.padding_top }}px; --pb: {{ s.padding_bottom }}px;"
@@ -16,66 +13,12 @@
       </div>
     {%- endif -%}
 
-    <ul class="editorial-grid editorial-grid--{{ s.layout }} editorial-grid--m-{{ s.mobile_layout }} editorial-grid--size-{{ s.image_size }}" role="list" style="--editorial-gap: {{ gap }}px;">
-      {%- for block in section.blocks -%}
-        {%- liquid
-          assign b = block.settings
-          assign tile_sizes = '(min-width: 990px) 33vw, 50vw'
-          if b.size == 'large' or b.size == 'wide'
-            assign tile_sizes = '(min-width: 990px) 66vw, 100vw'
-          endif
-          assign placeholder_number = forloop.index | modulo: 3 | plus: 1
-          assign placeholder_name = 'lifestyle-' | append: placeholder_number
-          if placeholder_number == 3
-            assign placeholder_name = 'hero-apparel-2'
-          endif
-        -%}
-        <li class="editorial-tile editorial-tile--{{ b.size }} editorial-tile--text-{{ b.text_position }} reveal" style="--reveal-index: {{ forloop.index0 | modulo: 4 }};" {{ block.shopify_attributes }}>
-          <div class="editorial-tile__media" style="--ratio: {{ b.image.aspect_ratio | default: 0.75 }};">
-            {%- if b.image != blank -%}
-              <picture>
-                {%- if b.image_mobile != blank -%}
-                  <source
-                    media="(max-width: 749px)"
-                    srcset="{{ b.image_mobile | image_url: width: 600 }} 600w, {{ b.image_mobile | image_url: width: 900 }} 900w, {{ b.image_mobile | image_url: width: 1200 }} 1200w"
-                    sizes="100vw"
-                    width="{{ b.image_mobile.width }}"
-                    height="{{ b.image_mobile.height }}"
-                  >
-                {%- endif -%}
-                {%- assign tile_alt = b.image.alt | escape -%}
-                {{ b.image | image_url: width: 2400 | image_tag: widths: '400, 600, 800, 1100, 1500, 2000, 2400', sizes: tile_sizes, loading: 'lazy', alt: tile_alt, class: 'editorial-tile__image' }}
-              </picture>
-            {%- else -%}
-              {{ placeholder_name | placeholder_svg_tag: 'editorial-tile__image placeholder-svg' }}
-            {%- endif -%}
-          </div>
-          {%- if b.link != blank and b.heading == blank -%}
-            <a href="{{ b.link }}" class="editorial-tile__link">
-              <span class="visually-hidden">{{ b.link_label | default: b.eyebrow | default: b.image.alt | escape }}</span>
-            </a>
-          {%- endif -%}
-          {%- if b.eyebrow != blank or b.heading != blank or b.text != blank or b.link_label != blank -%}
-            <div class="editorial-tile__content">
-              {%- if b.eyebrow != blank -%}<p class="eyebrow editorial-tile__eyebrow">{{ b.eyebrow | escape }}</p>{%- endif -%}
-              {%- if b.heading != blank -%}
-                <h3 class="editorial-tile__heading {% if b.size == 'large' %}h2{% else %}h3{% endif %}">
-                  {%- if b.link != blank -%}
-                    <a href="{{ b.link }}" class="editorial-tile__link">{{ b.heading }}</a>
-                  {%- else -%}
-                    {{ b.heading }}
-                  {%- endif -%}
-                </h3>
-              {%- endif -%}
-              {%- if b.text != blank -%}<div class="editorial-tile__text rte">{{ b.text }}</div>{%- endif -%}
-              {%- if b.link_label != blank -%}
-                <span class="editorial-tile__cta link" aria-hidden="true">{{ b.link_label | escape }} {% render 'icon', icon: 'arrow-right' %}</span>
-              {%- endif -%}
-            </div>
-          {%- endif -%}
-        </li>
-      {%- endfor -%}
-    </ul>
+    <div
+      class="editorial-grid editorial-grid--m-{{ s.mobile_layout }}"
+      style="--eg-gap-x: {{ s.gap_x }}px; --eg-gap-y: {{ s.gap_y }}px; --eg-gap-x-m: {{ s.gap_x_mobile }}px; --eg-gap-y-m: {{ s.gap_y_mobile }}px;"
+    >
+      {% content_for 'blocks' %}
+    </div>
   </div>
 </div>
 
@@ -84,49 +27,10 @@
   "name": "Editorial grid",
   "tag": "section",
   "class": "section-editorial-grid",
-  "max_blocks": 10,
+  "max_blocks": 16,
+  "blocks": [{ "type": "_editorial-item" }],
   "settings": [
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
-    {
-      "type": "select",
-      "id": "layout",
-      "label": "Layout",
-      "options": [
-        { "value": "magazine", "label": "Magazine" },
-        { "value": "collage", "label": "Collage" },
-        { "value": "mosaic", "label": "Mosaic" }
-      ],
-      "default": "magazine",
-      "info": "Desktop. Magazine follows tile sizes in rows. Collage staggers tiles for an image collage. Mosaic packs tiles tightly."
-    },
-    {
-      "type": "select",
-      "id": "mobile_layout",
-      "label": "Mobile layout",
-      "options": [
-        { "value": "carousel", "label": "Swipeable carousel" },
-        { "value": "mosaic", "label": "Mosaic grid" },
-        { "value": "stack", "label": "One per row" }
-      ],
-      "default": "carousel",
-      "info": "Phones and tablets. The carousel shows every tile in the same shape, with the next one peeking in."
-    },
-    {
-      "type": "select",
-      "id": "image_size",
-      "label": "Image size",
-      "options": [
-        { "value": "original", "label": "Original image ratio" },
-        { "value": "ratio", "label": "Default" },
-        { "value": "x-small", "label": "X-Small" },
-        { "value": "small", "label": "Small" },
-        { "value": "medium", "label": "Medium" },
-        { "value": "large", "label": "Large" }
-      ],
-      "default": "ratio",
-      "info": "Original image ratio shows each image uncropped in its own shape. X-Small to Large set a fixed image height and crop to fit. On desktop it sets the row height of the magazine and mosaic layouts."
-    },
-    { "type": "checkbox", "id": "image_zoom", "label": "Zoom images on hover", "info": "Works when Theme settings > Animations > Image hover effect uses zoom.", "default": true },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
     { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "Stories from the studio" },
     {
@@ -139,67 +43,109 @@
       ],
       "default": "start"
     },
-    { "type": "range", "id": "gap", "label": "Space between tiles", "min": 0, "max": 40, "step": 2, "unit": "px", "default": 12 },
+    { "type": "header", "content": "Grid" },
+    {
+      "type": "paragraph",
+      "content": "Add grid items and place each one on the grid: desktop has 12 columns, mobile has 6. Each item holds images, headings, text and buttons."
+    },
+    {
+      "type": "select",
+      "id": "align_items",
+      "label": "Vertical alignment",
+      "options": [
+        { "value": "start", "label": "Top" },
+        { "value": "center", "label": "Center" },
+        { "value": "end", "label": "Bottom" },
+        { "value": "stretch", "label": "Fill row height" }
+      ],
+      "default": "stretch",
+      "info": "How items in the same row line up. Fill row height stretches images so rows have no gaps. Each item can override it."
+    },
+    { "type": "range", "id": "gap_x", "label": "Horizontal spacing", "min": 0, "max": 80, "step": 4, "unit": "px", "default": 16 },
+    { "type": "range", "id": "gap_y", "label": "Vertical spacing", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 16 },
     { "type": "checkbox", "id": "full_width", "label": "Full width", "default": false },
+    { "type": "checkbox", "id": "image_zoom", "label": "Zoom images on hover", "info": "Works when Theme settings > Animations > Image hover effect uses zoom.", "default": true },
+    { "type": "header", "content": "Mobile" },
+    {
+      "type": "select",
+      "id": "mobile_layout",
+      "label": "Mobile layout",
+      "options": [
+        { "value": "grid", "label": "Grid" },
+        { "value": "carousel", "label": "Swipeable carousel" },
+        { "value": "stack", "label": "One per row" }
+      ],
+      "default": "grid",
+      "info": "Grid uses each item's mobile settings. The carousel and one per row show the items in order."
+    },
+    { "type": "range", "id": "gap_x_mobile", "label": "Horizontal spacing", "min": 0, "max": 40, "step": 2, "unit": "px", "default": 10 },
+    { "type": "range", "id": "gap_y_mobile", "label": "Vertical spacing", "min": 0, "max": 80, "step": 2, "unit": "px", "default": 10 },
+    { "type": "header", "content": "Spacing" },
     { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 },
     { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 }
-  ],
-  "blocks": [
-    {
-      "type": "tile",
-      "name": "Tile",
-      "settings": [
-        { "type": "image_picker", "id": "image", "label": "Image", "info": "Recommended: small tile 3:4 (1200 x 1600 px), tall tile 2:3 (1200 x 1800 px), large tile 4:3 (1600 x 1200 px)." },
-        { "type": "image_picker", "id": "image_mobile", "label": "Mobile image", "info": "Optional. Shown on phones in the tile's shape. Recommended: 3:4 portrait, 900 x 1200 px." },
-        {
-          "type": "select",
-          "id": "size",
-          "label": "Tile size",
-          "options": [
-            { "value": "small", "label": "Small" },
-            { "value": "wide", "label": "Wide" },
-            { "value": "tall", "label": "Tall" },
-            { "value": "large", "label": "Large" }
-          ],
-          "default": "small",
-          "info": "Small: one column. Tall: one column, two rows high. Wide: two columns. Large: two columns, two rows high. Phones follow the section's mobile layout."
-        },
-        {
-          "type": "select",
-          "id": "text_position",
-          "label": "Text position",
-          "options": [
-            { "value": "overlay", "label": "On image" },
-            { "value": "below", "label": "Below image" }
-          ],
-          "default": "overlay"
-        },
-        { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
-        { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "Tile heading" },
-        { "type": "inline_richtext", "id": "text", "label": "Text" },
-        { "type": "url", "id": "link", "label": "Link" },
-        { "type": "text", "id": "link_label", "label": "Link label", "default": "Discover" }
-      ]
-    }
   ],
   "presets": [
     {
       "name": "Editorial grid",
       "blocks": [
-        { "type": "tile", "settings": { "size": "large", "eyebrow": "Campaign", "heading": "Quiet luxury, everyday" } },
-        { "type": "tile", "settings": { "size": "small", "heading": "The linen shirt" } },
-        { "type": "tile", "settings": { "size": "small", "heading": "Soft tailoring" } },
-        { "type": "tile", "settings": { "size": "wide", "heading": "Weekend layers" } }
+        {
+          "type": "_editorial-item",
+          "settings": { "span": 6, "rows": 2, "mobile_span": 6, "text_on_image": true },
+          "blocks": [
+            { "type": "_editorial-image" },
+            { "type": "heading", "settings": { "eyebrow": "Campaign", "heading": "Quiet luxury, everyday", "size": "h2", "alignment": "left", "max_width": 22 } },
+            { "type": "button", "settings": { "label": "Discover", "style": "link" } }
+          ]
+        },
+        {
+          "type": "_editorial-item",
+          "settings": { "span": 3, "rows": 2, "mobile_span": 3, "mobile_rows": 2, "text_on_image": true },
+          "blocks": [
+            { "type": "_editorial-image" },
+            { "type": "heading", "settings": { "heading": "The linen shirt", "size": "h4", "alignment": "left" } }
+          ]
+        },
+        {
+          "type": "_editorial-item",
+          "settings": { "span": 3, "mobile_span": 3, "text_on_image": true },
+          "blocks": [
+            { "type": "_editorial-image" },
+            { "type": "heading", "settings": { "heading": "Soft tailoring", "size": "h4", "alignment": "left" } }
+          ]
+        },
+        {
+          "type": "_editorial-item",
+          "settings": { "span": 3, "mobile_span": 3, "text_on_image": true },
+          "blocks": [
+            { "type": "_editorial-image" },
+            { "type": "heading", "settings": { "heading": "Weekend layers", "size": "h4", "alignment": "left" } }
+          ]
+        }
       ]
     },
     {
       "name": "Image collage",
-      "settings": { "layout": "collage", "heading": "" },
+      "settings": { "heading": "", "align_items": "start", "gap_x": 24 },
       "blocks": [
-        { "type": "tile", "settings": { "size": "tall", "heading": "", "link_label": "" } },
-        { "type": "tile", "settings": { "size": "small", "heading": "", "link_label": "" } },
-        { "type": "tile", "settings": { "size": "large", "heading": "", "link_label": "" } },
-        { "type": "tile", "settings": { "size": "small", "heading": "", "link_label": "" } }
+        {
+          "type": "_editorial-item",
+          "settings": { "position": "custom", "row": 1, "column": 1, "span": 5, "mobile_position": "custom", "mobile_row": 1, "mobile_column": 1, "mobile_span": 4 },
+          "blocks": [{ "type": "_editorial-image", "settings": { "ratio": "portrait", "caption": "The new season" } }]
+        },
+        {
+          "type": "_editorial-item",
+          "settings": { "position": "custom", "row": 1, "column": 7, "span": 3, "shift_y": 18, "mobile_position": "custom", "mobile_row": 2, "mobile_column": 3, "mobile_span": 4, "mobile_shift_y": -30, "bring_to_front": true },
+          "blocks": [{ "type": "_editorial-image", "settings": { "ratio": "portrait" } }]
+        },
+        {
+          "type": "_editorial-item",
+          "settings": { "position": "custom", "row": 1, "column": 10, "span": 3, "vertical_alignment": "end", "mobile_position": "custom", "mobile_row": 3, "mobile_column": 1, "mobile_span": 6 },
+          "blocks": [
+            { "type": "heading", "settings": { "eyebrow": "Lookbook", "heading": "Made to be lived in", "size": "h3", "alignment": "left" } },
+            { "type": "text", "settings": { "text": "<p>Easy shapes in natural fabrics, styled for the way you actually dress.</p>", "alignment": "left" } },
+            { "type": "button", "settings": { "label": "Explore the edit", "style": "secondary" } }
+          ]
+        }
       ]
     }
   ]

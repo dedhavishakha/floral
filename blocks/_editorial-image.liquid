@@ -1,0 +1,119 @@
+{% doc %}
+  Image for an Editorial grid item: separate desktop and mobile images, a fixed or original shape, an optional link
+  and caption, and full or custom width with separate desktop and mobile maximum widths.
+{% enddoc %}
+{%- liquid
+  assign b = block.settings
+  assign img = b.image
+  assign img_alt = img.alt | escape
+  assign ratio_d = img.aspect_ratio | default: 0.75
+  assign ratio_m = b.image_mobile.aspect_ratio | default: ratio_d
+
+  assign shape = b.ratio
+  if shape == 'original'
+    assign shape = 'natural'
+  endif
+
+  assign self = 'flex-start'
+  if b.alignment == 'center'
+    assign self = 'center'
+  elsif b.alignment == 'right'
+    assign self = 'flex-end'
+  endif
+
+  assign image_sizes = 'auto, (min-width: 990px) 50vw, 100vw'
+  if b.width == 'custom'
+    assign image_sizes = 'auto, ' | append: b.max_width | append: 'px'
+  endif
+  # Name for an image link when the image has no alt text
+  assign link_label = 'sections.editorial_grid.link_fallback' | t
+  if b.caption != blank
+    assign link_label = b.caption
+  endif
+  assign link_label = link_label | escape
+-%}
+<div
+  class="editorial-image editorial-image--{{ b.width }}"
+  style="--img-max: {{ b.max_width }}px; --img-max-m: {{ b.mobile_max_width }}px; --img-self: {{ self }}; --img-text: {{ b.alignment }};"
+  {{ block.shopify_attributes }}
+>
+  {%- capture media -%}
+    {%- if img != blank -%}
+      <picture>
+        {%- if b.image_mobile != blank -%}
+          <source
+            media="(max-width: 749px)"
+            srcset="{{ b.image_mobile | image_url: width: 600 }} 600w, {{ b.image_mobile | image_url: width: 900 }} 900w, {{ b.image_mobile | image_url: width: 1200 }} 1200w, {{ b.image_mobile | image_url: width: 1600 }} 1600w"
+            sizes="auto, 100vw"
+            width="{{ b.image_mobile.width }}"
+            height="{{ b.image_mobile.height }}"
+          >
+        {%- endif -%}
+        {{ img | image_url: width: 2400 | image_tag: widths: '400, 600, 800, 1100, 1500, 2000, 2400', sizes: image_sizes, loading: 'lazy', alt: img_alt, class: 'editorial-image__img' }}
+      </picture>
+    {%- else -%}
+      {{ 'lifestyle-1' | placeholder_svg_tag: 'editorial-image__img placeholder-svg' }}
+    {%- endif -%}
+  {%- endcapture -%}
+  {%- if b.link != blank -%}
+    <a
+      href="{{ b.link }}"
+      class="editorial-image__media media media--{{ shape }}"
+      style="--ratio-d: {{ ratio_d }}; --ratio-m: {{ ratio_m }};"
+      {% if img_alt == blank %}aria-label="{{ link_label }}"{% endif %}
+      {% if b.new_tab %}target="_blank" rel="noopener"{% endif %}
+    >
+      {{- media -}}
+    </a>
+  {%- else -%}
+    <div class="editorial-image__media media media--{{ shape }}" style="--ratio-d: {{ ratio_d }}; --ratio-m: {{ ratio_m }};">
+      {{- media -}}
+    </div>
+  {%- endif -%}
+  {%- if b.caption != blank -%}
+    <p class="editorial-image__caption">{{ b.caption | escape }}</p>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Image",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Image", "info": "Recommended: at least 1600 px wide. Portrait 3:4 (1200 x 1600 px) suits most grid items." },
+    { "type": "image_picker", "id": "image_mobile", "label": "Mobile image", "info": "Optional. Replaces the image on phones, e.g. a portrait crop of a landscape photo (900 x 1200 px)." },
+    {
+      "type": "select",
+      "id": "ratio",
+      "label": "Image shape",
+      "options": [
+        { "value": "original", "label": "Original image ratio" },
+        { "value": "portrait", "label": "Portrait 3:4" },
+        { "value": "portrait-45", "label": "Portrait 4:5" },
+        { "value": "tall", "label": "Tall 2:3" },
+        { "value": "square", "label": "Square 1:1" },
+        { "value": "landscape", "label": "Landscape 4:3" },
+        { "value": "wide", "label": "Wide 16:9" }
+      ],
+      "default": "original",
+      "info": "Original image ratio shows the whole image. The fixed shapes crop it to fit."
+    },
+    { "type": "url", "id": "link", "label": "Link" },
+    { "type": "checkbox", "id": "new_tab", "label": "Open link in new tab", "default": false },
+    { "type": "text", "id": "caption", "label": "Caption" },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Image width",
+      "options": [
+        { "value": "full", "label": "Full width" },
+        { "value": "custom", "label": "Custom" }
+      ],
+      "default": "full"
+    },
+    { "type": "text_alignment", "id": "alignment", "label": "Alignment", "default": "center", "visible_if": "{{ block.settings.width == 'custom' }}" },
+    { "type": "range", "id": "max_width", "label": "Maximum width", "min": 100, "max": 1100, "step": 10, "unit": "px", "default": 400, "visible_if": "{{ block.settings.width == 'custom' }}" },
+    { "type": "range", "id": "mobile_max_width", "label": "Mobile maximum width", "min": 50, "max": 600, "step": 10, "unit": "px", "default": 240, "visible_if": "{{ block.settings.width == 'custom' }}" }
+  ],
+  "presets": [{ "name": "Image" }]
+}
+{% endschema %}

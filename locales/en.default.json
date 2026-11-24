@@ -351,6 +351,9 @@
     },
     "before_after": {
       "slider_label": "Drag or use the arrow keys to compare the before and after images"
+    },
+    "editorial_grid": {
+      "link_fallback": "View more"
     }
   },
   "newsletter": {

@@ -11,7 +11,7 @@
   "current": {
     "color_sale_price": "#B23A2A",
     "type_heading_font": "instrument_sans_n5",
-    "heading_scale": 100,
+    "heading_scale": 80,
     "heading_tracking": -2,
     "heading_line_height": 100,
     "heading_case": "none",

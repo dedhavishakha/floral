@@ -1,0 +1,161 @@
+{% doc %}
+  Grid item for the Editorial grid section. Places its blocks on a 12-column desktop grid and a 6-column mobile grid.
+  Automatic placement follows the block order; Custom sets the start row and column. Shifts move the item by a
+  percentage of its own size for overlapping collage layouts.
+{% enddoc %}
+{%- liquid
+  assign b = block.settings
+
+  # Desktop: 12 columns. Spans are clamped so an item never runs past the last column.
+  assign col = 'auto'
+  assign row = 'auto'
+  assign span = b.span
+  if b.position == 'custom'
+    assign col = b.column
+    assign row = b.row
+    assign max_span = 13 | minus: b.column
+    assign span = b.span | at_most: max_span
+  endif
+
+  # Mobile: 6 columns
+  assign m_col = 'auto'
+  assign m_row = 'auto'
+  assign m_span = b.mobile_span
+  if b.mobile_position == 'custom'
+    assign m_col = b.mobile_column
+    assign m_row = b.mobile_row
+    assign m_max_span = 7 | minus: b.mobile_column
+    assign m_span = b.mobile_span | at_most: m_max_span
+  endif
+
+  assign align = b.vertical_alignment
+  if align == 'inherit'
+    assign align = section.settings.align_items
+  endif
+
+  assign justify = 'flex-start'
+  if b.content_alignment == 'center'
+    assign justify = 'center'
+  elsif b.content_alignment == 'right'
+    assign justify = 'flex-end'
+  endif
+
+  assign overlay = b.overlay_opacity | divided_by: 100.0
+-%}
+<div
+  class="editorial-item editorial-item--show-{{ b.visibility }} editorial-item--align-{{ align }}{% if b.text_on_image %} editorial-item--overlay editorial-item--content-{{ b.content_position }}{% endif %}{% if b.bring_to_front %} editorial-item--front{% endif %} reveal"
+  style="--col: {{ col }}; --row: {{ row }}; --span: {{ span }}; --rows: {{ b.rows }}; --x: {{ b.shift_x }}%; --y: {{ b.shift_y }}%; --m-col: {{ m_col }}; --m-row: {{ m_row }}; --m-span: {{ m_span }}; --m-rows: {{ b.mobile_rows }}; --m-x: {{ b.mobile_shift_x }}%; --m-y: {{ b.mobile_shift_y }}%; --item-gap: {{ b.gap }}px; --item-text: {{ b.content_alignment }}; --item-justify: {{ justify }}; --overlay: {{ overlay }};"
+  {{ block.shopify_attributes }}
+>
+  {% content_for 'blocks' %}
+</div>
+
+{% schema %}
+{
+  "name": "Grid item",
+  "blocks": [
+    { "type": "_editorial-image" },
+    { "type": "heading" },
+    { "type": "text" },
+    { "type": "button" },
+    { "type": "spacer" },
+    { "type": "custom-liquid" }
+  ],
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Desktop has 12 columns and mobile has 6. Automatic placement fills the grid in block order; choose Custom to set the exact row and column."
+    },
+    { "type": "header", "content": "Desktop" },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Placement",
+      "options": [
+        { "value": "auto", "label": "Automatic" },
+        { "value": "custom", "label": "Custom" }
+      ],
+      "default": "auto"
+    },
+    { "type": "range", "id": "row", "label": "Start at row", "min": 1, "max": 12, "step": 1, "default": 1, "visible_if": "{{ block.settings.position == 'custom' }}" },
+    { "type": "range", "id": "column", "label": "Start at column", "min": 1, "max": 12, "step": 1, "default": 1, "visible_if": "{{ block.settings.position == 'custom' }}" },
+    { "type": "range", "id": "span", "label": "Span columns", "min": 1, "max": 12, "step": 1, "default": 4 },
+    { "type": "range", "id": "rows", "label": "Span rows", "min": 1, "max": 4, "step": 1, "default": 1 },
+    { "type": "range", "id": "shift_x", "label": "Horizontal shift", "min": -50, "max": 50, "step": 1, "unit": "%", "default": 0 },
+    { "type": "range", "id": "shift_y", "label": "Vertical shift", "min": -50, "max": 50, "step": 1, "unit": "%", "default": 0 },
+    { "type": "header", "content": "Mobile" },
+    {
+      "type": "paragraph",
+      "content": "Used when the section's mobile layout is Grid. Span 6 columns for full width, 3 for half."
+    },
+    {
+      "type": "select",
+      "id": "mobile_position",
+      "label": "Placement",
+      "options": [
+        { "value": "auto", "label": "Automatic" },
+        { "value": "custom", "label": "Custom" }
+      ],
+      "default": "auto"
+    },
+    { "type": "range", "id": "mobile_row", "label": "Start at row", "min": 1, "max": 20, "step": 1, "default": 1, "visible_if": "{{ block.settings.mobile_position == 'custom' }}" },
+    { "type": "range", "id": "mobile_column", "label": "Start at column", "min": 1, "max": 6, "step": 1, "default": 1, "visible_if": "{{ block.settings.mobile_position == 'custom' }}" },
+    { "type": "range", "id": "mobile_span", "label": "Span columns", "min": 1, "max": 6, "step": 1, "default": 6 },
+    { "type": "range", "id": "mobile_rows", "label": "Span rows", "min": 1, "max": 4, "step": 1, "default": 1 },
+    { "type": "range", "id": "mobile_shift_x", "label": "Horizontal shift", "min": -50, "max": 50, "step": 1, "unit": "%", "default": 0 },
+    { "type": "range", "id": "mobile_shift_y", "label": "Vertical shift", "min": -50, "max": 50, "step": 1, "unit": "%", "default": 0 },
+    { "type": "header", "content": "Style" },
+    {
+      "type": "select",
+      "id": "vertical_alignment",
+      "label": "Vertical alignment",
+      "options": [
+        { "value": "inherit", "label": "Section default" },
+        { "value": "start", "label": "Top" },
+        { "value": "center", "label": "Center" },
+        { "value": "end", "label": "Bottom" },
+        { "value": "stretch", "label": "Fill row height" }
+      ],
+      "default": "inherit",
+      "info": "Fill row height stretches the image so items in the same row line up."
+    },
+    { "type": "text_alignment", "id": "content_alignment", "label": "Content alignment", "default": "left" },
+    { "type": "range", "id": "gap", "label": "Space between blocks", "min": 0, "max": 40, "step": 2, "unit": "px", "default": 12 },
+    { "type": "checkbox", "id": "text_on_image", "label": "Show text on the image", "default": false, "info": "Put an Image block first. The blocks after it sit on top of the image." },
+    {
+      "type": "select",
+      "id": "content_position",
+      "label": "Text position",
+      "options": [
+        { "value": "top", "label": "Top" },
+        { "value": "center", "label": "Center" },
+        { "value": "bottom", "label": "Bottom" }
+      ],
+      "default": "bottom",
+      "visible_if": "{{ block.settings.text_on_image }}"
+    },
+    { "type": "range", "id": "overlay_opacity", "label": "Image overlay", "min": 0, "max": 80, "step": 5, "unit": "%", "default": 40, "visible_if": "{{ block.settings.text_on_image }}" },
+    { "type": "checkbox", "id": "bring_to_front", "label": "Bring to front", "default": false, "info": "For overlapping items: this one sits on top." },
+    {
+      "type": "select",
+      "id": "visibility",
+      "label": "Show on",
+      "options": [
+        { "value": "all", "label": "All devices" },
+        { "value": "desktop", "label": "Desktop only" },
+        { "value": "mobile", "label": "Mobile only" }
+      ],
+      "default": "all"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Grid item",
+      "blocks": [
+        { "type": "_editorial-image" },
+        { "type": "heading", "settings": { "heading": "Grid item", "size": "h4", "alignment": "left" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

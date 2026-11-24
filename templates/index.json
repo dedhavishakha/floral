@@ -354,76 +354,332 @@
       "type": "editorial-grid",
       "blocks": {
         "tile-1": {
-          "type": "tile",
+          "type": "_editorial-item",
           "settings": {
-            "image": "shopify://shop_images/home-editorial-1.jpg",
-            "size": "large",
-            "text_position": "overlay",
-            "eyebrow": "Loungewear",
-            "heading": "Evenings, unhurried",
-            "text": "Waffle-knit sets and silk robes made for slow evenings.",
-            "link": "shopify://collections/sets-loungewear",
-            "link_label": "Shop loungewear"
-          }
+            "position": "auto",
+            "span": 4,
+            "rows": 1,
+            "shift_x": 0,
+            "shift_y": 0,
+            "mobile_position": "auto",
+            "mobile_span": 2,
+            "mobile_rows": 1,
+            "mobile_shift_x": 0,
+            "mobile_shift_y": 0,
+            "vertical_alignment": "inherit",
+            "content_alignment": "left",
+            "gap": 8,
+            "text_on_image": true,
+            "content_position": "bottom",
+            "overlay_opacity": 50,
+            "bring_to_front": false,
+            "visibility": "all"
+          },
+          "blocks": {
+            "tile-1-image": {
+              "type": "_editorial-image",
+              "settings": {
+                "ratio": "landscape",
+                "width": "full",
+                "image": "shopify://shop_images/home-editorial-1.jpg",
+                "link": "shopify://collections/sets-loungewear"
+              }
+            },
+            "tile-1-heading": {
+              "type": "heading",
+              "settings": {
+                "eyebrow": "Loungewear",
+                "heading": "Evenings, unhurried",
+                "size": "h3",
+                "alignment": "left",
+                "max_width": 22
+              }
+            },
+            "tile-1-text": {
+              "type": "text",
+              "settings": {
+                "text": "<p>Waffle-knit sets and silk robes made for slow evenings.</p>",
+                "style": "body",
+                "alignment": "left",
+                "max_width": 40
+              }
+            },
+            "tile-1-button": {
+              "type": "button",
+              "settings": {
+                "label": "Shop loungewear",
+                "link": "shopify://collections/sets-loungewear",
+                "style": "link",
+                "new_tab": false,
+                "full_width": false
+              }
+            }
+          },
+          "block_order": [
+            "tile-1-image",
+            "tile-1-heading",
+            "tile-1-text",
+            "tile-1-button"
+          ]
         },
         "tile-2": {
-          "type": "tile",
+          "type": "_editorial-item",
           "settings": {
-            "image": "shopify://shop_images/home-editorial-2.jpg",
-            "size": "tall",
-            "text_position": "overlay",
-            "eyebrow": "Tailoring",
-            "heading": "Tailoring, softened",
-            "text": "",
-            "link": "shopify://collections/the-executive-foundation",
-            "link_label": "Shop tailoring"
-          }
+            "position": "auto",
+            "span": 4,
+            "rows": 2,
+            "shift_x": 0,
+            "shift_y": 0,
+            "mobile_position": "auto",
+            "mobile_span": 2,
+            "mobile_rows": 2,
+            "mobile_shift_x": 0,
+            "mobile_shift_y": 0,
+            "vertical_alignment": "inherit",
+            "content_alignment": "left",
+            "gap": 8,
+            "text_on_image": true,
+            "content_position": "bottom",
+            "overlay_opacity": 50,
+            "bring_to_front": false,
+            "visibility": "all"
+          },
+          "blocks": {
+            "tile-2-image": {
+              "type": "_editorial-image",
+              "settings": {
+                "ratio": "tall",
+                "width": "full",
+                "image": "shopify://shop_images/home-editorial-2.jpg",
+                "link": "shopify://collections/the-executive-foundation"
+              }
+            },
+            "tile-2-heading": {
+              "type": "heading",
+              "settings": {
+                "eyebrow": "Tailoring",
+                "heading": "Tailoring, softened",
+                "size": "h3",
+                "alignment": "left",
+                "max_width": 22
+              }
+            },
+            "tile-2-button": {
+              "type": "button",
+              "settings": {
+                "label": "Shop tailoring",
+                "link": "shopify://collections/the-executive-foundation",
+                "style": "link",
+                "new_tab": false,
+                "full_width": false
+              }
+            }
+          },
+          "block_order": [
+            "tile-2-image",
+            "tile-2-heading",
+            "tile-2-button"
+          ]
         },
         "tile-3": {
-          "type": "tile",
+          "type": "_editorial-item",
           "settings": {
-            "image": "shopify://shop_images/home-editorial-3.jpg",
-            "size": "small",
-            "text_position": "overlay",
-            "eyebrow": "",
-            "heading": "The easy top",
-            "text": "",
-            "link": "shopify://collections/tops-blouses",
-            "link_label": "Shop tops"
-          }
+            "position": "auto",
+            "span": 3,
+            "rows": 1,
+            "shift_x": 0,
+            "shift_y": 0,
+            "mobile_position": "auto",
+            "mobile_span": 3,
+            "mobile_rows": 1,
+            "mobile_shift_x": 0,
+            "mobile_shift_y": 0,
+            "vertical_alignment": "inherit",
+            "content_alignment": "left",
+            "gap": 8,
+            "text_on_image": true,
+            "content_position": "bottom",
+            "overlay_opacity": 50,
+            "bring_to_front": false,
+            "visibility": "all"
+          },
+          "blocks": {
+            "tile-3-image": {
+              "type": "_editorial-image",
+              "settings": {
+                "ratio": "square",
+                "width": "full",
+                "image": "shopify://shop_images/home-editorial-3.jpg",
+                "link": "shopify://collections/tops-blouses"
+              }
+            },
+            "tile-3-heading": {
+              "type": "heading",
+              "settings": {
+                "eyebrow": "",
+                "heading": "The easy top",
+                "size": "h3",
+                "alignment": "left",
+                "max_width": 22
+              }
+            },
+            "tile-3-button": {
+              "type": "button",
+              "settings": {
+                "label": "Shop tops",
+                "link": "shopify://collections/tops-blouses",
+                "style": "link",
+                "new_tab": false,
+                "full_width": false
+              }
+            }
+          },
+          "block_order": [
+            "tile-3-image",
+            "tile-3-heading",
+            "tile-3-button"
+          ],
+          "disabled": true
         },
         "tile-4": {
-          "type": "tile",
+          "type": "_editorial-item",
           "settings": {
-            "image": "shopify://shop_images/home-editorial-4.jpg",
-            "image_mobile": "shopify://shop_images/home-editorial-1.jpg",
-            "size": "small",
-            "text_position": "overlay",
-            "eyebrow": "",
-            "heading": "Wide-leg trousers",
-            "text": "",
-            "link": "shopify://collections/trousers",
-            "link_label": "Shop trousers"
-          }
+            "position": "auto",
+            "span": 4,
+            "rows": 2,
+            "shift_x": 0,
+            "shift_y": 0,
+            "mobile_position": "auto",
+            "mobile_span": 2,
+            "mobile_rows": 2,
+            "mobile_shift_x": 0,
+            "mobile_shift_y": 0,
+            "vertical_alignment": "inherit",
+            "content_alignment": "left",
+            "gap": 8,
+            "text_on_image": true,
+            "content_position": "bottom",
+            "overlay_opacity": 50,
+            "bring_to_front": false,
+            "visibility": "all"
+          },
+          "blocks": {
+            "tile-4-image": {
+              "type": "_editorial-image",
+              "settings": {
+                "ratio": "tall",
+                "width": "full",
+                "image": "shopify://shop_images/home-editorial-4.jpg",
+                "link": "shopify://collections/trousers"
+              }
+            },
+            "tile-4-heading": {
+              "type": "heading",
+              "settings": {
+                "eyebrow": "",
+                "heading": "Wide-leg trousers",
+                "size": "h3",
+                "alignment": "left",
+                "max_width": 22
+              }
+            },
+            "tile-4-button": {
+              "type": "button",
+              "settings": {
+                "label": "Shop trousers",
+                "link": "shopify://collections/trousers",
+                "style": "link",
+                "new_tab": false,
+                "full_width": false
+              }
+            }
+          },
+          "block_order": [
+            "tile-4-image",
+            "tile-4-heading",
+            "tile-4-button"
+          ]
+        },
+        "tile-5": {
+          "type": "_editorial-item",
+          "settings": {
+            "position": "auto",
+            "span": 4,
+            "rows": 1,
+            "shift_x": 0,
+            "shift_y": 0,
+            "mobile_position": "auto",
+            "mobile_span": 2,
+            "mobile_rows": 1,
+            "mobile_shift_x": 0,
+            "mobile_shift_y": 0,
+            "vertical_alignment": "inherit",
+            "content_alignment": "left",
+            "gap": 8,
+            "text_on_image": true,
+            "content_position": "bottom",
+            "overlay_opacity": 50,
+            "bring_to_front": false,
+            "visibility": "all"
+          },
+          "blocks": {
+            "tile-5-image": {
+              "type": "_editorial-image",
+              "settings": {
+                "image": "shopify://shop_images/home-hero.jpg",
+                "ratio": "landscape",
+                "width": "full",
+                "link": "shopify://collections/knitwear-layers"
+              }
+            },
+            "tile-5-heading": {
+              "type": "heading",
+              "settings": {
+                "eyebrow": "Layers",
+                "heading": "Coats and easy layers",
+                "size": "h3",
+                "alignment": "left",
+                "max_width": 22
+              }
+            },
+            "tile-5-button": {
+              "type": "button",
+              "settings": {
+                "label": "Shop layers",
+                "link": "shopify://collections/knitwear-layers",
+                "style": "link",
+                "new_tab": false,
+                "full_width": false
+              }
+            }
+          },
+          "block_order": [
+            "tile-5-image",
+            "tile-5-heading",
+            "tile-5-button"
+          ]
         }
       },
       "block_order": [
-        "tile-1",
         "tile-2",
-        "tile-3",
-        "tile-4"
+        "tile-1",
+        "tile-4",
+        "tile-5",
+        "tile-3"
       ],
       "settings": {
         "color_scheme": "scheme-1",
-        "layout": "magazine",
-        "mobile_layout": "carousel",
-        "image_size": "ratio",
-        "image_zoom": true,
         "eyebrow": "The edit",
         "heading": "Dressed for the in-between",
         "header_alignment": "start",
-        "gap": 12,
+        "align_items": "stretch",
+        "gap_x": 12,
+        "gap_y": 12,
         "full_width": false,
+        "image_zoom": true,
+        "mobile_layout": "grid",
+        "gap_x_mobile": 8,
+        "gap_y_mobile": 8,
         "padding_top": 64,
         "padding_bottom": 64
       }
