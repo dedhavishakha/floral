@@ -1,0 +1,404 @@
+{%- liquid
+  assign s = section.settings
+  assign products = s.collection.products
+  if s.source == 'products'
+    assign products = s.product_list
+  endif
+  assign product_total = products.size
+
+  assign quick_add = nil
+  if s.quick_add == 'show'
+    assign quick_add = true
+  elsif s.quick_add == 'hide'
+    assign quick_add = false
+  endif
+
+  assign cols_tablet = s.columns_desktop | at_most: 3
+  assign card_vw = 100 | divided_by: s.columns_desktop
+  capture card_sizes
+    echo '(min-width: 990px) ' | append: card_vw | append: 'vw, (min-width: 750px) 33vw, ' | append: '60vw'
+  endcapture
+
+  assign view_all_url = nil
+  if s.source == 'collection' and s.collection != blank
+    assign view_all_url = s.collection.url
+  endif
+-%}
+<div
+  class="section featured-collection color-{{ s.color_scheme }}{% unless s.image_zoom %} zoom-off{% endunless %}"
+  style="--pt: {{ s.padding_top }}px; --pb: {{ s.padding_bottom }}px;"
+>
+  <div class="page-width">
+    {%- capture header_text -%}
+      {%- if s.eyebrow != blank -%}<p class="eyebrow">{{ s.eyebrow | escape }}</p>{%- endif -%}
+      {%- if s.heading != blank -%}<h2 class="h2">{{ s.heading }}</h2>{%- endif -%}
+      {%- if s.description != blank -%}<div class="rte">{{ s.description }}</div>{%- endif -%}
+    {%- endcapture -%}
+
+    <carousel-slider class="carousel carousel--peek-{{ s.carousel_peek }}">
+
+    <div class="section-header{% if s.header_alignment == 'center' %} section-header--center{% endif %}">
+      <div class="section-header__text">{{ header_text }}</div>
+      <div class="section-header__actions">
+        {%- if s.show_view_all and view_all_url and s.view_all_label != blank -%}
+          <a href="{{ view_all_url }}" class="link">
+            {{- s.view_all_label | escape -}}
+            <span class="visually-hidden">: {{ s.collection.title | escape }}</span>
+          </a>
+        {%- endif -%}
+        {%- if s.layout == 'carousel' -%}
+          <div class="carousel__nav">
+            <button type="button" class="icon-button icon-button--bordered" data-carousel-prev aria-label="{{ 'general.accessibility.previous_slide' | t }}">
+              {%- render 'icon', icon: 'chevron-left' -%}
+            </button>
+            <button type="button" class="icon-button icon-button--bordered" data-carousel-next aria-label="{{ 'general.accessibility.next_slide' | t }}">
+              {%- render 'icon', icon: 'chevron-right' -%}
+            </button>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <ul
+      class="{% if s.layout == 'carousel' %}carousel__track{% else %}grid{% endif %}"
+      {% if s.layout == 'carousel' %}data-carousel-track{% endif %}
+      role="list"
+      style="--cols-desktop: {{ s.columns_desktop }}; --cols-tablet: {{ cols_tablet }}; --cols-mobile: {{ s.columns_mobile }};"
+    >
+      {%- if product_total > 0 -%}
+        {%- for product in products limit: s.products_to_show -%}
+          <li class="reveal" style="--reveal-index: {{ forloop.index0 | modulo: 6 }};">
+            {% render 'product-card',
+              product: product,
+              card_style: s.card_style,
+              image_ratio: s.image_ratio,
+              sizes: card_sizes,
+              show_quick_add: quick_add,
+              swatches: s.show_swatches,
+              badges: s.show_badges,
+              section_id: section.id
+            %}
+          </li>
+        {%- endfor -%}
+      {%- else -%}
+        {%- for i in (1..4) -%}
+          <li>{% render 'product-card', card_style: s.card_style, image_ratio: s.image_ratio, placeholder_index: forloop.index %}</li>
+        {%- endfor -%}
+      {%- endif -%}
+    </ul>
+
+    {%- if s.layout == 'carousel' -%}
+      {%- if s.show_progress -%}<div class="carousel__progress" aria-hidden="true"><span class="carousel__progress-bar"></span></div>{%- endif -%}
+    {%- endif -%}
+    </carousel-slider>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Featured collection",
+  "tag": "section",
+  "class": "section-featured-collection",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "select",
+      "id": "source",
+      "label": "Products from",
+      "options": [
+        {
+          "value": "collection",
+          "label": "A collection"
+        },
+        {
+          "value": "products",
+          "label": "Products I choose"
+        }
+      ],
+      "default": "collection"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "product_list",
+      "id": "product_list",
+      "label": "Products",
+      "limit": 24
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Maximum products to show",
+      "min": 2,
+      "max": 24,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "New arrivals"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Heading alignment",
+      "options": [
+        {
+          "value": "start",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ],
+      "default": "start"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_all",
+      "label": "Show \"View all\" link",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "view_all_label",
+      "label": "\"View all\" label",
+      "default": "View all"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Display as",
+      "options": [
+        {
+          "value": "grid",
+          "label": "Grid"
+        },
+        {
+          "value": "carousel",
+          "label": "Carousel"
+        }
+      ],
+      "default": "carousel"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Desktop columns",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Mobile columns",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        }
+      ],
+      "default": "2"
+    },
+    { "type": "checkbox", "id": "carousel_peek", "label": "Show part of the next item", "info": "Carousel only.", "default": true },
+    { "type": "checkbox", "id": "show_progress", "label": "Show progress bar", "info": "Carousel only.", "default": true },
+    {
+      "type": "header",
+      "content": "Product cards"
+    },
+    {
+      "type": "select",
+      "id": "card_style",
+      "label": "Card layout",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use theme setting"
+        },
+        {
+          "value": "minimal",
+          "label": "Minimal"
+        },
+        {
+          "value": "standard",
+          "label": "Fashion standard"
+        },
+        {
+          "value": "conversion",
+          "label": "Conversion"
+        },
+        {
+          "value": "editorial",
+          "label": "Editorial"
+        }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "show_swatches",
+      "label": "Color swatches",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use card layout"
+        },
+        {
+          "value": "show",
+          "label": "Show"
+        },
+        {
+          "value": "hide",
+          "label": "Hide"
+        }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "show_badges",
+      "label": "Badges",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use card layout"
+        },
+        {
+          "value": "show",
+          "label": "Show"
+        },
+        {
+          "value": "hide",
+          "label": "Hide"
+        }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use theme setting"
+        },
+        {
+          "value": "portrait",
+          "label": "Portrait 3:4"
+        },
+        {
+          "value": "portrait-45",
+          "label": "Portrait 4:5"
+        },
+        {
+          "value": "tall",
+          "label": "Tall 2:3"
+        },
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "natural",
+          "label": "Natural"
+        }
+      ],
+      "default": "inherit"
+    },
+    { "type": "checkbox", "id": "image_zoom", "label": "Zoom images on hover", "info": "Works when Theme settings > Animations > Image hover effect uses zoom.", "default": true },
+    {
+      "type": "select",
+      "id": "quick_add",
+      "label": "Quick add",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use card layout"
+        },
+        {
+          "value": "show",
+          "label": "Show"
+        },
+        {
+          "value": "hide",
+          "label": "Hide"
+        }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured collection"
+    },
+    {
+      "name": "Featured products",
+      "settings": {
+        "source": "products",
+        "heading": "Editor's picks",
+        "layout": "grid"
+      }
+    }
+  ]
+}
+{% endschema %}

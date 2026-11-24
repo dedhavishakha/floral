@@ -1,0 +1,154 @@
+{%- liquid
+  assign s = section.settings
+  case s.speed
+    when 'slow'
+      assign duration = 60
+    when 'fast'
+      assign duration = 18
+    else
+      assign duration = 34
+  endcase
+  assign duration = duration | times: section.blocks.size | at_least: 12 | divided_by: 3
+-%}
+{%- capture marquee_items -%}
+  {%- for block in section.blocks -%}
+    <span class="marquee__item" {{ block.shopify_attributes }}>
+      {%- if block.settings.link != blank -%}
+        <a href="{{ block.settings.link }}" class="marquee__link">{{ block.settings.text }}</a>
+      {%- else -%}
+        <span>{{ block.settings.text }}</span>
+      {%- endif -%}
+      {%- case s.separator -%}
+        {%- when 'dot' -%}
+          <span class="marquee__sep marquee__sep--dot" aria-hidden="true"></span>
+        {%- when 'none' -%}
+        {%- else -%}
+          <span class="marquee__sep" aria-hidden="true">{% render 'icon', icon: s.separator %}</span>
+      {%- endcase -%}
+    </span>
+  {%- endfor -%}
+{%- endcapture -%}
+<div
+  class="section scrolling-text color-{{ s.color_scheme }}{% if s.show_borders %} scrolling-text--borders{% endif %}"
+  style="--pt: {{ s.padding_top }}px; --pb: {{ s.padding_bottom }}px;"
+>
+  <marquee-text
+    class="marquee marquee--{{ s.size }} marquee--{{ s.font }}{% if s.direction == 'right' %} marquee--reverse{% endif %}"
+    style="--marquee-duration: {{ duration }}s;"
+  >
+    <div class="marquee__viewport">
+      <div class="marquee__track">
+        <div class="marquee__group">{{ marquee_items }}</div>
+        <div class="marquee__group" aria-hidden="true" inert>{{ marquee_items }}</div>
+        <div class="marquee__group" aria-hidden="true" inert>{{ marquee_items }}</div>
+      </div>
+    </div>
+    {%- if s.show_pause -%}
+      <button
+        type="button"
+        class="icon-button marquee__toggle"
+        aria-pressed="false"
+        data-marquee-toggle
+        data-label-pause="{{ 'sections.marquee.pause' | t }}"
+        data-label-play="{{ 'sections.marquee.play' | t }}"
+        aria-label="{{ 'sections.marquee.pause' | t }}"
+      >
+        <span class="marquee__icon-pause">{% render 'icon', icon: 'pause' %}</span>
+        <span class="marquee__icon-play">{% render 'icon', icon: 'play' %}</span>
+      </button>
+    {%- endif -%}
+  </marquee-text>
+</div>
+
+{% schema %}
+{
+  "name": "Scrolling text",
+  "tag": "section",
+  "class": "section-scrolling-text",
+  "max_blocks": 10,
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    {
+      "type": "select",
+      "id": "size",
+      "label": "Text size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" },
+        { "value": "xlarge", "label": "Extra large" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "font",
+      "label": "Font",
+      "options": [
+        { "value": "heading", "label": "Heading" },
+        { "value": "body", "label": "Body" }
+      ],
+      "default": "heading"
+    },
+    {
+      "type": "select",
+      "id": "speed",
+      "label": "Speed",
+      "options": [
+        { "value": "slow", "label": "Slow" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "fast", "label": "Fast" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "direction",
+      "label": "Direction",
+      "options": [
+        { "value": "left", "label": "Right to left" },
+        { "value": "right", "label": "Left to right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "separator",
+      "label": "Separator",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "dot", "label": "Dot" },
+        { "value": "sparkle", "label": "Sparkle" },
+        { "value": "star", "label": "Star" },
+        { "value": "arrow-right", "label": "Arrow" },
+        { "value": "leaf", "label": "Leaf" }
+      ],
+      "default": "sparkle"
+    },
+    { "type": "checkbox", "id": "show_pause", "label": "Show pause button", "default": true, "info": "Recommended for accessibility. Scrolling also pauses on hover." },
+    { "type": "checkbox", "id": "show_borders", "label": "Show top and bottom borders", "default": true },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 0 }
+  ],
+  "blocks": [
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        { "type": "inline_richtext", "id": "text", "label": "Text", "default": "Free shipping over $150" },
+        { "type": "url", "id": "link", "label": "Link" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scrolling text",
+      "blocks": [
+        { "type": "text", "settings": { "text": "New season, new layers" } },
+        { "type": "text", "settings": { "text": "Free returns within 30 days" } },
+        { "type": "text", "settings": { "text": "Responsibly made" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

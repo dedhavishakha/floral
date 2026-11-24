@@ -1,0 +1,101 @@
+{%- assign s = section.settings -%}
+<div
+  class="section faq color-{{ s.color_scheme }}"
+  style="--pt: {{ s.padding_top }}px; --pb: {{ s.padding_bottom }}px;"
+>
+  <div class="page-width">
+    <div class="faq__layout faq__layout--{{ s.layout }}">
+      <div class="faq__intro section-header__text">
+        {%- if s.eyebrow != blank -%}<p class="eyebrow">{{ s.eyebrow | escape }}</p>{%- endif -%}
+        {%- if s.heading != blank -%}<h2 class="h2">{{ s.heading }}</h2>{%- endif -%}
+        {%- if s.text != blank -%}<div class="rte text-muted">{{ s.text }}</div>{%- endif -%}
+        {%- if s.contact_label != blank and s.contact_link != blank -%}
+          <a href="{{ s.contact_link }}" class="button button--secondary faq__contact">{{ s.contact_label | escape }}</a>
+        {%- endif -%}
+      </div>
+      <div class="faq__items">
+        {%- for block in section.blocks -%}
+          <details class="faq__item" {% if s.open_first and forloop.first %}open{% endif %} {{ block.shopify_attributes }}>
+            <summary class="faq__question">
+              <span>{{ block.settings.question | escape }}</span>
+              <span class="faq__icon" aria-hidden="true">{% render 'icon', icon: 'plus' %}</span>
+            </summary>
+            <div class="faq__answer rte">{{ block.settings.answer }}</div>
+          </details>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+{%- if s.structured_data and section.blocks.size > 0 -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {%- for block in section.blocks -%}
+          {
+            "@type": "Question",
+            "name": {{ block.settings.question | json }},
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": {{ block.settings.answer | strip_html | json }}
+            }
+          }{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ]
+    }
+  </script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "FAQ",
+  "tag": "section",
+  "class": "section-faq",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        { "value": "stacked", "label": "Heading above questions" },
+        { "value": "side", "label": "Heading beside questions" }
+      ],
+      "default": "side"
+    },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Help" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "Frequently asked questions" },
+    { "type": "richtext", "id": "text", "label": "Text" },
+    { "type": "text", "id": "contact_label", "label": "Contact button label", "default": "Contact us" },
+    { "type": "url", "id": "contact_link", "label": "Contact button link" },
+    { "type": "checkbox", "id": "open_first", "label": "Open the first question", "default": false },
+    { "type": "checkbox", "id": "structured_data", "label": "Add FAQ structured data for search engines", "info": "Turn on for only one FAQ section per page.", "default": false },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "blocks": [
+    {
+      "type": "question",
+      "name": "Question",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question", "default": "How do I find my size?" },
+        { "type": "richtext", "id": "answer", "label": "Answer", "default": "<p>Every product page has a size guide with body measurements and the model's size. If you are between sizes, we recommend sizing up for a relaxed fit.</p>" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "FAQ",
+      "blocks": [
+        { "type": "question" },
+        { "type": "question", "settings": { "question": "What is your returns policy?", "answer": "<p>Return unworn items within 30 days for a full refund. Returns are free in your country.</p>" } },
+        { "type": "question", "settings": { "question": "How long does delivery take?", "answer": "<p>Standard delivery takes 2 to 4 business days. Express next-day delivery is available at checkout.</p>" } },
+        { "type": "question", "settings": { "question": "How should I care for my garments?", "answer": "<p>Care instructions are on each product page and on the label. Washing cold and drying flat keeps natural fibres looking new.</p>" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

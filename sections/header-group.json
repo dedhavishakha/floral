@@ -1,0 +1,142 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "type": "header",
+  "name": "Header group",
+  "sections": {
+    "announcement-bar": {
+      "type": "announcement-bar",
+      "blocks": {
+        "announcement-1": {
+          "type": "announcement",
+          "settings": {
+            "text": "Free shipping on orders over ₹5,000",
+            "link": "shopify://collections/new-arrivals",
+            "link_label": "Shop new in"
+          }
+        },
+        "announcement-2": {
+          "type": "announcement",
+          "settings": {
+            "text": "Free returns within 30 days",
+            "link": "",
+            "link_label": ""
+          }
+        },
+        "announcement-3": {
+          "type": "announcement",
+          "settings": {
+            "text": "End of season: up to 22% off selected styles",
+            "link": "shopify://collections/sale",
+            "link_label": "Shop the sale"
+          }
+        }
+      },
+      "block_order": [
+        "announcement-1",
+        "announcement-2",
+        "announcement-3"
+      ],
+      "settings": {
+        "color_scheme": "scheme-3",
+        "sticky": false,
+        "autoplay": true,
+        "autoplay_speed": 5,
+        "text_size": 13,
+        "text_size_mobile": 12,
+        "uppercase": true,
+        "full_width": false,
+        "show_country": true,
+        "show_social": false
+      }
+    },
+    "header": {
+      "type": "header",
+      "blocks": {
+        "mega-women": {
+          "type": "mega_menu",
+          "settings": {
+            "menu_item": "Clothing",
+            "layout": "images",
+            "image_shape": "arch",
+            "image_1": "shopify://shop_images/home-menu-1.jpg",
+            "title_1": "New arrivals",
+            "text_1": "Fresh pieces for the new season",
+            "link_1": "shopify://collections/new-arrivals",
+            "image_2": "shopify://shop_images/home-menu-2.jpg",
+            "title_2": "Easy tops",
+            "text_2": "Shirts, blouses and everyday tees",
+            "link_2": "shopify://collections/tops-blouses",
+            "collection": "",
+            "products_heading": "Trending now",
+            "products_count": 3
+          }
+        },
+        "mega-men": {
+          "type": "mega_menu",
+          "settings": {
+            "menu_item": "Collections",
+            "layout": "collections",
+            "image_shape": "rectangle",
+            "image_1": "shopify://shop_images/home-menu-3.jpg",
+            "title_1": "Polished daytime",
+            "text_1": "Structured pieces for work",
+            "link_1": "shopify://collections/polished-daytime-structures",
+            "image_2": "shopify://shop_images/home-menu-4.jpg",
+            "title_2": "Quiet afternoons",
+            "text_2": "Soft linen for slow days",
+            "link_2": "shopify://collections/quiet-afternoon-silhouettes",
+            "collection": "",
+            "products_heading": "Trending now",
+            "products_count": 3
+          }
+        }
+      },
+      "block_order": [
+        "mega-women",
+        "mega-men"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "logo": "shopify://shop_images/Elegant_Appsy_Serif_Wordmark.png",
+        "logo_width": 120,
+        "logo_width_mobile": 90,
+        "logo_position": "left",
+        "mobile_logo_position": "center",
+        "menu": "main-menu",
+        "mobile_menu": "main-menu",
+        "customer_account_menu": "customer-account-main-menu",
+        "show_drawer_promos": true,
+        "menu_color_scheme": "scheme-2",
+        "sticky": "always",
+        "transparent_home": true,
+        "transparent_text": "dark",
+        "transparent_logo": "shopify://shop_images/Elegant_Appsy_Serif_Wordmark.png",
+        "show_country": false,
+        "show_language": false,
+        "wishlist_link": "",
+        "full_width": false,
+        "border": true,
+        "countdown_show": false,
+        "countdown_position": "above",
+        "countdown_label": "End of season sale ends in",
+        "countdown_end": "2026-12-31 23:59",
+        "countdown_link_label": "Shop the sale",
+        "countdown_link": "shopify://collections/sale",
+        "countdown_expired": "hide",
+        "countdown_color_scheme": "scheme-4"
+      }
+    }
+  },
+  "order": [
+    "announcement-bar",
+    "header"
+  ]
+}

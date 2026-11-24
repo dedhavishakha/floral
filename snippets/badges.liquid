@@ -1,0 +1,156 @@
+{% doc %}
+  Renders product labels: sold out, sale, new, the custom labels set in Theme settings > Product labels
+  (matched by tag, collection, vendor or product type), and labels from product tags that start with
+  "label:" or from the custom.badge metafield. Labels are sorted by their priority (1 shows first) and
+  limited to the "Maximum labels per product" setting.
+
+  @param {product} product - The product
+  @param {boolean} [use_variant] - Base sale and sold out state on the selected variant
+  @param {string} [class] - Extra classes for the wrapper
+
+  @example
+  {% render 'badges', product: product %}
+{% enddoc %}
+{%- liquid
+  if use_variant
+    assign v = product.selected_or_first_available_variant
+    assign price = v.price
+    assign compare_at = v.compare_at_price
+    assign available = v.available
+  else
+    assign price = product.price
+    assign compare_at = product.compare_at_price
+    assign available = product.available
+  endif
+
+  assign show_new = false
+  if settings.badge_new_days > 0 and product.published_at
+    assign now_s = 'now' | date: '%s' | plus: 0
+    assign published_s = product.published_at | date: '%s' | plus: 0
+    assign age_days = now_s | minus: published_s | divided_by: 86400
+    if age_days < settings.badge_new_days
+      assign show_new = true
+    endif
+  endif
+
+  assign item_sep = '|%|'
+  assign html_sep = '|~|'
+  assign entries = ''
+-%}
+
+{%- comment -%} Built-in labels {%- endcomment -%}
+{%- if available == false and settings.badge_sold_out -%}
+  {%- capture label_html -%}<span class="badge badge--sold-out">{{ 'products.product.sold_out' | t }}</span>{%- endcapture -%}
+  {%- assign sort_key = settings.badge_priority_sold_out | prepend: '0' | slice: -2, 2 | append: '-a' -%}
+  {%- assign entries = entries | append: sort_key | append: html_sep | append: label_html | append: item_sep -%}
+{%- elsif compare_at > price -%}
+  {%- capture label_html -%}
+    <span class="badge badge--sale">
+      {%- case settings.badge_sale_style -%}
+        {%- when 'percent' -%}
+          {%- assign saving = compare_at | minus: price | times: 100.0 | divided_by: compare_at | round -%}
+          {{- 'products.product.badge.percent_off' | t: amount: saving -}}
+        {%- when 'amount' -%}
+          {%- assign saving = compare_at | minus: price | money_without_trailing_zeros -%}
+          {{- 'products.product.badge.amount_off' | t: amount: saving -}}
+        {%- else -%}
+          {{- 'products.product.on_sale' | t -}}
+      {%- endcase -%}
+    </span>
+  {%- endcapture -%}
+  {%- assign sort_key = settings.badge_priority_sale | prepend: '0' | slice: -2, 2 | append: '-b' -%}
+  {%- assign entries = entries | append: sort_key | append: html_sep | append: label_html | append: item_sep -%}
+{%- endif -%}
+
+{%- if show_new -%}
+  {%- capture label_html -%}<span class="badge badge--new">{{ 'products.product.badge.new' | t }}</span>{%- endcapture -%}
+  {%- assign sort_key = settings.badge_priority_new | prepend: '0' | slice: -2, 2 | append: '-c' -%}
+  {%- assign entries = entries | append: sort_key | append: html_sep | append: label_html | append: item_sep -%}
+{%- endif -%}
+
+{%- comment -%} Custom labels from Theme settings {%- endcomment -%}
+{%- assign product_vendor = product.vendor | downcase | strip -%}
+{%- assign product_type = product.type | downcase | strip -%}
+{%- for i in (1..6) -%}
+  {%- liquid
+    assign key = 'label_' | append: i
+    assign key_text = key | append: '_text'
+    assign label_text = settings[key_text] | strip
+    if label_text == blank
+      continue
+    endif
+
+    assign key_rule = key | append: '_rule'
+    assign key_value = key | append: '_value'
+    assign key_collection = key | append: '_collection'
+    assign rule_value = settings[key_value] | downcase | strip
+    assign matched = false
+
+    case settings[key_rule]
+      when 'collection'
+        assign target = settings[key_collection]
+        if target != blank
+          for product_collection in product.collections
+            if product_collection.id == target.id
+              assign matched = true
+              break
+            endif
+          endfor
+        endif
+      when 'vendor'
+        if rule_value != blank and product_vendor == rule_value
+          assign matched = true
+        endif
+      when 'type'
+        if rule_value != blank and product_type == rule_value
+          assign matched = true
+        endif
+      else
+        if rule_value != blank
+          for tag in product.tags
+            assign tag_value = tag | downcase | strip
+            if tag_value == rule_value
+              assign matched = true
+              break
+            endif
+          endfor
+        endif
+    endcase
+
+    unless matched
+      continue
+    endunless
+
+    assign key_bg = key | append: '_bg'
+    assign key_fg = key | append: '_color'
+    assign key_priority = key | append: '_priority'
+    assign label_bg = settings[key_bg]
+    assign label_fg = settings[key_fg]
+    assign sort_key = settings[key_priority] | prepend: '0' | slice: -2, 2 | append: '-d' | append: i
+  -%}
+  {%- capture label_html -%}
+    <span class="badge badge--custom"{% if label_bg != blank or label_fg != blank %} style="{% if label_bg != blank %}--badge-bg: {{ label_bg }};{% endif %}{% if label_fg != blank %}--badge-fg: {{ label_fg }};{% endif %}"{% endif %}>{{ label_text | escape }}</span>
+  {%- endcapture -%}
+  {%- assign entries = entries | append: sort_key | append: html_sep | append: label_html | append: item_sep -%}
+{%- endfor -%}
+
+{%- comment -%} Labels from "label:" tags and the custom.badge metafield {%- endcomment -%}
+{%- assign tag_priority = settings.badge_priority_tags | prepend: '0' | slice: -2, 2 -%}
+{%- if product.metafields.custom.badge != blank -%}
+  {%- capture label_html -%}<span class="badge badge--custom">{{ product.metafields.custom.badge.value | escape }}</span>{%- endcapture -%}
+  {%- assign entries = entries | append: tag_priority | append: '-e' | append: html_sep | append: label_html | append: item_sep -%}
+{%- endif -%}
+{%- for tag in product.tags -%}
+  {%- assign tag_start = tag | slice: 0, 6 | downcase -%}
+  {%- if tag_start == 'label:' -%}
+    {%- capture label_html -%}<span class="badge badge--custom">{{ tag | slice: 6, 60 | strip | escape }}</span>{%- endcapture -%}
+    {%- assign entries = entries | append: tag_priority | append: '-f' | append: forloop.index | append: html_sep | append: label_html | append: item_sep -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- assign labels = entries | split: item_sep | sort -%}
+<div class="badges{% if class != blank %} {{ class }}{% endif %}">
+  {%- for entry in labels limit: settings.badge_max -%}
+    {{- entry | split: html_sep | last -}}
+  {%- endfor -%}
+</div>

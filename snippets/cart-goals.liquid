@@ -1,0 +1,78 @@
+{% doc %}
+  Renders the free shipping progress bar and gift-with-purchase message for the cart.
+  Thresholds are set in the store's default currency and converted in the browser for other currencies.
+
+  @example
+  {% render 'cart-goals' %}
+{% enddoc %}
+{%- liquid
+  assign shipping_on = false
+  if settings.cart_free_shipping and settings.cart_free_shipping_threshold > 0
+    assign shipping_on = true
+  endif
+  assign gift_on = false
+  if settings.cart_gift_threshold > 0 and settings.cart_gift_label != blank
+    assign gift_on = true
+  endif
+-%}
+{%- if shipping_on or gift_on -%}
+  {%- liquid
+    assign total = cart.total_price
+    assign shipping_threshold = settings.cart_free_shipping_threshold | times: 100
+    assign gift_threshold = settings.cart_gift_threshold | times: 100
+    assign shipping_remaining = shipping_threshold | minus: total | at_least: 0
+    assign gift_remaining = gift_threshold | minus: total | at_least: 0
+    assign shipping_percent = 100
+    if shipping_threshold > 0
+      assign shipping_percent = total | times: 100 | divided_by: shipping_threshold | at_most: 100
+    endif
+    assign shipping_money = shipping_remaining | money
+    assign gift_money = gift_remaining | money
+    assign gift_name = settings.cart_gift_label | escape
+  -%}
+  <cart-goals
+    class="cart-goals"
+    data-total="{{ total }}"
+    data-currency="{{ cart.currency.iso_code }}"
+    data-shop-currency="{{ shop.currency }}"
+  >
+    {%- if shipping_on -%}
+      <div class="cart-goals__goal" data-goal data-threshold="{{ shipping_threshold }}">
+        <p class="cart-goals__message" data-goal-message data-template="{{ 'cart.goals.shipping_remaining_html' | t: amount: '[amount]' | escape }}" data-done="{{ 'cart.goals.shipping_done' | t | escape }}">
+          {%- if shipping_remaining > 0 -%}
+            {{ 'cart.goals.shipping_remaining_html' | t: amount: shipping_money }}
+          {%- else -%}
+            {{ 'cart.goals.shipping_done' | t }}
+          {%- endif -%}
+        </p>
+        <div
+          class="cart-goals__track"
+          role="progressbar"
+          aria-label="{{ 'cart.goals.shipping_label' | t }}"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="{{ shipping_percent }}"
+          data-goal-track
+        >
+          <span class="cart-goals__fill" style="--progress: {{ shipping_percent }}%;"></span>
+        </div>
+      </div>
+    {%- endif -%}
+    {%- if gift_on -%}
+      <p class="cart-goals__gift" data-goal data-threshold="{{ gift_threshold }}">
+        {%- render 'icon', icon: 'gift' -%}
+        <span
+          data-goal-message
+          data-template="{{ 'cart.goals.gift_remaining_html' | t: amount: '[amount]', gift: gift_name | escape }}"
+          data-done="{{ 'cart.goals.gift_done_html' | t: gift: gift_name | escape }}"
+        >
+          {%- if gift_remaining > 0 -%}
+            {{ 'cart.goals.gift_remaining_html' | t: amount: gift_money, gift: gift_name }}
+          {%- else -%}
+            {{ 'cart.goals.gift_done_html' | t: gift: gift_name }}
+          {%- endif -%}
+        </span>
+      </p>
+    {%- endif -%}
+  </cart-goals>
+{%- endif -%}

@@ -1,0 +1,59 @@
+{% doc %}
+  Renders country and language selectors that submit the localization form on change.
+
+  @param {string} id_suffix - Unique suffix for element ids
+  @param {boolean} [show_country] - Show the country and currency selector
+  @param {boolean} [show_language] - Show the language selector
+  @param {string} [class] - Extra classes for the wrapper
+
+  @example
+  {% render 'localization-form', id_suffix: 'footer', show_country: true, show_language: true %}
+{% enddoc %}
+{%- liquid
+  assign country_on = false
+  if show_country and localization.available_countries.size > 1
+    assign country_on = true
+  endif
+  assign language_on = false
+  if show_language and localization.available_languages.size > 1
+    assign language_on = true
+  endif
+  assign form_id = 'Localization-' | append: id_suffix
+-%}
+{%- if country_on or language_on -%}
+  <localization-form class="localization{% if class != blank %} {{ class }}{% endif %}">
+    {%- form 'localization', id: form_id, class: 'localization__form' -%}
+      {%- if country_on -%}
+        <div class="localization__field">
+          <label class="visually-hidden" for="Country-{{ id_suffix }}">{{ 'localization.country_label' | t }}</label>
+          <div class="select select--inline">
+            <select id="Country-{{ id_suffix }}" class="select__select" name="country_code">
+              {%- for country in localization.available_countries -%}
+                <option value="{{ country.iso_code }}" {% if country.iso_code == localization.country.iso_code %}selected{% endif %}>
+                  {{- country.name }} ({{ country.currency.iso_code }} {{ country.currency.symbol }})
+                </option>
+              {%- endfor -%}
+            </select>
+            {%- render 'icon', icon: 'chevron-down', class: 'select__icon' -%}
+          </div>
+        </div>
+      {%- endif -%}
+      {%- if language_on -%}
+        <div class="localization__field">
+          <label class="visually-hidden" for="Language-{{ id_suffix }}">{{ 'localization.language_label' | t }}</label>
+          <div class="select select--inline">
+            <select id="Language-{{ id_suffix }}" class="select__select" name="locale_code">
+              {%- for language in localization.available_languages -%}
+                <option value="{{ language.iso_code }}" lang="{{ language.iso_code }}" {% if language.iso_code == localization.language.iso_code %}selected{% endif %}>
+                  {{- language.endonym_name | capitalize -}}
+                </option>
+              {%- endfor -%}
+            </select>
+            {%- render 'icon', icon: 'chevron-down', class: 'select__icon' -%}
+          </div>
+        </div>
+      {%- endif -%}
+      <noscript><button class="button button--small">{{ 'localization.update' | t }}</button></noscript>
+    {%- endform -%}
+  </localization-form>
+{%- endif -%}

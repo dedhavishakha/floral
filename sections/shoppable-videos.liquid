@@ -1,0 +1,170 @@
+{%- liquid
+  assign s = section.settings
+  assign cols_tablet = s.columns_desktop | at_most: 3
+  assign modal_id = 'ShoppableVideoModal-' | append: section.id
+-%}
+<shoppable-videos
+  class="section shoppable-videos color-{{ s.color_scheme }}"
+  style="--pt: {{ s.padding_top }}px; --pb: {{ s.padding_bottom }}px;"
+  data-autoplay="{{ s.autoplay }}"
+  data-modal="{{ modal_id }}"
+>
+  <div class="page-width">
+    <carousel-slider class="carousel carousel--peek-{{ s.carousel_peek }}">
+      <div class="section-header{% if s.header_alignment == 'center' %} section-header--center{% endif %}">
+        {%- if s.eyebrow != blank or s.heading != blank or s.description != blank -%}
+          <div class="section-header__text">
+            {%- if s.eyebrow != blank -%}<p class="eyebrow">{{ s.eyebrow | escape }}</p>{%- endif -%}
+            {%- if s.heading != blank -%}<h2 class="h2">{{ s.heading }}</h2>{%- endif -%}
+            {%- if s.description != blank -%}<div class="rte">{{ s.description }}</div>{%- endif -%}
+          </div>
+        {%- endif -%}
+        <div class="section-header__actions">
+          <div class="carousel__nav">
+            <button type="button" class="icon-button icon-button--bordered" data-carousel-prev aria-label="{{ 'general.accessibility.previous_slide' | t }}">
+              {%- render 'icon', icon: 'chevron-left' -%}
+            </button>
+            <button type="button" class="icon-button icon-button--bordered" data-carousel-next aria-label="{{ 'general.accessibility.next_slide' | t }}">
+              {%- render 'icon', icon: 'chevron-right' -%}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <ul
+        class="carousel__track shoppable-videos__track"
+        data-carousel-track
+        role="list"
+        style="--cols-desktop: {{ s.columns_desktop }}; --cols-tablet: {{ cols_tablet }}; --cols-mobile: 1;"
+      >
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign b = block.settings
+            assign p = b.product
+            assign label = b.caption | default: p.title | default: s.heading | strip_html | escape
+          -%}
+          <li class="shoppable-video" data-video-item {{ block.shopify_attributes }}>
+            <div class="shoppable-video__media">
+              {%- if b.video != blank -%}
+                {{ b.video | video_tag: muted: true, loop: true, playsinline: true, preload: 'none', image_size: '720x', class: 'shoppable-video__video' }}
+                <button
+                  type="button"
+                  class="shoppable-video__open"
+                  data-video-open
+                  aria-haspopup="dialog"
+                  aria-label="{{ 'sections.shoppable_videos.watch' | t }}: {{ label }}"
+                ></button>
+                <button
+                  type="button"
+                  class="icon-button icon-button--surface shoppable-video__toggle"
+                  data-video-toggle
+                  aria-pressed="false"
+                  aria-label="{{ 'general.accessibility.play' | t }}"
+                  data-label-play="{{ 'general.accessibility.play' | t }}"
+                  data-label-pause="{{ 'general.accessibility.pause' | t }}"
+                >
+                  {%- render 'icon', icon: 'play', class: 'shoppable-video__icon-play' -%}
+                  {%- render 'icon', icon: 'pause', class: 'shoppable-video__icon-pause' -%}
+                </button>
+              {%- else -%}
+                {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg' }}
+              {%- endif -%}
+              {%- if b.caption != blank -%}
+                <p class="shoppable-video__caption">{{ b.caption | escape }}</p>
+              {%- endif -%}
+            </div>
+
+            {%- if s.show_product -%}
+              {%- if p != blank -%}
+                <div class="shoppable-video__product" data-video-product>
+                  <a href="{{ p.url }}" class="shoppable-video__product-link">
+                    <span class="shoppable-video__thumb media media--square">
+                      {%- if p.featured_media -%}
+                        {{ p.featured_media.preview_image | image_url: width: 160 | image_tag: loading: 'lazy', alt: '', widths: '80, 160', sizes: '56px' }}
+                      {%- endif -%}
+                    </span>
+                    <span class="shoppable-video__product-info">
+                      <span class="shoppable-video__product-title">{{ p.title | escape }}</span>
+                      {% render 'price', product: p %}
+                    </span>
+                  </a>
+                  {%- if p.available -%}
+                    <button type="button" class="button button--small shoppable-video__shop" data-quick-view="{{ p.url }}" aria-haspopup="dialog">
+                      {{- 'sections.shoppable_videos.shop' | t -}}
+                      <span class="visually-hidden">: {{ p.title | escape }}</span>
+                    </button>
+                  {%- endif -%}
+                </div>
+              {%- elsif request.design_mode -%}
+                <div class="shoppable-video__product">
+                  <span class="shoppable-video__product-info">
+                    <span class="shoppable-video__product-title">{{ 'onboarding.product_title' | t }}</span>
+                  </span>
+                </div>
+              {%- endif -%}
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+      {%- if s.show_progress -%}
+        <div class="carousel__progress" aria-hidden="true"><span class="carousel__progress-bar"></span></div>
+      {%- endif -%}
+    </carousel-slider>
+  </div>
+
+  <dialog id="{{ modal_id }}" class="modal shoppable-videos__modal color-{{ s.color_scheme }}" aria-label="{{ 'sections.shoppable_videos.watch' | t }}">
+    <button type="button" class="modal__close icon-button" data-dialog-close aria-label="{{ 'general.accessibility.close' | t }}">
+      {%- render 'icon', icon: 'close' -%}
+    </button>
+    <div class="shoppable-videos__modal-body" data-video-modal-content></div>
+  </dialog>
+</shoppable-videos>
+
+{% schema %}
+{
+  "name": "Shoppable videos",
+  "tag": "section",
+  "class": "shoppable-videos-section",
+  "max_blocks": 12,
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Seen on you" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "Shop the video" },
+    { "type": "richtext", "id": "description", "label": "Description" },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "start", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "start"
+    },
+    { "type": "range", "id": "columns_desktop", "label": "Videos per row on desktop", "min": 2, "max": 6, "step": 1, "default": 4 },
+    { "type": "checkbox", "id": "carousel_peek", "label": "Show part of the next item", "default": true },
+    { "type": "checkbox", "id": "show_progress", "label": "Show progress bar", "default": false },
+    { "type": "checkbox", "id": "autoplay", "label": "Play videos muted while visible", "info": "Videos never autoplay for visitors who prefer reduced motion. Each video has a pause button.", "default": true },
+    { "type": "checkbox", "id": "show_product", "label": "Show product under each video", "default": true },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "blocks": [
+    {
+      "type": "video",
+      "name": "Video",
+      "settings": [
+        { "type": "video", "id": "video", "label": "Video", "info": "Upload a vertical video (9:16 recommended) in Shopify Files." },
+        { "type": "product", "id": "product", "label": "Product" },
+        { "type": "text", "id": "caption", "label": "Caption" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shoppable videos",
+      "blocks": [{ "type": "video" }, { "type": "video" }, { "type": "video" }, { "type": "video" }]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,1038 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "slideshow": {
+      "type": "slideshow",
+      "blocks": {
+        "slide-1": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/home-hero.jpg",
+            "image_mobile": "shopify://shop_images/home-hero-mobile.jpg",
+            "image_focus": "top",
+            "overlay_opacity": 0,
+            "eyebrow": "The new season",
+            "heading": "The art of ease",
+            "text": "Relaxed tailoring, fluid silk and soft cashmere in natural fibres, cut to move with you from morning to evening.",
+            "button_label": "Shop new arrivals",
+            "button_link": "shopify://collections/new-arrivals",
+            "button_label_2": "Explore collections",
+            "button_link_2": "shopify://collections",
+            "content_position": "bottom-left",
+            "text_alignment": "start",
+            "text_color": "dark"
+          }
+        },
+        "slide-2": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/home-editorial-1.jpg",
+            "image_focus": "top",
+            "overlay_opacity": 25,
+            "eyebrow": "Sets & loungewear",
+            "heading": "Evenings, unhurried",
+            "text": "Waffle-knit sets and silk robes made for slow evenings at home.",
+            "button_label": "Shop loungewear",
+            "button_link": "shopify://collections/sets-loungewear",
+            "button_label_2": "",
+            "button_link_2": "",
+            "content_position": "bottom-left",
+            "text_alignment": "start",
+            "text_color": "light"
+          }
+        },
+        "slide-3": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/home-newsletter.jpg",
+            "image_focus": "center",
+            "overlay_opacity": 0,
+            "eyebrow": "Knitwear & layers",
+            "heading": "Cashmere, quietly",
+            "text": "Soft cashmere cardigans and a camel wrap coat to layer through the season.",
+            "button_label": "Shop knitwear",
+            "button_link": "shopify://collections/knitwear-layers",
+            "button_label_2": "",
+            "button_link_2": "",
+            "content_position": "middle-left",
+            "text_alignment": "start",
+            "text_color": "dark"
+          }
+        }
+      },
+      "block_order": [
+        "slide-1",
+        "slide-2",
+        "slide-3"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "autoplay": true,
+        "interval": 6,
+        "show_pause": false,
+        "show_dots": true,
+        "dots_style": "dots",
+        "controls_position": "on",
+        "controls_alignment": "center",
+        "show_arrows": true,
+        "arrows_position": "bottom",
+        "heading_size": "h0",
+        "height": "original",
+        "mobile_height": "large",
+        "slide_zoom": true,
+        "accessibility_label": "Featured collections",
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "hero": {
+      "type": "hero",
+      "disabled": true,
+      "settings": {
+        "color_scheme": "scheme-1",
+        "layout": "full",
+        "image": "shopify://shop_images/home-hero.jpg",
+        "image_mobile": "shopify://shop_images/home-hero-mobile.jpg",
+        "image_focus": "top",
+        "overlay_opacity": 0,
+        "media_text": "dark",
+        "image_position": "left",
+        "eyebrow": "The new season",
+        "heading": "The art of ease",
+        "heading_size": "h0",
+        "text": "Relaxed tailoring, fluid silk and soft cashmere in natural fibres, cut to move with you from morning to evening.",
+        "button_label_1": "Shop new arrivals",
+        "button_link_1": "shopify://collections/new-arrivals",
+        "button_style_1": "primary",
+        "button_label_2": "Explore collections",
+        "button_link_2": "shopify://collections",
+        "button_style_2": "secondary",
+        "content_position": "bottom-left",
+        "text_alignment": "start",
+        "panel_1_title": "Women",
+        "panel_1_label": "Shop now",
+        "panel_1_link": "",
+        "panel_2_title": "Men",
+        "panel_2_label": "Shop now",
+        "panel_2_link": "",
+        "height": "full",
+        "mobile_height": "large",
+        "card_color_scheme": "",
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "marquee": {
+      "type": "scrolling-text",
+      "blocks": {
+        "marquee-1": {
+          "type": "text",
+          "settings": {
+            "text": "Free shipping over ₹5,000",
+            "link": ""
+          }
+        },
+        "marquee-2": {
+          "type": "text",
+          "settings": {
+            "text": "Free returns within 30 days",
+            "link": ""
+          }
+        },
+        "marquee-3": {
+          "type": "text",
+          "settings": {
+            "text": "Pure European linen",
+            "link": ""
+          }
+        },
+        "marquee-4": {
+          "type": "text",
+          "settings": {
+            "text": "Made in small runs",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "marquee-1",
+        "marquee-2",
+        "marquee-3",
+        "marquee-4"
+      ],
+      "settings": {
+        "color_scheme": "scheme-4",
+        "size": "small",
+        "font": "heading",
+        "speed": "medium",
+        "direction": "left",
+        "separator": "none",
+        "show_pause": false,
+        "show_borders": false,
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "categories": {
+      "type": "collection-list",
+      "blocks": {
+        "category-1": {
+          "type": "collection",
+          "settings": {
+            "collection": "tops-blouses",
+            "image": "shopify://shop_images/home-menu-4.jpg",
+            "title": ""
+          }
+        },
+        "category-2": {
+          "type": "collection",
+          "settings": {
+            "collection": "trousers",
+            "title": ""
+          }
+        },
+        "category-3": {
+          "type": "collection",
+          "settings": {
+            "collection": "sets-loungewear",
+            "title": ""
+          }
+        },
+        "category-4": {
+          "type": "collection",
+          "settings": {
+            "collection": "knitwear-layers",
+            "title": ""
+          }
+        }
+      },
+      "block_order": [
+        "category-1",
+        "category-2",
+        "category-3",
+        "category-4"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "eyebrow": "Shop by category",
+        "heading": "Find your next favorite",
+        "header_alignment": "start",
+        "layout": "carousel",
+        "columns_desktop": 3,
+        "columns_mobile": "2",
+        "carousel_peek": true,
+        "show_progress": false,
+        "image_ratio": "natural",
+        "image_size": "ratio",
+        "image_zoom": true,
+        "image_source": "collection",
+        "title_position": "below",
+        "show_count": false,
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "tabs": {
+      "type": "collection-tabs",
+      "blocks": {
+        "tab-new": {
+          "type": "tab",
+          "settings": {
+            "collection": "new-arrivals",
+            "label": "New in"
+          }
+        },
+        "tab-best": {
+          "type": "tab",
+          "settings": {
+            "collection": "the-executive-foundation",
+            "label": "Tailoring"
+          }
+        },
+        "tab-essentials": {
+          "type": "tab",
+          "settings": {
+            "collection": "soft-evening-layers",
+            "label": "Loungewear"
+          }
+        }
+      },
+      "block_order": [
+        "tab-new",
+        "tab-best",
+        "tab-essentials"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "eyebrow": "This week",
+        "heading": "Just landed",
+        "header_alignment": "start",
+        "products_to_show": 8,
+        "layout": "carousel",
+        "arrows_desktop": "below",
+        "arrows_mobile": "heading",
+        "columns_desktop": 4,
+        "columns_mobile": "2",
+        "carousel_peek": true,
+        "show_progress": false,
+        "card_style": "inherit",
+        "show_swatches": "inherit",
+        "show_badges": "inherit",
+        "image_ratio": "inherit",
+        "image_zoom": true,
+        "view_all_label": "View all",
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "shoppable-videos": {
+      "type": "shoppable-videos",
+      "blocks": {
+        "reel-1": {
+          "type": "video",
+          "settings": {
+            "video": "shopify://files/videos/home-reel-1.mp4",
+            "product": "silk-lounge-robe",
+            "caption": "Silk for slow evenings"
+          }
+        },
+        "reel-2": {
+          "type": "video",
+          "settings": {
+            "video": "shopify://files/videos/home-reel-2.mp4",
+            "product": "cropped-tapered-wool-trousers",
+            "caption": "Cropped tailoring, desk to dinner"
+          }
+        },
+        "reel-3": {
+          "type": "video",
+          "settings": {
+            "video": "shopify://files/videos/home-reel-3.mp4",
+            "product": "cotton-knit-jogger-set",
+            "caption": "Soft knits for easy weekends"
+          }
+        },
+        "reel-4": {
+          "type": "video",
+          "settings": {
+            "video": "shopify://files/videos/home-reel-4.mp4",
+            "product": "cotton-waffle-pyjama-set",
+            "caption": "Waffle-knit mornings"
+          }
+        }
+      },
+      "block_order": [
+        "reel-1",
+        "reel-2",
+        "reel-3",
+        "reel-4"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "eyebrow": "Seen on you",
+        "heading": "Shop the video",
+        "description": "",
+        "header_alignment": "start",
+        "columns_desktop": 4,
+        "carousel_peek": true,
+        "show_progress": false,
+        "autoplay": true,
+        "show_product": true,
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "editorial": {
+      "type": "editorial-grid",
+      "blocks": {
+        "tile-1": {
+          "type": "tile",
+          "settings": {
+            "image": "shopify://shop_images/home-editorial-1.jpg",
+            "size": "large",
+            "text_position": "overlay",
+            "eyebrow": "Loungewear",
+            "heading": "Evenings, unhurried",
+            "text": "Waffle-knit sets and silk robes made for slow evenings.",
+            "link": "shopify://collections/sets-loungewear",
+            "link_label": "Shop loungewear"
+          }
+        },
+        "tile-2": {
+          "type": "tile",
+          "settings": {
+            "image": "shopify://shop_images/home-editorial-2.jpg",
+            "size": "tall",
+            "text_position": "overlay",
+            "eyebrow": "Tailoring",
+            "heading": "Tailoring, softened",
+            "text": "",
+            "link": "shopify://collections/the-executive-foundation",
+            "link_label": "Shop tailoring"
+          }
+        },
+        "tile-3": {
+          "type": "tile",
+          "settings": {
+            "image": "shopify://shop_images/home-editorial-3.jpg",
+            "size": "small",
+            "text_position": "overlay",
+            "eyebrow": "",
+            "heading": "The easy top",
+            "text": "",
+            "link": "shopify://collections/tops-blouses",
+            "link_label": "Shop tops"
+          }
+        },
+        "tile-4": {
+          "type": "tile",
+          "settings": {
+            "image": "shopify://shop_images/home-editorial-4.jpg",
+            "image_mobile": "shopify://shop_images/home-editorial-1.jpg",
+            "size": "small",
+            "text_position": "overlay",
+            "eyebrow": "",
+            "heading": "Wide-leg trousers",
+            "text": "",
+            "link": "shopify://collections/trousers",
+            "link_label": "Shop trousers"
+          }
+        }
+      },
+      "block_order": [
+        "tile-1",
+        "tile-2",
+        "tile-3",
+        "tile-4"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "layout": "magazine",
+        "mobile_layout": "carousel",
+        "image_size": "ratio",
+        "image_zoom": true,
+        "eyebrow": "The edit",
+        "heading": "Dressed for the in-between",
+        "header_alignment": "start",
+        "gap": 12,
+        "full_width": false,
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "shop-the-look": {
+      "type": "shop-the-look",
+      "blocks": {
+        "spot-1": {
+          "type": "hotspot",
+          "settings": {
+            "product": "tailored-poplin-shirt",
+            "x": 50,
+            "y": 30
+          }
+        },
+        "spot-2": {
+          "type": "hotspot",
+          "settings": {
+            "product": "straight-leg-cotton-chinos",
+            "x": 47,
+            "y": 66
+          }
+        }
+      },
+      "block_order": [
+        "spot-1",
+        "spot-2"
+      ],
+      "settings": {
+        "color_scheme": "scheme-2",
+        "image": "shopify://shop_images/home-shop-the-look.jpg",
+        "image_size": "ratio",
+        "image_position": "left",
+        "eyebrow": "Shop the look",
+        "heading": "The weekday uniform",
+        "text": "<p>A crisp cotton poplin shirt with sand straight-leg chinos. Tap a dot to see each piece, or add the whole look in one go.</p>",
+        "show_add_all": true,
+        "popover_color_scheme": "scheme-2",
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "brand-story": {
+      "type": "image-with-text",
+      "blocks": {
+        "story-eyebrow": {
+          "type": "eyebrow",
+          "settings": {
+            "text": "Our story"
+          }
+        },
+        "story-heading": {
+          "type": "heading",
+          "settings": {
+            "heading": "Made slowly, worn for years",
+            "size": "h2"
+          }
+        },
+        "story-text": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Every piece starts as a sketch in our studio and is cut from natural fibres by workshops we have known for years. We make in small runs, so nothing is wasted and every seam gets attention.</p>",
+            "style": "body"
+          }
+        },
+        "story-fact-1": {
+          "type": "fact",
+          "settings": {
+            "label": "Fabrics",
+            "value": "European flax linen and organic cotton"
+          }
+        },
+        "story-fact-2": {
+          "type": "fact",
+          "settings": {
+            "label": "Made in",
+            "value": "Small family-run workshops"
+          }
+        },
+        "story-fact-3": {
+          "type": "fact",
+          "settings": {
+            "label": "Care",
+            "value": "Pre-washed for softness, built to last"
+          }
+        },
+        "story-button": {
+          "type": "button",
+          "settings": {
+            "label": "Read our story",
+            "link": "shopify://pages/our-story",
+            "style": "secondary"
+          }
+        }
+      },
+      "block_order": [
+        "story-eyebrow",
+        "story-heading",
+        "story-text",
+        "story-fact-1",
+        "story-fact-2",
+        "story-fact-3",
+        "story-button"
+      ],
+      "settings": {
+        "color_scheme": "scheme-4",
+        "image": "shopify://shop_images/home-story-1.jpg",
+        "image_2": "shopify://shop_images/home-story-2.jpg",
+        "image_position": "left",
+        "image_width": 50,
+        "image_ratio": "portrait",
+        "image_size": "ratio",
+        "vertical_alignment": "center",
+        "text_alignment": "start",
+        "full_width": false,
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "lookbook": {
+      "type": "lookbook",
+      "blocks": {
+        "look-1": {
+          "type": "look",
+          "settings": {
+            "image": "shopify://shop_images/home-look-1.jpg",
+            "title": "Golden hour",
+            "caption": "<p>An espresso silk slip dress for warm evenings, with the camel wrap coat for later.</p>",
+            "product_1": "bias-cut-midi-slip-dress",
+            "product_2": "cashmere-wrap-coat",
+            "product_3": ""
+          }
+        },
+        "look-2": {
+          "type": "look",
+          "settings": {
+            "image": "shopify://shop_images/home-look-2.jpg",
+            "title": "Studio days",
+            "caption": "<p>A sand linen waistcoat and trouser co-ord, on its own or over a crisp poplin shirt.</p>",
+            "product_1": "tailored-linen-co-ord-set",
+            "product_2": "tailored-poplin-shirt",
+            "product_3": ""
+          }
+        },
+        "look-3": {
+          "type": "look",
+          "settings": {
+            "image": "shopify://shop_images/home-look-3.jpg",
+            "title": "Reading room",
+            "caption": "<p>An oat cashmere cardigan over an easy cotton tee for quiet afternoons.</p>",
+            "product_1": "cashmere-crewneck-cardigan",
+            "product_2": "organic-cotton-boxy-tee",
+            "product_3": ""
+          }
+        },
+        "look-4": {
+          "type": "look",
+          "settings": {
+            "image": "shopify://shop_images/home-look-4.jpg",
+            "title": "Garden meeting",
+            "caption": "<p>A relaxed oat linen shirt dress, with an unstructured blazer for cooler mornings.</p>",
+            "product_1": "linen-shirt-dress",
+            "product_2": "unstructured-linen-blazer",
+            "product_3": ""
+          }
+        }
+      },
+      "block_order": [
+        "look-1",
+        "look-2",
+        "look-3",
+        "look-4"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "eyebrow": "Lookbook",
+        "heading": "Linen, styled four ways",
+        "description": "",
+        "look_width": "medium",
+        "carousel_peek": true,
+        "show_progress": true,
+        "image_ratio": "tall",
+        "image_size": "ratio",
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "featured_product_8YU6BP": {
+      "type": "featured-product",
+      "blocks": {
+        "vendor_zfN8ar": {
+          "type": "vendor",
+          "settings": {}
+        },
+        "title_7HFB66": {
+          "type": "title",
+          "settings": {
+            "heading_size": "h2"
+          }
+        },
+        "price_mQxzPw": {
+          "type": "price",
+          "settings": {}
+        },
+        "variant_picker_Ag9maa": {
+          "type": "variant_picker",
+          "settings": {
+            "picker_style": "buttons",
+            "show_swatches": true
+          }
+        },
+        "quantity_j6VMre": {
+          "type": "quantity",
+          "settings": {}
+        },
+        "buy_buttons_FjCjhc": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_quantity": false,
+            "show_dynamic_checkout": true,
+            "show_installments": true
+          }
+        },
+        "description_twaytF": {
+          "type": "description",
+          "settings": {
+            "truncate": true
+          }
+        },
+        "view_details_c8AiHL": {
+          "type": "view_details",
+          "settings": {
+            "label": ""
+          }
+        }
+      },
+      "block_order": [
+        "vendor_zfN8ar",
+        "title_7HFB66",
+        "price_mQxzPw",
+        "variant_picker_Ag9maa",
+        "quantity_j6VMre",
+        "buy_buttons_FjCjhc",
+        "description_twaytF",
+        "view_details_c8AiHL"
+      ],
+      "name": "Featured product",
+      "settings": {
+        "color_scheme": "",
+        "product": "organic-cotton-boxy-tee",
+        "media_position": "left",
+        "gallery_layout": "slider",
+        "enable_lightbox": false,
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "promo": {
+      "type": "promo-banner",
+      "settings": {
+        "color_scheme": "scheme-3",
+        "layout": "image_right",
+        "image": "shopify://shop_images/home-promo.jpg",
+        "image_size": "ratio",
+        "overlay_opacity": 35,
+        "eyebrow": "End of season",
+        "heading": "Up to 22% off selected styles",
+        "heading_size": "h1",
+        "text": "<p>Cotton dresses, linen trousers and a cashmere cardigan at reduced prices, while sizes last.</p>",
+        "text_alignment": "start",
+        "show_countdown": true,
+        "end_date": "2026-12-31 23:59",
+        "countdown_label": "Offer ends in",
+        "expired_behavior": "hide",
+        "discount_code": "",
+        "button_label_1": "Shop the sale",
+        "button_link_1": "shopify://collections/sale",
+        "button_label_2": "",
+        "button_link_2": "",
+        "full_width": false,
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "editors-picks": {
+      "type": "featured-collection",
+      "settings": {
+        "color_scheme": "scheme-1",
+        "source": "collection",
+        "collection": "quiet-afternoon-silhouettes",
+        "product_list": [],
+        "products_to_show": 4,
+        "eyebrow": "Editor's picks",
+        "heading": "The pieces we reach for",
+        "description": "",
+        "header_alignment": "center",
+        "show_view_all": true,
+        "view_all_label": "Shop all",
+        "layout": "grid",
+        "columns_desktop": 4,
+        "columns_mobile": "2",
+        "carousel_peek": true,
+        "show_progress": true,
+        "card_style": "editorial",
+        "show_swatches": "inherit",
+        "show_badges": "inherit",
+        "image_ratio": "inherit",
+        "image_zoom": true,
+        "quick_add": "inherit",
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "testimonials": {
+      "type": "testimonials",
+      "blocks": {
+        "review-1": {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "<p>The co-ord set is beautifully cut. The linen felt soft from the first wear and the trousers fall perfectly.</p>",
+            "author": "Ananya R.",
+            "detail": "Verified buyer",
+            "product": "tailored-linen-co-ord-set"
+          }
+        },
+        "review-2": {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "<p>My new everyday shirt. Breathable in the heat and it still looks crisp at the end of a long day.</p>",
+            "author": "Meera K.",
+            "detail": "Verified buyer",
+            "product": "relaxed-linen-shirt"
+          }
+        },
+        "review-3": {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "<p>So comfortable that I went back for a second color. Quick delivery and lovely plastic-free packaging.</p>",
+            "author": "Riya S.",
+            "detail": "Verified buyer",
+            "product": "linen-drawstring-lounge-set"
+          }
+        }
+      },
+      "block_order": [
+        "review-1",
+        "review-2",
+        "review-3"
+      ],
+      "settings": {
+        "color_scheme": "scheme-4",
+        "eyebrow": "Reviews",
+        "heading": "Worn and loved",
+        "header_alignment": "start",
+        "layout": "carousel",
+        "columns_desktop": 3,
+        "carousel_peek": true,
+        "show_progress": false,
+        "card_style": "boxed",
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "press": {
+      "type": "logo-list",
+      "blocks": {
+        "logo-1": {
+          "type": "logo",
+          "settings": {
+            "name": "Northline",
+            "link": ""
+          }
+        },
+        "logo-2": {
+          "type": "logo",
+          "settings": {
+            "name": "Atelier Rue",
+            "link": ""
+          }
+        },
+        "logo-3": {
+          "type": "logo",
+          "settings": {
+            "name": "Kinfolk Supply",
+            "link": ""
+          }
+        },
+        "logo-4": {
+          "type": "logo",
+          "settings": {
+            "name": "Maison Vert",
+            "link": ""
+          }
+        },
+        "logo-5": {
+          "type": "logo",
+          "settings": {
+            "name": "Studio Ora",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "logo-1",
+        "logo-2",
+        "logo-3",
+        "logo-4",
+        "logo-5"
+      ],
+      "disabled": true,
+      "settings": {
+        "color_scheme": "scheme-1",
+        "heading": "As featured in",
+        "logo_height": 28,
+        "grayscale": true,
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "promises": {
+      "type": "icons-with-text",
+      "blocks": {
+        "promise-1": {
+          "type": "item",
+          "settings": {
+            "icon": "truck",
+            "title": "Free shipping",
+            "text": "<p>On orders over ₹5,000.</p>"
+          }
+        },
+        "promise-2": {
+          "type": "item",
+          "settings": {
+            "icon": "return",
+            "title": "30-day returns",
+            "text": "<p>Free and easy, no questions asked.</p>"
+          }
+        },
+        "promise-3": {
+          "type": "item",
+          "settings": {
+            "icon": "lock",
+            "title": "Secure checkout",
+            "text": "<p>Cards, UPI and wallets, all encrypted.</p>"
+          }
+        },
+        "promise-4": {
+          "type": "item",
+          "settings": {
+            "icon": "leaf",
+            "title": "Natural fibres",
+            "text": "<p>Linen and cotton from certified mills.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "promise-1",
+        "promise-2",
+        "promise-3",
+        "promise-4"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "heading": "",
+        "columns_desktop": 4,
+        "columns_mobile": "2",
+        "alignment": "center",
+        "show_dividers": true,
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "social": {
+      "type": "social-gallery",
+      "blocks": {
+        "social-1": {
+          "type": "image",
+          "settings": {
+            "image": "shopify://shop_images/home-social-1.jpg",
+            "caption": "",
+            "link": ""
+          }
+        },
+        "social-2": {
+          "type": "image",
+          "settings": {
+            "image": "shopify://shop_images/home-social-2.jpg",
+            "caption": "",
+            "link": ""
+          }
+        },
+        "social-3": {
+          "type": "image",
+          "settings": {
+            "image": "shopify://shop_images/home-social-3.jpg",
+            "caption": "",
+            "link": ""
+          }
+        },
+        "social-4": {
+          "type": "image",
+          "settings": {
+            "image": "shopify://shop_images/home-social-4.jpg",
+            "caption": "",
+            "link": ""
+          }
+        },
+        "social-5": {
+          "type": "image",
+          "settings": {
+            "image": "shopify://shop_images/home-social-5.jpg",
+            "caption": "",
+            "link": ""
+          }
+        },
+        "social-6": {
+          "type": "image",
+          "settings": {
+            "image": "shopify://shop_images/home-social-6.jpg",
+            "caption": "",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "social-1",
+        "social-2",
+        "social-3",
+        "social-4",
+        "social-5",
+        "social-6"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "eyebrow": "Community",
+        "heading": "Seen on you",
+        "handle": "",
+        "profile_link": "",
+        "columns_desktop": 6,
+        "columns_mobile": "2",
+        "gap": 4,
+        "full_width": true,
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "journal": {
+      "type": "blog-posts",
+      "settings": {
+        "color_scheme": "scheme-1",
+        "blog": "journal",
+        "post_count": 3,
+        "eyebrow": "Journal",
+        "heading": "Notes on linen",
+        "view_all_label": "All stories",
+        "layout": "grid",
+        "columns_desktop": 3,
+        "carousel_peek": true,
+        "show_progress": false,
+        "image_ratio": "portrait",
+        "image_size": "ratio",
+        "image_zoom": true,
+        "show_date": true,
+        "show_author": false,
+        "show_excerpt": true,
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "newsletter": {
+      "type": "newsletter",
+      "settings": {
+        "color_scheme": "scheme-4",
+        "layout": "split",
+        "image": "shopify://shop_images/home-newsletter.jpg",
+        "image_size": "ratio",
+        "image_position": "left",
+        "eyebrow": "Newsletter",
+        "heading": "First look at new drops",
+        "text": "<p>Early access to new collections, private sales and care notes from the studio.</p>",
+        "button_label": "Subscribe",
+        "disclaimer": "<p>By subscribing you agree to receive marketing emails. Unsubscribe at any time.</p>",
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    }
+  },
+  "order": [
+    "slideshow",
+    "hero",
+    "marquee",
+    "categories",
+    "tabs",
+    "shoppable-videos",
+    "editorial",
+    "shop-the-look",
+    "brand-story",
+    "lookbook",
+    "featured_product_8YU6BP",
+    "promo",
+    "editors-picks",
+    "testimonials",
+    "press",
+    "promises",
+    "social",
+    "journal",
+    "newsletter"
+  ]
+}

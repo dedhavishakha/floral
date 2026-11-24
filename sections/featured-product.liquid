@@ -1,0 +1,354 @@
+{%- liquid
+  assign s = section.settings
+  assign featured = s.product
+  # When the picker reloads this section from the product URL, use the page product so the chosen size and color apply.
+  if request.page_type == 'product' and product != blank and featured != blank and product.id == featured.id
+    assign featured = product
+  endif
+  assign form_id = 'product-form-' | append: section.id
+  assign quantity_blocks = section.blocks | where: 'type', 'quantity'
+  assign has_quantity_block = false
+  if quantity_blocks.size > 0
+    assign has_quantity_block = true
+  endif
+  assign vendor_html = ''
+-%}
+{%- unless template.name == 'product' -%}
+  {{ 'product.css' | asset_url | stylesheet_tag }}
+{%- endunless -%}
+
+<div
+  class="section featured-product color-{{ s.color_scheme }}"
+  style="--pt: {{ s.padding_top }}px; --pb: {{ s.padding_bottom }}px;"
+>
+  <div class="page-width">
+    {%- if featured != blank -%}
+      <div
+        class="product product--medium product--gallery-{{ s.gallery_layout }} featured-product__layout featured-product__layout--media-{{ s.media_position }}"
+        data-product-root
+        data-section-id="{{ section.id }}"
+      >
+        <div class="product__media">
+          {% render 'product-gallery',
+            product: featured,
+            section_id: section.id,
+            layout: s.gallery_layout,
+            media_size: 'medium',
+            lightbox: s.enable_lightbox,
+            hover_zoom: false,
+            group_by_color: false
+          %}
+        </div>
+
+        <div class="product__info">
+          <div class="product__info-inner">
+            {%- for block in section.blocks -%}
+              {%- case block.type -%}
+                {%- when '@app' -%}
+                  <div class="product__block product__block--app">{% render block %}</div>
+
+                {%- when 'vendor' -%}
+                  {%- if featured.vendor != blank -%}
+                    {%- capture vendor_html -%}
+                      <p class="product__vendor eyebrow" {{ block.shopify_attributes }}>
+                        <span class="visually-hidden">{{ 'products.product.vendor' | t }}</span>
+                        {{- featured.vendor | escape -}}
+                      </p>
+                    {%- endcapture -%}
+                    {%- assign next_block = section.blocks[forloop.index] -%}
+                    {%- if next_block.type != 'title' -%}
+                      {{- vendor_html -}}
+                      {%- assign vendor_html = '' -%}
+                    {%- endif -%}
+                  {%- endif -%}
+
+                {%- when 'title' -%}
+                  {%- capture title_html -%}
+                    <h2 class="product__title {{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
+                      <a href="{{ featured.url }}" class="featured-product__title-link">{{ featured.title | escape }}</a>
+                    </h2>
+                  {%- endcapture -%}
+                  {%- if vendor_html != blank -%}
+                    <div class="product__heading">
+                      {{- vendor_html -}}
+                      {{- title_html -}}
+                    </div>
+                    {%- assign vendor_html = '' -%}
+                  {%- else -%}
+                    {{- title_html -}}
+                  {%- endif -%}
+
+                {%- when 'price' -%}
+                  <div class="product__price" {{ block.shopify_attributes }}>
+                    <div data-update="price">
+                      {% render 'price', product: featured, use_variant: true, class: 'price--large' %}
+                    </div>
+                  </div>
+
+                {%- when 'rating' -%}
+                  {%- if featured.metafields.reviews.rating.value != blank -%}
+                    <div class="product__rating" {{ block.shopify_attributes }}>
+                      {% render 'rating', product: featured, show_count: true %}
+                    </div>
+                  {%- endif -%}
+
+                {%- when 'variant_picker' -%}
+                  {%- unless featured.has_only_default_variant -%}
+                    <div class="product__block product__block--picker" {{ block.shopify_attributes }}>
+                      {% render 'variant-picker',
+                        product: featured,
+                        section_id: section.id,
+                        update_url: false,
+                        picker_style: block.settings.picker_style,
+                        show_swatches: block.settings.show_swatches
+                      %}
+                    </div>
+                  {%- endunless -%}
+
+                {%- when 'quantity' -%}
+                  {%- liquid
+                    assign qty_variant = featured.selected_or_first_available_variant
+                    assign qty_id = 'Quantity-block-' | append: section.id
+                  -%}
+                  <div class="product__block product__block--quantity" {{ block.shopify_attributes }}>
+                    <label class="product__quantity-label" for="{{ qty_id }}">{{ 'products.product.quantity.label' | t }}</label>
+                    <quantity-input class="quantity">
+                      <button type="button" class="quantity__button" name="minus" aria-label="{{ 'products.product.quantity.decrease' | t: product: featured.title | escape }}">
+                        {%- render 'icon', icon: 'minus' -%}
+                      </button>
+                      <input
+                        class="quantity__input"
+                        type="number"
+                        name="quantity"
+                        id="{{ qty_id }}"
+                        value="{{ qty_variant.quantity_rule.min | default: 1 }}"
+                        min="{{ qty_variant.quantity_rule.min | default: 1 }}"
+                        step="{{ qty_variant.quantity_rule.increment | default: 1 }}"
+                        {% if qty_variant.quantity_rule.max != null %}max="{{ qty_variant.quantity_rule.max }}"{% endif %}
+                        form="{{ form_id }}"
+                        inputmode="numeric"
+                      >
+                      <button type="button" class="quantity__button" name="plus" aria-label="{{ 'products.product.quantity.increase' | t: product: featured.title | escape }}">
+                        {%- render 'icon', icon: 'plus' -%}
+                      </button>
+                    </quantity-input>
+                  </div>
+
+                {%- when 'buy_buttons' -%}
+                  <div class="product__block product__block--buy" {{ block.shopify_attributes }}>
+                    {% render 'buy-buttons',
+                      product: featured,
+                      section_id: section.id,
+                      show_quantity: block.settings.show_quantity,
+                      hide_quantity: has_quantity_block,
+                      show_dynamic_checkout: block.settings.show_dynamic_checkout,
+                      show_installments: block.settings.show_installments
+                    %}
+                  </div>
+
+                {%- when 'description' -%}
+                  {%- if featured.description != blank -%}
+                    <div class="product__description rte" {{ block.shopify_attributes }}>
+                      {%- if block.settings.truncate -%}
+                        <p>{{ featured.description | strip_html | truncatewords: 40 }}</p>
+                      {%- else -%}
+                        {{ featured.description }}
+                      {%- endif -%}
+                    </div>
+                  {%- endif -%}
+
+                {%- when 'text' -%}
+                  {%- if block.settings.text != blank -%}
+                    <div class="product__text product__text--{{ block.settings.text_style }} rte" {{ block.shopify_attributes }}>
+                      {{ block.settings.text }}
+                    </div>
+                  {%- endif -%}
+
+                {%- when 'custom_liquid' -%}
+                  {%- if block.settings.custom_liquid != blank -%}
+                    <div class="product__custom-liquid" {{ block.shopify_attributes }}>
+                      {{ block.settings.custom_liquid }}
+                    </div>
+                  {%- endif -%}
+
+                {%- when 'view_details' -%}
+                  <a href="{{ featured.url }}" class="link featured-product__details" {{ block.shopify_attributes }}>
+                    {%- if block.settings.label != blank -%}
+                      {{- block.settings.label | escape -}}
+                    {%- else -%}
+                      {{- 'products.quick_view.view_details' | t -}}
+                    {%- endif -%}
+                    {%- render 'icon', icon: 'arrow-right' -%}
+                  </a>
+              {%- endcase -%}
+            {%- endfor -%}
+          </div>
+        </div>
+      </div>
+    {%- else -%}
+      <div class="product product--medium featured-product__layout featured-product__layout--media-{{ s.media_position }}">
+        <div class="product__media">
+          <div class="media media--{{ settings.product_image_ratio }}">
+            {{ 'product-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+          </div>
+        </div>
+        <div class="product__info">
+          <div class="product__info-inner">
+            <h2 class="product__title h2">{{ 'onboarding.product_title' | t }}</h2>
+            <div class="product__price">
+              <div class="price price--large"><span class="price__current">{{ 3990 | money }}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Featured product",
+  "tag": "section",
+  "class": "section-featured-product",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "product", "id": "product", "label": "Product" },
+    {
+      "type": "select",
+      "id": "media_position",
+      "label": "Desktop media position",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "gallery_layout",
+      "label": "Desktop media layout",
+      "options": [
+        { "value": "slider", "label": "Carousel" },
+        { "value": "thumbnails_bottom", "label": "Thumbnails below" },
+        { "value": "thumbnails_left", "label": "Thumbnails on the left" }
+      ],
+      "default": "thumbnails_bottom",
+      "info": "Mobile always shows a swipeable slider."
+    },
+    { "type": "checkbox", "id": "enable_lightbox", "label": "Open images in a full-screen viewer", "default": true },
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "blocks": [
+    { "type": "@app" },
+    { "type": "vendor", "name": "Vendor", "limit": 1, "settings": [] },
+    {
+      "type": "title",
+      "name": "Title",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "heading_size",
+          "label": "Heading size",
+          "options": [
+            { "value": "h1", "label": "Large" },
+            { "value": "h2", "label": "Medium" },
+            { "value": "h3", "label": "Small" }
+          ],
+          "default": "h2"
+        }
+      ]
+    },
+    { "type": "price", "name": "Price", "limit": 1, "settings": [] },
+    { "type": "rating", "name": "Rating", "limit": 1, "settings": [] },
+    {
+      "type": "variant_picker",
+      "name": "Variant picker",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "picker_style",
+          "label": "Style",
+          "options": [
+            { "value": "buttons", "label": "Buttons" },
+            { "value": "dropdown", "label": "Dropdown" }
+          ],
+          "default": "buttons"
+        },
+        { "type": "checkbox", "id": "show_swatches", "label": "Show color swatches", "default": true }
+      ]
+    },
+    { "type": "quantity", "name": "Quantity selector", "limit": 1, "settings": [] },
+    {
+      "type": "buy_buttons",
+      "name": "Buy buttons",
+      "limit": 1,
+      "settings": [
+        { "type": "checkbox", "id": "show_quantity", "label": "Show quantity selector", "default": false },
+        { "type": "checkbox", "id": "show_dynamic_checkout", "label": "Show dynamic checkout buttons", "info": "Customers see their preferred payment method, such as Shop Pay or Apple Pay.", "default": true },
+        { "type": "checkbox", "id": "show_installments", "label": "Show Shop Pay Installments", "default": true }
+      ]
+    },
+    {
+      "type": "description",
+      "name": "Description",
+      "limit": 1,
+      "settings": [
+        { "type": "checkbox", "id": "truncate", "label": "Show a short excerpt", "default": true }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        { "type": "richtext", "id": "text", "label": "Text", "default": "<p>Add a short note, such as a delivery promise or a story about the product.</p>" },
+        {
+          "type": "select",
+          "id": "text_style",
+          "label": "Style",
+          "options": [
+            { "value": "body", "label": "Body" },
+            { "value": "small", "label": "Small" },
+            { "value": "muted", "label": "Muted" }
+          ],
+          "default": "body"
+        }
+      ]
+    },
+    {
+      "type": "view_details",
+      "name": "View details link",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "info": "Leave empty to use the default text." }
+      ]
+    },
+    {
+      "type": "custom_liquid",
+      "name": "Custom Liquid",
+      "settings": [
+        { "type": "liquid", "id": "custom_liquid", "label": "Custom Liquid", "info": "Add app snippets or other Liquid code." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured product",
+      "blocks": [
+        { "type": "vendor" },
+        { "type": "title" },
+        { "type": "price" },
+        { "type": "variant_picker" },
+        { "type": "quantity" },
+        { "type": "buy_buttons" },
+        { "type": "description" },
+        { "type": "view_details" }
+      ]
+    }
+  ],
+  "disabled_on": { "groups": ["header", "footer"] }
+}
+{% endschema %}

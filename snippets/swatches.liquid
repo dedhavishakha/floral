@@ -1,0 +1,71 @@
+{% doc %}
+  Renders colour swatches for a product card. Selecting a swatch swaps the card image and link to that colour.
+  Uses the option value swatch set in Shopify admin, then the variant image, then the colour name.
+
+  @param {product} product - The product
+  @param {number} [limit] - Maximum swatches before a "+ more" link
+
+  @example
+  {% render 'swatches', product: product, limit: 5 %}
+{% enddoc %}
+{%- liquid
+  assign limit = limit | default: settings.card_swatch_limit
+  assign color_option = nil
+  for option in product.options_with_values
+    assign option_name = option.name | downcase
+    if option_name contains 'color' or option_name contains 'colour' or option_name contains 'couleur' or option_name contains 'farbe'
+      assign color_option = option
+      break
+    endif
+  endfor
+-%}
+{%- if color_option and color_option.values.size > 1 -%}
+  <div class="card-swatches" role="group" aria-label="{{ 'products.card.colors' | t: count: color_option.values.size }}">
+    {%- for value in color_option.values limit: limit -%}
+      {%- liquid
+        assign swatch_variant = value.variant
+        assign swatch_image = swatch_variant.featured_media.preview_image
+        capture custom_hex
+          render 'swatch-color', name: value.name
+        endcapture
+        assign custom_hex = custom_hex | strip
+        if value.swatch.image
+          assign swatch_url = value.swatch.image | image_url: width: 72
+          assign swatch_style = 'background-image: url(' | append: swatch_url | append: ');'
+        elsif value.swatch.color
+          assign swatch_style = 'background-color: ' | append: value.swatch.color | append: ';'
+        elsif custom_hex != blank
+          assign swatch_style = 'background-color: ' | append: custom_hex | append: ';'
+        elsif swatch_image
+          assign swatch_url = swatch_image | image_url: width: 72
+          assign swatch_style = 'background-image: url(' | append: swatch_url | append: ');'
+        else
+          assign swatch_name = value.name | downcase | replace: ' ', ''
+          assign swatch_style = 'background-color: ' | append: swatch_name | append: ';'
+        endif
+      -%}
+      <button
+        type="button"
+        class="swatch{% if value.selected %} is-active{% endif %}{% unless value.available %} is-unavailable{% endunless %}"
+        style="{{ swatch_style | escape }}"
+        data-card-swatch
+        {% if swatch_image %}
+          data-srcset="{{ swatch_image | image_url: width: 360 }} 360w, {{ swatch_image | image_url: width: 540 }} 540w, {{ swatch_image | image_url: width: 720 }} 720w, {{ swatch_image | image_url: width: 1080 }} 1080w"
+        {% endif %}
+        {% if value.product_url %}
+          data-href="{{ value.product_url }}"
+        {% elsif swatch_variant %}
+          data-href="{{ swatch_variant.url }}"
+        {% endif %}
+        aria-label="{{ value.name | escape }}"
+        aria-pressed="{{ value.selected }}"
+      ></button>
+    {%- endfor -%}
+    {%- if color_option.values.size > limit -%}
+      <a class="card-swatches__more" href="{{ product.url }}" tabindex="-1">
+        {%- assign more_count = color_option.values.size | minus: limit -%}
+        {{- 'products.card.more_colors' | t: count: more_count -}}
+      </a>
+    {%- endif -%}
+  </div>
+{%- endif -%}

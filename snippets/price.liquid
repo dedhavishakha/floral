@@ -1,0 +1,70 @@
+{% doc %}
+  Renders a product or variant price with compare-at price, "From" pricing and unit price.
+
+  @param {product} product - The product
+  @param {boolean} [use_variant] - Use the selected or first available variant instead of the product's lowest price
+  @param {string} [class] - Extra classes for the wrapper
+  @param {string} [id] - Optional id for the wrapper
+
+  @example
+  {% render 'price', product: product, use_variant: true %}
+{% enddoc %}
+{%- if use_variant and product.selected_or_first_available_variant == blank -%}
+  <div class="price price--unavailable{% if class != blank %} {{ class }}{% endif %}"{% if id != blank %} id="{{ id }}"{% endif %}>
+    <span class="price__current">{{ 'products.product.unavailable' | t }}</span>
+  </div>
+{%- else -%}
+{%- liquid
+  if use_variant
+    assign target = product.selected_or_first_available_variant
+    assign price = target.price
+    assign compare_at = target.compare_at_price
+    assign available = target.available
+    assign varies = false
+  else
+    assign target = product.selected_or_first_available_variant
+    assign price = product.price
+    assign compare_at = product.compare_at_price
+    assign available = product.available
+    assign varies = product.price_varies
+  endif
+
+  assign on_sale = false
+  if compare_at > price
+    assign on_sale = true
+  endif
+
+  if settings.currency_code_enabled
+    assign price_money = price | money_with_currency
+    assign compare_money = compare_at | money_with_currency
+  else
+    assign price_money = price | money
+    assign compare_money = compare_at | money
+  endif
+-%}
+<div
+  class="price{% if on_sale %} price--on-sale{% endif %}{% unless available %} price--sold-out{% endunless %}{% if class != blank %} {{ class }}{% endif %}"
+  {% if id != blank %}id="{{ id }}"{% endif %}
+>
+  {%- if on_sale -%}
+    <span class="visually-hidden">{{ 'products.product.price.sale_price' | t }}</span>
+    <span class="price__current price__current--sale">
+      {%- if varies -%}{{ 'products.product.price.from_price_html' | t: price: price_money }}{%- else -%}{{ price_money }}{%- endif -%}
+    </span>
+    <span class="visually-hidden">{{ 'products.product.price.regular_price' | t }}</span>
+    <s class="price__compare">{{ compare_money }}</s>
+  {%- else -%}
+    <span class="visually-hidden">{{ 'products.product.price.regular_price' | t }}</span>
+    <span class="price__current">
+      {%- if varies -%}{{ 'products.product.price.from_price_html' | t: price: price_money }}{%- else -%}{{ price_money }}{%- endif -%}
+    </span>
+  {%- endif -%}
+
+  {%- if target.unit_price_measurement -%}
+    <span class="price__unit">
+      <span class="visually-hidden">{{ 'products.product.price.unit_price' | t }}</span>
+      {{- target.unit_price | unit_price_with_measurement: target.unit_price_measurement -}}
+    </span>
+  {%- endif -%}
+</div>
+{%- endif -%}

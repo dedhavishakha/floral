@@ -1,0 +1,31 @@
+<div
+  class="block-text rte{% if block.settings.style == 'large' %} text-large{% elsif block.settings.style == 'small' %} text-small{% elsif block.settings.style == 'muted' %} text-muted{% endif %}"
+  style="--block-align: {{ block.settings.alignment }}; --block-max-width: {{ block.settings.max_width }}ch;"
+  {{ block.shopify_attributes }}
+>
+  {{ block.settings.text }}
+</div>
+
+{% schema %}
+{
+  "name": "Text",
+  "settings": [
+    { "type": "richtext", "id": "text", "label": "Text", "default": "<p>Share something about your brand, a collection or a promise to your customers.</p>" },
+    {
+      "type": "select",
+      "id": "style",
+      "label": "Style",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "large", "label": "Large" },
+        { "value": "small", "label": "Small" },
+        { "value": "muted", "label": "Muted" }
+      ],
+      "default": "body"
+    },
+    { "type": "text_alignment", "id": "alignment", "label": "Alignment", "default": "center" },
+    { "type": "range", "id": "max_width", "label": "Maximum width", "min": 20, "max": 120, "step": 5, "unit": "ch", "default": 60 }
+  ],
+  "presets": [{ "name": "Text" }]
+}
+{% endschema %}

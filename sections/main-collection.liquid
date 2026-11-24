@@ -1,0 +1,589 @@
+{%- liquid
+  assign sort_by = collection.sort_by | default: collection.default_sort_by
+  assign layout = section.settings.filter_layout
+  assign cols_d = section.settings.columns_desktop
+  assign cols_t = cols_d | at_most: 3
+  assign cols_m = section.settings.columns_mobile | plus: 0
+  assign clear_url = collection.url | append: '?sort_by=' | append: sort_by
+
+  assign has_filters = false
+  if section.settings.enable_filtering and collection.filters.size > 0
+    assign has_filters = true
+  endif
+
+  assign vw_desktop = 100 | divided_by: cols_d
+  if has_filters and layout == 'sidebar'
+    assign vw_desktop = 78 | divided_by: cols_d
+  endif
+  assign vw_tablet = 100 | divided_by: cols_t
+  assign vw_mobile = 100 | divided_by: cols_m
+  capture image_sizes
+    echo '(min-width: 990px) ' | append: vw_desktop | append: 'vw, (min-width: 750px) ' | append: vw_tablet | append: 'vw, ' | append: vw_mobile | append: 'vw'
+  endcapture
+
+  assign banner_layout = section.settings.banner_layout
+  assign banner_image = nil
+  if section.settings.show_image and collection.image
+    assign banner_image = collection.image
+  endif
+  if banner_image == nil and banner_layout != 'minimal'
+    assign banner_layout = 'minimal'
+  endif
+-%}
+
+<div
+  class="section main-collection color-{{ section.settings.color_scheme }}{% unless section.settings.image_zoom %} zoom-off{% endunless %}"
+  style="--pt: {{ section.settings.padding_top }}px; --pb: {{ section.settings.padding_bottom }}px;"
+>
+  {%- if section.settings.show_banner -%}
+    {%- capture banner_text -%}
+      <h1 class="collection-banner__title h1">{{ collection.title | escape }}</h1>
+      {%- if section.settings.show_description and collection.description != blank -%}
+        <div class="collection-banner__text rte">{{ collection.description }}</div>
+      {%- endif -%}
+    {%- endcapture -%}
+    {%- case banner_layout -%}
+      {%- when 'overlay' -%}
+        <header class="collection-banner collection-banner--overlay">
+          <div class="collection-banner__media">
+            {{
+              banner_image
+              | image_url: width: 3000
+              | image_tag:
+                widths: '750, 1100, 1500, 2000, 2500, 3000',
+                sizes: '100vw',
+                loading: 'eager',
+                fetchpriority: 'high',
+                alt: ''
+            }}
+          </div>
+          <div class="collection-banner__overlay" style="--overlay: {{ section.settings.overlay_opacity | divided_by: 100.0 }};"></div>
+          <div class="collection-banner__content page-width">
+            <div class="section-header__text">{{ banner_text }}</div>
+          </div>
+        </header>
+      {%- when 'split' -%}
+        <header class="collection-banner collection-banner--split page-width">
+          <div class="collection-banner__content section-header__text">{{ banner_text }}</div>
+          <div class="collection-banner__media media media--landscape">
+            {{
+              banner_image
+              | image_url: width: 2000
+              | image_tag:
+                widths: '600, 900, 1200, 1600, 2000',
+                sizes: '(min-width: 750px) 50vw, 100vw',
+                loading: 'eager',
+                fetchpriority: 'high',
+                alt: ''
+            }}
+          </div>
+        </header>
+      {%- else -%}
+        <div class="page-width">
+          <header class="section-header collection-banner collection-banner--minimal">
+            <div class="section-header__text">{{ banner_text }}</div>
+          </header>
+        </div>
+    {%- endcase -%}
+  {%- else -%}
+    <h1 class="visually-hidden">{{ collection.title | escape }}</h1>
+  {%- endif -%}
+
+  <facets-section class="page-width facets-section" data-section-id="{{ section.id }}" data-columns="{{ cols_d }}">
+    {%- paginate collection.products by section.settings.products_per_page -%}
+      {% render 'facets',
+        part: 'toolbar',
+        results: collection,
+        section_id: section.id,
+        layout: layout,
+        enable_filtering: section.settings.enable_filtering,
+        enable_sorting: section.settings.enable_sorting,
+        show_columns: section.settings.show_column_switcher,
+        columns: cols_d,
+        product_count: collection.products_count,
+        clear_url: clear_url,
+        form_action: collection.url
+      %}
+
+      <div class="facets-layout facets-layout--{{ layout }}{% if has_filters %} facets-layout--has-filters{% endif %}">
+        {% render 'facets',
+          part: 'panel',
+          results: collection,
+          section_id: section.id,
+          layout: layout,
+          enable_filtering: section.settings.enable_filtering,
+          product_count: collection.products_count,
+          clear_url: clear_url,
+          form_action: collection.url
+        %}
+
+        <div class="facets-results" data-facets-update="results" id="ProductGridContainer-{{ section.id }}">
+          {%- if collection.products.size > 0 -%}
+            <ul
+              class="grid collection-grid{% if cols_m == 1 %} collection-grid--single{% endif %}"
+              role="list"
+              id="ProductGrid-{{ section.id }}"
+              data-results-grid
+              style="--cols-desktop: {{ cols_d }}; --cols-tablet: {{ cols_t }}; --cols-mobile: {{ cols_m }};"
+            >
+              {%- for product in collection.products -%}
+                {%- if paginate.current_page == 1 -%}
+                  {%- for block in section.blocks -%}
+                    {%- if block.type == 'promo' and block.settings.position == forloop.parentloop.index -%}
+                      <li
+                        class="collection-promo{% if block.settings.wide %} collection-promo--wide{% endif %} color-{{ block.settings.color_scheme }}"
+                        {{ block.shopify_attributes }}
+                      >
+                        <div class="collection-promo__media">
+                          {%- if block.settings.image != blank -%}
+                            {{
+                              block.settings.image
+                              | image_url: width: 1600
+                              | image_tag: widths: '400, 600, 800, 1200, 1600', sizes: '(min-width: 990px) 50vw, 100vw', loading: 'lazy', alt: ''
+                            }}
+                          {%- else -%}
+                            {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                          {%- endif -%}
+                        </div>
+                        <div class="collection-promo__content">
+                          {%- if block.settings.eyebrow != blank -%}
+                            <p class="eyebrow">{{ block.settings.eyebrow | escape }}</p>
+                          {%- endif -%}
+                          {%- if block.settings.heading != blank -%}
+                            <h2 class="h3">{{ block.settings.heading | escape }}</h2>
+                          {%- endif -%}
+                          {%- if block.settings.text != blank -%}
+                            <div class="rte">{{ block.settings.text }}</div>
+                          {%- endif -%}
+                          {%- if block.settings.link_label != blank and block.settings.link != blank -%}
+                            <a href="{{ block.settings.link }}" class="collection-promo__link link">
+                              {{- block.settings.link_label | escape -}}
+                              {%- render 'icon', icon: 'arrow-right' -%}
+                            </a>
+                          {%- endif -%}
+                        </div>
+                      </li>
+                    {%- endif -%}
+                  {%- endfor -%}
+                {%- endif -%}
+                {%- liquid
+                  assign eager = false
+                  if paginate.current_page == 1 and forloop.index <= cols_d and section.settings.show_banner == false
+                    assign eager = true
+                  endif
+                -%}
+                <li class="collection-grid__item reveal" style="--reveal-index: {{ forloop.index0 | modulo: cols_d }};">
+                  {% render 'product-card',
+                    product: product,
+                    card_style: section.settings.card_style,
+                    image_ratio: section.settings.image_ratio,
+                    sizes: image_sizes,
+                    eager: eager,
+                    swatches: section.settings.show_swatches,
+                    badges: section.settings.show_badges,
+                    excerpt: true,
+                    section_id: section.id
+                  %}
+                </li>
+              {%- endfor -%}
+            </ul>
+
+            <div class="facets-pagination" data-facets-update="pagination">
+              {%- if section.settings.pagination_type != 'numbers' -%}
+                {%- if paginate.pages > 1 -%}
+                  {%- assign shown = paginate.current_offset | plus: collection.products.size -%}
+                  <div class="load-more">
+                    <p class="load-more__count">{{ 'collections.general.showing' | t: shown: shown, total: paginate.items }}</p>
+                    <div class="load-more__bar" aria-hidden="true">
+                      <span style="--progress: {{ shown | times: 100 | divided_by: paginate.items }}%;"></span>
+                    </div>
+                    {%- if paginate.next -%}
+                      <a href="{{ paginate.next.url }}" class="button button--secondary" data-load-more{% if section.settings.pagination_type == 'infinite' %} data-infinite{% endif %}>
+                        {{- 'collections.general.load_more' | t -}}
+                        <span class="loading-spinner" aria-hidden="true"></span>
+                      </a>
+                    {%- endif -%}
+                  </div>
+                {%- endif -%}
+              {%- else -%}
+                {% render 'pagination', paginate: paginate %}
+              {%- endif -%}
+            </div>
+          {%- else -%}
+            <div class="facets-empty">
+              {%- if collection.filters.size > 0 and collection.all_products_count > 0 -%}
+                <h2 class="h3">{{ 'collections.general.no_matches' | t }}</h2>
+                <p class="text-muted">{{ 'collections.general.no_matches_text' | t }}</p>
+                <a href="{{ clear_url }}" class="button" data-facets-link>{{ 'collections.filters.clear_all' | t }}</a>
+              {%- else -%}
+                <h2 class="h3">{{ 'collections.general.empty' | t }}</h2>
+                <a href="{{ routes.all_products_collection_url }}" class="button">{{ 'collections.general.browse_all' | t }}</a>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endpaginate -%}
+    <p class="visually-hidden" role="status" data-facets-status></p>
+  </facets-section>
+</div>
+
+{% schema %}
+{
+  "name": "Product grid",
+  "class": "shopify-section--main-collection",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Banner"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_banner",
+      "label": "Show collection banner",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "banner_layout",
+      "label": "Banner layout",
+      "options": [
+        {
+          "value": "minimal",
+          "label": "Text only"
+        },
+        {
+          "value": "overlay",
+          "label": "Text over image"
+        },
+        {
+          "value": "split",
+          "label": "Text beside image"
+        }
+      ],
+      "default": "minimal"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_image",
+      "label": "Show collection image",
+      "info": "Set the image in Products > Collections.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show collection description",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Image overlay opacity",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Products"
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Products per page",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Desktop columns",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Mobile columns",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        }
+      ],
+      "default": "2"
+    },
+    {
+      "type": "select",
+      "id": "card_style",
+      "label": "Card layout",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use theme setting"
+        },
+        {
+          "value": "minimal",
+          "label": "Minimal"
+        },
+        {
+          "value": "standard",
+          "label": "Fashion standard"
+        },
+        {
+          "value": "conversion",
+          "label": "Conversion"
+        },
+        {
+          "value": "editorial",
+          "label": "Editorial"
+        }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "show_swatches",
+      "label": "Color swatches",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use card layout"
+        },
+        {
+          "value": "show",
+          "label": "Show"
+        },
+        {
+          "value": "hide",
+          "label": "Hide"
+        }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "show_badges",
+      "label": "Badges",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use card layout"
+        },
+        {
+          "value": "show",
+          "label": "Show"
+        },
+        {
+          "value": "hide",
+          "label": "Hide"
+        }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use theme setting"
+        },
+        {
+          "value": "portrait",
+          "label": "Portrait 3:4"
+        },
+        {
+          "value": "portrait-45",
+          "label": "Portrait 4:5"
+        },
+        {
+          "value": "tall",
+          "label": "Tall 2:3"
+        },
+        {
+          "value": "square",
+          "label": "Square 1:1"
+        },
+        {
+          "value": "natural",
+          "label": "Natural"
+        }
+      ],
+      "default": "inherit"
+    },
+    { "type": "checkbox", "id": "image_zoom", "label": "Zoom images on hover", "info": "Works when Theme settings > Animations > Image hover effect uses zoom.", "default": true },
+    {
+      "type": "select",
+      "id": "pagination_type",
+      "label": "Pagination",
+      "options": [
+        {
+          "value": "numbers",
+          "label": "Page numbers"
+        },
+        {
+          "value": "load_more",
+          "label": "Load more button"
+        },
+        {
+          "value": "infinite",
+          "label": "Infinite scroll"
+        }
+      ],
+      "default": "load_more"
+    },
+    {
+      "type": "header",
+      "content": "Filtering and sorting"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_filtering",
+      "label": "Enable filtering",
+      "info": "Customize filters with the Search & Discovery app.",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "filter_layout",
+      "label": "Desktop filter layout",
+      "info": "Filters always open in a drawer on mobile.",
+      "options": [
+        {
+          "value": "sidebar",
+          "label": "Sidebar"
+        },
+        {
+          "value": "drawer",
+          "label": "Drawer"
+        }
+      ],
+      "default": "sidebar"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sorting",
+      "label": "Enable sorting",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_column_switcher",
+      "label": "Show desktop layout switcher",
+      "info": "Lets customers pick 2–4 columns or a list view.",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Section"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    }
+  ],
+  "blocks": [
+    {
+      "type": "promo",
+      "name": "Promo tile",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Shows inside the product grid on the first page."
+        },
+        {
+          "type": "range",
+          "id": "position",
+          "label": "Show before product",
+          "min": 1,
+          "max": 24,
+          "step": 1,
+          "default": 5
+        },
+        {
+          "type": "checkbox",
+          "id": "wide",
+          "label": "Span two columns",
+          "default": true
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "Spans two product columns. Recommended: 3:2 landscape, 1600 x 1067 px."
+        },
+        {
+          "type": "text",
+          "id": "eyebrow",
+          "label": "Eyebrow",
+          "default": "Campaign"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "The new season edit"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text"
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Link label",
+          "default": "Discover"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        },
+        {
+          "type": "color_scheme",
+          "id": "color_scheme",
+          "label": "Color scheme",
+          "default": "scheme-3"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,121 @@
+{%- liquid
+  assign s = section.settings
+  assign has_video = false
+  if s.source == 'shopify' and s.video != blank
+    assign has_video = true
+  elsif s.source == 'external' and s.video_url != blank
+    assign has_video = true
+  endif
+  assign cover = s.cover_image
+  if cover == blank and s.source == 'shopify' and s.video != blank
+    assign cover = s.video.preview_image
+  endif
+  assign video_title = s.description | default: s.heading | strip_html | escape
+-%}
+<div
+  class="section video-section color-{{ s.color_scheme }}"
+  style="--pt: {{ s.padding_top }}px; --pb: {{ s.padding_bottom }}px;"
+>
+  <div class="page-width{% if s.full_width %} page-width--full page-width--flush{% endif %}">
+    {%- if s.heading != blank -%}
+      <div class="section-header section-header--center{% if s.full_width %} page-width{% endif %}">
+        <div class="section-header__text"><h2 class="h2">{{ s.heading }}</h2></div>
+      </div>
+    {%- endif -%}
+    <lazy-video class="video-section__player media media--{{ s.ratio }} media--size-{{ s.image_size }}" style="--ratio: {{ s.cover_image.aspect_ratio | default: s.video.aspect_ratio | default: 1.7778 }};">
+      {%- if cover != blank -%}
+        {%- assign cover_alt = cover.alt | escape -%}
+        {{ cover | image_url: width: 2800 | image_tag: widths: '600, 900, 1200, 1600, 2000, 2800', sizes: '100vw', loading: 'lazy', alt: cover_alt, class: 'video-section__cover' }}
+      {%- else -%}
+        {{ 'hero-apparel-3' | placeholder_svg_tag: 'video-section__cover placeholder-svg' }}
+      {%- endif -%}
+      {%- if has_video -%}
+        <button type="button" class="video-section__play" data-video-play>
+          <span class="video-section__play-icon" aria-hidden="true">{% render 'icon', icon: 'play' %}</span>
+          <span class="visually-hidden">{{ 'sections.video.play' | t: title: video_title }}</span>
+        </button>
+        <template data-video-template>
+          {%- if s.source == 'shopify' -%}
+            {{ s.video | video_tag: autoplay: true, controls: true, image_size: '1600x', class: 'video-section__media' }}
+          {%- elsif s.video_url.type == 'youtube' -%}
+            <iframe
+              class="video-section__media"
+              src="https://www.youtube-nocookie.com/embed/{{ s.video_url.id }}?autoplay=1&rel=0&playsinline=1"
+              title="{{ video_title }}"
+              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+              allowfullscreen
+            ></iframe>
+          {%- elsif s.video_url.type == 'vimeo' -%}
+            <iframe
+              class="video-section__media"
+              src="https://player.vimeo.com/video/{{ s.video_url.id }}?autoplay=1&dnt=1"
+              title="{{ video_title }}"
+              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+              allowfullscreen
+            ></iframe>
+          {%- endif -%}
+        </template>
+      {%- endif -%}
+    </lazy-video>
+    {%- if s.description != blank -%}
+      <div class="video-section__caption rte text-muted{% if s.full_width %} page-width{% endif %}">{{ s.description }}</div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Video",
+  "tag": "section",
+  "class": "section-video",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    {
+      "type": "select",
+      "id": "source",
+      "label": "Video source",
+      "options": [
+        { "value": "external", "label": "YouTube or Vimeo" },
+        { "value": "shopify", "label": "Uploaded to Shopify" }
+      ],
+      "default": "external"
+    },
+    { "type": "video_url", "id": "video_url", "label": "YouTube or Vimeo link", "accept": ["youtube", "vimeo"], "default": "https://www.youtube.com/watch?v=_9VUPq3SxOc" },
+    { "type": "video", "id": "video", "label": "Shopify-hosted video" },
+    { "type": "image_picker", "id": "cover_image", "label": "Cover image", "info": "The video only loads when visitors press play. Recommended: the same shape as the video, e.g. 16:9 at 1920 x 1080 px." },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "Behind the collection" },
+    { "type": "richtext", "id": "description", "label": "Description", "info": "Also used as the video title for screen readers." },
+    {
+      "type": "select",
+      "id": "ratio",
+      "label": "Aspect ratio",
+      "options": [
+        { "value": "wide", "label": "Widescreen 16:9" },
+        { "value": "landscape", "label": "Landscape 4:3" },
+        { "value": "square", "label": "Square" },
+        { "value": "tall", "label": "Vertical 2:3" }
+      ],
+      "default": "wide"
+    },
+    {
+      "type": "select",
+      "id": "image_size",
+      "label": "Image size",
+      "options": [
+        { "value": "original", "label": "Original image ratio" },
+        { "value": "ratio", "label": "Use video ratio" },
+        { "value": "x-small", "label": "X-Small" },
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "ratio",
+      "info": "Original image ratio shows each image uncropped in its own shape. X-Small to Large set a fixed image height and crop to fit. Uploaded videos and the cover image fill the frame; YouTube and Vimeo keep their own shape inside it."
+    },
+    { "type": "checkbox", "id": "full_width", "label": "Full width", "default": false },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "presets": [{ "name": "Video" }]
+}
+{% endschema %}

@@ -1,0 +1,259 @@
+{% doc %}
+  Renders the product page gallery with grid, thumbnail and slider layouts, a swipeable mobile slider,
+  hover zoom, a full-screen lightbox and optional grouping of media by the selected colour (via alt text).
+
+  @param {product} product - The product
+  @param {string} section_id - The id of the parent section
+  @param {string} layout - grid, stacked, collage, thumbnails_left, thumbnails_bottom or slider
+  @param {string} [media_size] - wide or medium, used for image sizes
+  @param {boolean} [lightbox] - Open images in a full-screen viewer
+  @param {boolean} [hover_zoom] - Zoom images on hover on desktop
+  @param {boolean} [group_by_color] - Show only media whose alt text matches the selected colour
+
+  @example
+  {% render 'product-gallery', product: product, section_id: section.id, layout: 'grid', lightbox: true %}
+{% enddoc %}
+{%- liquid
+  assign base_scheme = 'scheme-1'
+  for scheme in settings.color_schemes
+    assign base_scheme = scheme.id
+    break
+  endfor
+-%}
+{%- liquid
+  assign variant = product.selected_or_first_available_variant
+  assign featured = variant.featured_media | default: product.featured_media
+  assign ratio = settings.product_image_ratio
+
+  if featured
+    assign featured_list = product.media | where: 'id', featured.id
+    assign rest = product.media | reject: 'id', featured.id
+    assign ordered = featured_list | concat: rest
+  else
+    assign ordered = product.media
+  endif
+
+  assign color_index = -1
+  assign color_handle = ''
+  for option in product.options_with_values
+    assign option_name = option.name | downcase
+    if option_name contains 'color' or option_name contains 'colour' or option_name contains 'couleur' or option_name contains 'farbe'
+      assign color_index = forloop.index0
+      assign color_handle = option.selected_value | handleize
+      break
+    endif
+  endfor
+
+  assign prefix = color_handle | append: '-'
+  assign group_on = false
+  if group_by_color and color_handle != blank
+    for media in product.media
+      assign alt_handle = media.alt | handleize
+      assign alt_start = alt_handle | slice: 0, prefix.size
+      if alt_handle == color_handle or alt_start == prefix
+        assign group_on = true
+        break
+      endif
+    endfor
+  endif
+
+  assign grid_variant = ''
+  if layout == 'stacked' or layout == 'collage'
+    assign grid_variant = layout
+    assign layout = 'grid'
+  endif
+
+  if layout == 'grid' and grid_variant == ''
+    if media_size == 'medium'
+      assign sizes = '(min-width: 990px) 25vw, 100vw'
+    else
+      assign sizes = '(min-width: 990px) 30vw, 100vw'
+    endif
+  elsif media_size == 'medium'
+    assign sizes = '(min-width: 990px) 45vw, 100vw'
+  elsif media_size == 'full'
+    assign sizes = '(min-width: 990px) 62vw, 100vw'
+  else
+    assign sizes = '(min-width: 990px) 55vw, 100vw'
+  endif
+
+  assign visible_count = 0
+  for media in ordered
+    assign alt_handle = media.alt | handleize
+    assign alt_start = alt_handle | slice: 0, prefix.size
+    if group_on == false or alt_handle == color_handle or alt_start == prefix
+      assign visible_count = visible_count | plus: 1
+    endif
+  endfor
+
+  assign show_thumbs = false
+  if layout contains 'thumbnails' and product.media.size > 1
+    assign show_thumbs = true
+  endif
+-%}
+<product-gallery
+  class="gallery gallery--{{ layout }}{% if grid_variant != '' %} gallery--{{ grid_variant }}{% endif %}{% if show_thumbs %} gallery--has-thumbs{% endif %}"
+  data-section-id="{{ section_id }}"
+  data-layout="{{ layout }}"
+  data-color-index="{{ color_index }}"
+  data-group-by-color="{{ group_by_color | default: false }}"
+  data-hover-zoom="{{ hover_zoom | default: false }}"
+>
+  <div class="gallery__viewer">
+    {%- if product.media.size > 0 -%}
+      <ul
+        class="gallery__slider"
+        data-gallery-slider
+        role="list"
+        aria-label="{{ 'products.gallery.label' | t }}"
+      >
+        {%- for media in ordered -%}
+          {%- liquid
+            assign alt_handle = media.alt | handleize
+            assign alt_start = alt_handle | slice: 0, prefix.size
+            assign media_hidden = false
+            if group_on
+              unless alt_handle == color_handle or alt_start == prefix
+                assign media_hidden = true
+              endunless
+            endif
+          -%}
+          <li
+            class="gallery__item gallery__item--{{ media.media_type }}"
+            data-gallery-item
+            data-media-id="{{ media.id }}"
+            data-media-type="{{ media.media_type }}"
+            data-media-alt="{{ alt_handle }}"
+            {% if media_hidden %}hidden{% endif %}
+          >
+            {% render 'product-media',
+              media: media,
+              product_title: product.title,
+              ratio: ratio,
+              sizes: sizes,
+              index: forloop.index,
+              eager: forloop.first,
+              lightbox: lightbox,
+              hover_zoom: hover_zoom
+            %}
+          </li>
+        {%- endfor -%}
+      </ul>
+
+      {%- if product.media.size > 1 -%}
+        <div class="gallery__controls">
+          <button type="button" class="icon-button icon-button--surface gallery__arrow" data-gallery-prev aria-label="{{ 'products.gallery.previous' | t }}">
+            {%- render 'icon', icon: 'chevron-left' -%}
+          </button>
+          <p class="gallery__counter" data-gallery-counter>
+            <span class="visually-hidden">{{ 'products.gallery.counter_label' | t }}</span>
+            <span data-gallery-current>1</span>
+            <span aria-hidden="true">/</span>
+            <span class="visually-hidden">{{ 'products.gallery.of' | t }}</span>
+            <span data-gallery-total>{{ visible_count }}</span>
+          </p>
+          <button type="button" class="icon-button icon-button--surface gallery__arrow" data-gallery-next aria-label="{{ 'products.gallery.next' | t }}">
+            {%- render 'icon', icon: 'chevron-right' -%}
+          </button>
+        </div>
+      {%- endif -%}
+    {%- else -%}
+      <div class="gallery__media media media--{{ ratio }}">
+        {{ 'product-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+      </div>
+    {%- endif -%}
+  </div>
+
+  {%- if show_thumbs -%}
+    <ul class="gallery__thumbs" role="list" data-gallery-thumbs aria-label="{{ 'products.gallery.thumbnails' | t }}">
+      {%- for media in ordered -%}
+        {%- liquid
+          assign alt_handle = media.alt | handleize
+          assign alt_start = alt_handle | slice: 0, prefix.size
+          assign media_hidden = false
+          if group_on
+            unless alt_handle == color_handle or alt_start == prefix
+              assign media_hidden = true
+            endunless
+          endif
+        -%}
+        <li class="gallery__thumb-item" data-gallery-thumb-item data-media-id="{{ media.id }}" {% if media_hidden %}hidden{% endif %}>
+          <button
+            type="button"
+            class="gallery__thumb media media--{{ ratio }}"
+            style="--ratio: {{ media.preview_image.aspect_ratio | default: 1 }};"
+            data-gallery-thumb="{{ media.id }}"
+            aria-label="{{ 'products.gallery.show_media' | t: index: forloop.index }}"
+            aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
+          >
+            {{ media.preview_image | image_url: width: 240 | image_tag: widths: '120, 180, 240', sizes: '6rem', loading: 'lazy', alt: '' }}
+            {%- if media.media_type == 'video' or media.media_type == 'external_video' -%}
+              <span class="gallery__thumb-badge">{%- render 'icon', icon: 'play' -%}</span>
+            {%- elsif media.media_type == 'model' -%}
+              <span class="gallery__thumb-badge">{%- render 'icon', icon: 'sparkle' -%}</span>
+            {%- endif -%}
+          </button>
+        </li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+
+  {%- if lightbox and product.media.size > 0 -%}
+    <dialog id="Lightbox-{{ section_id }}" class="lightbox color-{{ base_scheme }}" aria-label="{{ 'products.gallery.lightbox_label' | t: product: product.title | escape }}">
+      <lightbox-viewer class="lightbox__inner" data-section-id="{{ section_id }}">
+        <div class="lightbox__bar">
+          <p class="lightbox__counter" data-lightbox-counter aria-live="polite"></p>
+          <button type="button" class="icon-button icon-button--surface" data-dialog-close aria-label="{{ 'general.accessibility.close' | t }}">
+            {%- render 'icon', icon: 'close' -%}
+          </button>
+        </div>
+        <ul class="lightbox__slider" data-lightbox-slider role="list">
+          {%- for media in ordered -%}
+            {%- if media.media_type == 'image' -%}
+              {%- liquid
+                assign alt_handle = media.alt | handleize
+                assign alt_start = alt_handle | slice: 0, prefix.size
+                assign media_hidden = false
+                if group_on
+                  unless alt_handle == color_handle or alt_start == prefix
+                    assign media_hidden = true
+                  endunless
+                endif
+                assign lightbox_alt = media.alt | default: product.title | escape
+              -%}
+              <li class="lightbox__item" data-lightbox-item data-media-id="{{ media.id }}" {% if media_hidden %}hidden{% endif %}>
+                <button type="button" class="lightbox__frame" data-lightbox-zoom aria-label="{{ 'products.gallery.zoom' | t }}" aria-pressed="false">
+                  {{ media | image_url: width: 3000 | image_tag: widths: '750, 1100, 1500, 2000, 2500, 3000', sizes: '100vw', loading: 'lazy', alt: lightbox_alt, class: 'lightbox__image' }}
+                </button>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+        <button type="button" class="icon-button icon-button--surface lightbox__nav lightbox__nav--prev" data-lightbox-prev aria-label="{{ 'products.gallery.previous' | t }}">
+          {%- render 'icon', icon: 'chevron-left' -%}
+        </button>
+        <button type="button" class="icon-button icon-button--surface lightbox__nav lightbox__nav--next" data-lightbox-next aria-label="{{ 'products.gallery.next' | t }}">
+          {%- render 'icon', icon: 'chevron-right' -%}
+        </button>
+      </lightbox-viewer>
+    </dialog>
+  {%- endif -%}
+
+  {%- if color_index >= 0 -%}
+    {%- assign color_option = product.options_with_values[color_index] -%}
+    <script type="application/json" data-color-handles>
+      {
+      {%- for value in color_option.values -%}
+        {{ value.name | json }}: {{ value.name | handleize | json }}{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+      }
+    </script>
+  {%- endif -%}
+
+  {%- assign models = product.media | where: 'media_type', 'model' -%}
+  {%- if models.size > 0 -%}
+    <script type="application/json" data-product-models>
+      {{ models | json }}
+    </script>
+  {%- endif -%}
+</product-gallery>

@@ -1,0 +1,420 @@
+{%- liquid
+  assign s = section.settings
+  assign layout = s.layout
+  assign loading = 'lazy'
+  assign priority = 'auto'
+  if section.index == 1 or section.index == 2
+    assign loading = 'eager'
+    assign priority = 'high'
+  endif
+  assign heading_tag = 'h2'
+  if section.index == 1 and template.name != 'index'
+    assign heading_tag = 'h1'
+  endif
+
+  assign on_media = false
+  if layout == 'full' or layout == 'video' or layout == 'two_column'
+    assign on_media = true
+  endif
+
+  assign primary_class = 'button'
+  assign secondary_class = 'button button--secondary'
+  if on_media and s.media_text == 'light'
+    assign primary_class = 'button button--light'
+    assign secondary_class = 'button button--outline-light'
+  endif
+
+  assign image_sizes = '100vw'
+  if layout == 'split' or layout == 'two_column'
+    assign image_sizes = '(min-width: 750px) 50vw, 100vw'
+  elsif layout == 'editorial'
+    assign image_sizes = '(min-width: 990px) 70vw, 100vw'
+  elsif layout == 'minimal'
+    assign image_sizes = '(min-width: 750px) 360px, 60vw'
+  endif
+
+  assign overlay = s.overlay_opacity | divided_by: 100.0
+-%}
+
+{%- capture hero_picture -%}
+  {%- if s.image != blank -%}
+    <picture{% if s.image_mobile != blank %} class="has-mobile-focal" style="--mobile-focal: {{ s.image_mobile.presentation.focal_point }};"{% endif %}>
+      {%- if s.image_mobile != blank -%}
+        <source
+          media="(max-width: 749px)"
+          srcset="{{ s.image_mobile | image_url: width: 750 }} 750w, {{ s.image_mobile | image_url: width: 1100 }} 1100w, {{ s.image_mobile | image_url: width: 1500 }} 1500w"
+          sizes="100vw"
+          width="{{ s.image_mobile.width }}"
+          height="{{ s.image_mobile.height }}"
+        >
+      {%- endif -%}
+      {%- assign hero_alt = s.image.alt | escape -%}
+      {{
+        s.image
+        | image_url: width: 3840
+        | image_tag:
+          widths: '600, 900, 1200, 1600, 2000, 2600, 3200, 3840',
+          sizes: image_sizes,
+          loading: loading,
+          fetchpriority: priority,
+          class: 'hero__img',
+          alt: hero_alt
+      }}
+    </picture>
+  {%- else -%}
+    {{ 'hero-apparel-1' | placeholder_svg_tag: 'hero__img placeholder-svg' }}
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- capture hero_content -%}
+  {%- if s.eyebrow != blank -%}
+    <p class="eyebrow hero__eyebrow">{{ s.eyebrow | escape }}</p>
+  {%- endif -%}
+  {%- if s.heading != blank -%}
+    <{{ heading_tag }} class="hero__heading {{ s.heading_size }}">{{ s.heading }}</{{ heading_tag }}>
+  {%- endif -%}
+  {%- if s.text != blank -%}
+    <div class="hero__text rte">{{ s.text }}</div>
+  {%- endif -%}
+  {%- if s.button_label_1 != blank or s.button_label_2 != blank -%}
+    <div class="hero__buttons">
+      {%- if s.button_label_1 != blank -%}
+        <a
+          {% if s.button_link_1 != blank %}href="{{ s.button_link_1 }}"{% else %}role="link" aria-disabled="true"{% endif %}
+          class="{% if s.button_style_1 == 'secondary' %}{{ secondary_class }}{% elsif s.button_style_1 == 'link' %}link{% else %}{{ primary_class }}{% endif %}"
+        >
+          {{- s.button_label_1 | escape -}}
+        </a>
+      {%- endif -%}
+      {%- if s.button_label_2 != blank -%}
+        <a
+          {% if s.button_link_2 != blank %}href="{{ s.button_link_2 }}"{% else %}role="link" aria-disabled="true"{% endif %}
+          class="{% if s.button_style_2 == 'primary' %}{{ primary_class }}{% elsif s.button_style_2 == 'link' %}link{% else %}{{ secondary_class }}{% endif %}"
+        >
+          {{- s.button_label_2 | escape -}}
+        </a>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+{%- endcapture -%}
+{%- assign hero_content_check = hero_content | strip -%}
+
+<div
+  class="section hero hero--{{ layout }} hero--h-{{ s.height }} hero--mh-{{ s.mobile_height }} hero--text-{{ s.media_text }} hero--focus-{{ s.image_focus }} color-{{ s.color_scheme }}"
+  style="--pt: {{ s.padding_top }}px; --pb: {{ s.padding_bottom }}px; --hero-overlay: {{ overlay }}; --hero-ratio: {{ s.image.aspect_ratio | default: 1.7778 }}; --hero-ratio-mobile: {{ s.image_mobile.aspect_ratio | default: s.image.aspect_ratio | default: 0.8 }};"
+>
+  {%- case layout -%}
+    {%- when 'split' -%}
+      <div class="hero__split hero__split--image-{{ s.image_position }}">
+        <div class="hero__media">{{ hero_picture }}</div>
+        <div class="hero__panel">
+          <div class="hero__content hero__align-{{ s.text_alignment }} reveal">{{ hero_content }}</div>
+        </div>
+      </div>
+
+    {%- when 'editorial' -%}
+      <div class="page-width">
+        <div class="hero__editorial hero__editorial--image-{{ s.image_position }}">
+          <div class="hero__media hero__editorial-media">{{ hero_picture }}</div>
+          {%- if s.image_2 != blank -%}
+            <div class="hero__editorial-accent media media--portrait">
+              {{ s.image_2 | image_url: width: 900 | image_tag: widths: '300, 450, 600, 900', sizes: '(min-width: 990px) 20vw, 40vw', loading: 'lazy', alt: s.image_2.alt }}
+            </div>
+          {%- endif -%}
+          <div class="hero__editorial-card color-{{ s.card_color_scheme }}">
+            <div class="hero__content hero__align-{{ s.text_alignment }} reveal">{{ hero_content }}</div>
+          </div>
+        </div>
+      </div>
+
+    {%- when 'minimal' -%}
+      <div class="page-width">
+        <div class="hero__minimal hero__align-{{ s.text_alignment }}">
+          {%- if s.image != blank -%}
+            <div class="hero__minimal-media media media--portrait reveal">
+              {%- assign minimal_alt = s.image.alt | escape -%}
+              {{ s.image | image_url: width: 900 | image_tag: widths: '300, 450, 600, 900', sizes: image_sizes, loading: loading, alt: minimal_alt }}
+            </div>
+          {%- endif -%}
+          <div class="hero__content hero__align-{{ s.text_alignment }} reveal">{{ hero_content }}</div>
+        </div>
+      </div>
+
+    {%- when 'two_column' -%}
+      <div class="hero__columns">
+        {%- for i in (1..2) -%}
+          {%- liquid
+            if i == 1
+              assign panel_image = s.image
+              assign panel_title = s.panel_1_title
+              assign panel_link = s.panel_1_link
+              assign panel_label = s.panel_1_label
+              assign panel_placeholder = 'hero-apparel-2'
+            else
+              assign panel_image = s.image_2
+              assign panel_title = s.panel_2_title
+              assign panel_link = s.panel_2_link
+              assign panel_label = s.panel_2_label
+              assign panel_placeholder = 'hero-apparel-3'
+            endif
+          -%}
+          <div class="hero__column">
+            <div class="hero__media">
+              {%- if panel_image != blank -%}
+                {%- assign panel_alt = panel_image.alt | escape -%}
+                {{
+                  panel_image
+                  | image_url: width: 2400
+                  | image_tag:
+                    widths: '500, 750, 1000, 1400, 1800, 2400',
+                    sizes: image_sizes,
+                    loading: loading,
+                    fetchpriority: priority,
+                    class: 'hero__img',
+                    alt: panel_alt
+                }}
+              {%- else -%}
+                {{ panel_placeholder | placeholder_svg_tag: 'hero__img placeholder-svg' }}
+              {%- endif -%}
+              <span class="hero__overlay" aria-hidden="true"></span>
+            </div>
+            {%- if panel_title != blank or panel_label != blank -%}
+              <div class="hero__column-caption">
+                {%- if panel_title != blank -%}
+                  <h3 class="h3">{{ panel_title | escape }}</h3>
+                {%- endif -%}
+                {%- if panel_label != blank -%}
+                  <a {% if panel_link != blank %}href="{{ panel_link }}"{% else %}role="link" aria-disabled="true"{% endif %} class="{{ primary_class }} button--small hero__column-link">
+                    {{- panel_label | escape -}}
+                  </a>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+        {%- if hero_content_check != blank -%}
+          <div class="hero__overlay-content page-width hero__pos-{{ s.content_position }}">
+            <div class="hero__content hero__align-{{ s.text_alignment }} reveal">{{ hero_content }}</div>
+          </div>
+        {%- endif -%}
+      </div>
+
+    {%- else -%}
+      <div class="hero__stage">
+        <div class="hero__media">
+          {%- if layout == 'video' and s.video != blank -%}
+            {{ s.video | video_tag: autoplay: true, loop: true, muted: true, controls: false, image_size: '1920x', class: 'hero__video' }}
+          {%- else -%}
+            {{ hero_picture }}
+          {%- endif -%}
+          <span class="hero__overlay" aria-hidden="true"></span>
+        </div>
+        <div class="hero__overlay-content page-width hero__pos-{{ s.content_position }}">
+          <div class="hero__content hero__align-{{ s.text_alignment }} reveal">{{ hero_content }}</div>
+        </div>
+        {%- if layout == 'video' and s.video != blank -%}
+          <hero-video-toggle class="hero__video-toggle">
+            <button type="button" class="icon-button" aria-pressed="false" data-label-pause="{{ 'sections.hero.pause_video' | t }}" data-label-play="{{ 'sections.hero.play_video' | t }}" aria-label="{{ 'sections.hero.pause_video' | t }}">
+              <span class="hero__video-icon hero__video-icon--pause">{% render 'icon', icon: 'pause' %}</span>
+              <span class="hero__video-icon hero__video-icon--play">{% render 'icon', icon: 'play' %}</span>
+            </button>
+          </hero-video-toggle>
+        {%- endif -%}
+      </div>
+  {%- endcase -%}
+</div>
+
+{% schema %}
+{
+  "name": "Hero",
+  "tag": "section",
+  "class": "section-hero",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        { "value": "full", "label": "Full-width image" },
+        { "value": "split", "label": "Split screen" },
+        { "value": "video", "label": "Full-screen video" },
+        { "value": "editorial", "label": "Editorial overlap" },
+        { "value": "minimal", "label": "Minimal text campaign" },
+        { "value": "two_column", "label": "Two-column campaign" }
+      ],
+      "default": "full"
+    },
+    { "type": "header", "content": "Media" },
+    { "type": "image_picker", "id": "image", "label": "Image", "info": "Full width: 16:9 landscape, 2400 x 1350 px. Two-column: 4:5 portrait, 1600 x 2000 px. Keep faces away from the edges, or use Image focus." },
+    { "type": "image_picker", "id": "image_mobile", "label": "Mobile image", "info": "Optional. Shown on screens under 750px. Recommended: 4:5 portrait, 1080 x 1350 px." },
+    {
+      "type": "select",
+      "id": "image_focus",
+      "label": "Image focus",
+      "info": "The part of the image kept in view when the screen crops it, such as faces near the top.",
+      "options": [
+        { "value": "top", "label": "Top" },
+        { "value": "center", "label": "Center" },
+        { "value": "bottom", "label": "Bottom" }
+      ],
+      "default": "center"
+    },
+    { "type": "image_picker", "id": "image_2", "label": "Second image", "info": "Two-column: right image, 4:5 portrait, 1600 x 2000 px. Editorial: small accent image, 3:4, 900 x 1200 px." },
+    { "type": "video", "id": "video", "label": "Video", "info": "Full-screen video layout. Plays muted on a loop. The first image is used if no video is set." },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Image overlay",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 20
+    },
+    {
+      "type": "select",
+      "id": "media_text",
+      "label": "Text on images",
+      "options": [
+        { "value": "light", "label": "Light" },
+        { "value": "dark", "label": "Dark" }
+      ],
+      "default": "light"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Image position",
+      "info": "Split and editorial layouts.",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "New season" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "The autumn edit" },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        { "value": "h0", "label": "Display" },
+        { "value": "h1", "label": "Extra large" },
+        { "value": "h2", "label": "Large" },
+        { "value": "h3", "label": "Medium" }
+      ],
+      "default": "h0"
+    },
+    { "type": "inline_richtext", "id": "text", "label": "Text", "default": "Soft tailoring, heavy knits and easy layers for the months ahead." },
+    { "type": "text", "id": "button_label_1", "label": "First button label", "default": "Shop women" },
+    { "type": "url", "id": "button_link_1", "label": "First button link" },
+    {
+      "type": "select",
+      "id": "button_style_1",
+      "label": "First button style",
+      "options": [
+        { "value": "primary", "label": "Solid" },
+        { "value": "secondary", "label": "Outline" },
+        { "value": "link", "label": "Text link" }
+      ],
+      "default": "primary"
+    },
+    { "type": "text", "id": "button_label_2", "label": "Second button label", "default": "Shop men" },
+    { "type": "url", "id": "button_link_2", "label": "Second button link" },
+    {
+      "type": "select",
+      "id": "button_style_2",
+      "label": "Second button style",
+      "options": [
+        { "value": "primary", "label": "Solid" },
+        { "value": "secondary", "label": "Outline" },
+        { "value": "link", "label": "Text link" }
+      ],
+      "default": "secondary"
+    },
+    {
+      "type": "select",
+      "id": "content_position",
+      "label": "Content position",
+      "info": "Full-width, video and two-column layouts.",
+      "options": [
+        { "value": "top-left", "label": "Top left" },
+        { "value": "top-center", "label": "Top center" },
+        { "value": "top-right", "label": "Top right" },
+        { "value": "middle-left", "label": "Middle left" },
+        { "value": "middle-center", "label": "Middle center" },
+        { "value": "middle-right", "label": "Middle right" },
+        { "value": "bottom-left", "label": "Bottom left" },
+        { "value": "bottom-center", "label": "Bottom center" },
+        { "value": "bottom-right", "label": "Bottom right" }
+      ],
+      "default": "bottom-left"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        { "value": "start", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "end", "label": "Right" }
+      ],
+      "default": "start"
+    },
+    { "type": "header", "content": "Two-column panels" },
+    { "type": "text", "id": "panel_1_title", "label": "Left panel title", "default": "Women" },
+    { "type": "text", "id": "panel_1_label", "label": "Left panel button", "default": "Shop now" },
+    { "type": "url", "id": "panel_1_link", "label": "Left panel link" },
+    { "type": "text", "id": "panel_2_title", "label": "Right panel title", "default": "Men" },
+    { "type": "text", "id": "panel_2_label", "label": "Right panel button", "default": "Shop now" },
+    { "type": "url", "id": "panel_2_link", "label": "Right panel link" },
+    { "type": "header", "content": "Size" },
+    {
+      "type": "select",
+      "id": "height",
+      "label": "Image size",
+      "options": [
+        { "value": "original", "label": "Original image ratio" },
+        { "value": "x-small", "label": "X-Small" },
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" },
+        { "value": "full", "label": "Full screen" }
+      ],
+      "default": "full",
+      "info": "Original image ratio shows the whole image without cropping."
+    },
+    {
+      "type": "select",
+      "id": "mobile_height",
+      "label": "Mobile image size",
+      "options": [
+        { "value": "auto", "label": "Adapt to content" },
+        { "value": "original", "label": "Original image ratio" },
+        { "value": "x-small", "label": "X-Small" },
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" },
+        { "value": "full", "label": "Full screen" }
+      ],
+      "default": "large",
+      "info": "Original image ratio uses the mobile image, or the main image, at its own shape."
+    },
+    { "type": "header", "content": "Colors and spacing" },
+    { "type": "color_scheme", "id": "card_color_scheme", "label": "Editorial card color scheme", "default": "scheme-2" },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 0 }
+  ],
+  "presets": [
+    { "name": "Hero" },
+    { "name": "Hero: split screen", "settings": { "layout": "split", "height": "large", "mobile_height": "auto" } },
+    { "name": "Hero: video", "settings": { "layout": "video" } },
+    { "name": "Hero: editorial", "settings": { "layout": "editorial", "height": "large", "padding_top": 64, "padding_bottom": 64 } },
+    { "name": "Hero: minimal text", "settings": { "layout": "minimal", "height": "medium", "text_alignment": "center", "padding_top": 64, "padding_bottom": 64 } },
+    { "name": "Hero: two-column", "settings": { "layout": "two_column", "heading": "", "eyebrow": "", "text": "", "button_label_1": "", "button_label_2": "" } }
+  ]
+}
+{% endschema %}

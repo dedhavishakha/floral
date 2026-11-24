@@ -1,0 +1,136 @@
+{% doc %}
+  Outputs font faces, global design tokens and one CSS class per color scheme.
+
+  @example
+  {% render 'css-variables' %}
+{% enddoc %}
+{%- liquid
+  assign heading_font = settings.type_heading_font
+  assign body_font = settings.type_body_font
+  assign body_font_bold = body_font | font_modify: 'weight', 'bold'
+  assign body_font_italic = body_font | font_modify: 'style', 'italic'
+  assign body_font_bold_italic = body_font_bold | font_modify: 'style', 'italic'
+  assign body_font_medium = body_font | font_modify: 'weight', '+100'
+  assign heading_font_italic = heading_font | font_modify: 'style', 'italic'
+  assign heading_font_bold = heading_font | font_modify: 'weight', 'bold'
+  assign heading_font_bold_italic = heading_font_bold | font_modify: 'style', 'italic'
+-%}
+{% style %}
+  {{ heading_font | font_face: font_display: 'swap' }}
+  {{ heading_font_italic | font_face: font_display: 'swap' }}
+  {{ heading_font_bold | font_face: font_display: 'swap' }}
+  {{ heading_font_bold_italic | font_face: font_display: 'swap' }}
+  {{ body_font | font_face: font_display: 'swap' }}
+  {{ body_font_bold | font_face: font_display: 'swap' }}
+  {{ body_font_italic | font_face: font_display: 'swap' }}
+  {{ body_font_bold_italic | font_face: font_display: 'swap' }}
+  {{ body_font_medium | font_face: font_display: 'swap' }}
+
+  :root {
+    --font-heading-family: {{ heading_font.family }}, {{ heading_font.fallback_families }};
+    --font-heading-style: {{ heading_font.style }};
+    --font-heading-weight: {{ heading_font.weight }};
+    --font-heading-weight-bold: {% if heading_font_bold %}{{ heading_font_bold.weight }}{% else %}700{% endif %};
+    --font-heading-scale: {{ settings.heading_scale | divided_by: 100.0 }};
+    --font-heading-tracking: {{ settings.heading_tracking | divided_by: 100.0 }}em;
+    --font-heading-line-height: {{ settings.heading_line_height | divided_by: 100.0 }};
+    --font-heading-case: {{ settings.heading_case }};
+
+    --font-body-family: {{ body_font.family }}, {{ body_font.fallback_families }};
+    --font-body-style: {{ body_font.style }};
+    --font-body-weight: {{ body_font.weight }};
+    --font-body-weight-medium: {% if body_font_medium %}{{ body_font_medium.weight }}{% else %}{{ body_font.weight | plus: 100 }}{% endif %};
+    --font-body-weight-bold: {% if body_font_bold %}{{ body_font_bold.weight }}{% else %}700{% endif %};
+    --font-body-scale: {{ settings.body_scale | divided_by: 100.0 }};
+
+    --label-case: {{ settings.label_case }};
+    --label-tracking: {{ settings.label_tracking | divided_by: 100.0 }}em;
+
+    --page-width: {{ settings.page_width }}px;
+    --page-gutter: {{ settings.page_gutter_mobile }}px;
+    --page-gutter-desktop: {{ settings.page_gutter }}px;
+    --spacing-sections: {{ settings.spacing_sections }}px;
+    --spacing-scale: {{ settings.spacing_mobile_scale | divided_by: 100.0 }};
+    --grid-gap-x: {{ settings.grid_gap_x | at_most: 12 }}px;
+    --grid-gap-x-desktop: {{ settings.grid_gap_x }}px;
+    --grid-gap-y: {{ settings.grid_gap_y | times: 0.7 | round }}px;
+    --grid-gap-y-desktop: {{ settings.grid_gap_y }}px;
+
+    --button-radius: {{ settings.button_radius }}px;
+    --button-border: {{ settings.button_border }}px;
+    --button-height: {{ settings.button_height }}px;
+    --input-radius: {{ settings.input_radius }}px;
+    --swatch-radius: {% if settings.swatch_shape == 'circle' %}50%{% else %}2px{% endif %};
+    --media-radius: {{ settings.media_radius }}px;
+    --media-fit: {{ settings.product_image_fit }};
+    {%- case settings.product_image_ratio -%}
+      {%- when 'portrait-45' -%}{%- assign product_aspect = '4 / 5' -%}
+      {%- when 'tall' -%}{%- assign product_aspect = '2 / 3' -%}
+      {%- when 'square' -%}{%- assign product_aspect = '1 / 1' -%}
+      {%- else -%}{%- assign product_aspect = '3 / 4' -%}
+    {%- endcase %}
+    --product-aspect: {{ product_aspect }};
+
+    --color-badge-sale: {{ settings.color_badge_sale }};
+    --color-badge-new: {{ settings.color_badge_new }};
+    --color-badge-custom: {{ settings.color_badge_custom }};
+    --color-badge-text: {{ settings.color_badge_text }};
+    --color-sale-price: {{ settings.color_sale_price }};
+
+    --card-text-align: {{ settings.card_text_align }};
+  }
+
+  {% for scheme in settings.color_schemes -%}
+    {%- liquid
+      assign s = scheme.settings
+      assign muted = s.text | color_mix: s.background, 72
+      assign ratio = muted | color_contrast: s.background
+      if ratio < 4.5
+        assign muted = s.text | color_mix: s.background, 88
+        assign ratio = muted | color_contrast: s.background
+        if ratio < 4.5
+          assign muted = s.text
+        endif
+      endif
+      assign border_strong = s.text | color_mix: s.background, 55
+      assign ratio = border_strong | color_contrast: s.background
+      if ratio < 3
+        assign border_strong = s.text | color_mix: s.background, 75
+        assign ratio = border_strong | color_contrast: s.background
+        if ratio < 3
+          assign border_strong = s.text
+        endif
+      endif
+      assign sale = settings.color_sale_price
+      assign ratio = sale | color_contrast: s.background
+      if ratio < 4.5
+        assign sale = settings.color_sale_price | color_mix: s.text, 50
+        assign ratio = sale | color_contrast: s.background
+        if ratio < 4.5
+          assign sale = s.text
+        endif
+      endif
+    -%}
+    {% if forloop.index == 1 %}:root,{% endif %}
+    .color-{{ scheme.id }} {
+      --color-background: {{ s.background }};
+      --color-foreground: {{ s.text }};
+      --color-button: {{ s.button }};
+      --color-button-text: {{ s.button_label }};
+      --color-link: {{ s.secondary_button_label }};
+      --color-accent: {{ s.accent }};
+      --color-surface: {{ s.surface }};
+      --gradient-background: {% if s.background_gradient != blank %}{{ s.background_gradient }}{% else %}none{% endif %};
+      --color-muted: {{ muted }};
+      --color-sale-price: {{ sale }};
+      --color-subtle: color-mix(in srgb, {{ s.text }} 6%, {{ s.background }});
+      --color-border: color-mix(in srgb, {{ s.text }} 16%, {{ s.background }});
+      --color-border-strong: {{ border_strong }};
+      --color-overlay: color-mix(in srgb, {{ s.text }} 45%, transparent);
+      color-scheme: {% assign brightness = s.background | color_brightness %}{% if brightness < 128 %}dark{% else %}light{% endif %};
+      background-color: var(--color-background);
+      background-image: var(--gradient-background);
+      color: var(--color-foreground);
+    }
+  {%- endfor %}
+{% endstyle %}

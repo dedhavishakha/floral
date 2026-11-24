@@ -1,0 +1,32 @@
+<div class="block-heading" style="--block-align: {{ block.settings.alignment }}; --block-max-width: {{ block.settings.max_width }}ch;" {{ block.shopify_attributes }}>
+  {%- if block.settings.eyebrow != blank -%}
+    <p class="eyebrow">{{ block.settings.eyebrow | escape }}</p>
+  {%- endif -%}
+  <h2 class="{{ block.settings.size }}">{{ block.settings.heading }}</h2>
+</div>
+
+{% schema %}
+{
+  "name": "Heading",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "Heading" },
+    {
+      "type": "select",
+      "id": "size",
+      "label": "Size",
+      "options": [
+        { "value": "h0", "label": "Display" },
+        { "value": "h1", "label": "Extra large" },
+        { "value": "h2", "label": "Large" },
+        { "value": "h3", "label": "Medium" },
+        { "value": "h4", "label": "Small" }
+      ],
+      "default": "h2"
+    },
+    { "type": "text_alignment", "id": "alignment", "label": "Alignment", "default": "center" },
+    { "type": "range", "id": "max_width", "label": "Maximum width", "min": 10, "max": 60, "step": 2, "unit": "ch", "default": 30 }
+  ],
+  "presets": [{ "name": "Heading" }]
+}
+{% endschema %}

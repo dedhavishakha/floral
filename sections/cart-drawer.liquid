@@ -1,0 +1,156 @@
+{%- liquid
+  assign scheme_id = 'scheme-1'
+  for scheme in settings.color_schemes
+    assign scheme_id = scheme.id
+    break
+  endfor
+  assign cart_ids = cart.items | map: 'product_id' | join: ','
+  assign cart_ids = ',' | append: cart_ids | append: ','
+  if settings.currency_code_enabled
+    assign subtotal = cart.total_price | money_with_currency
+  else
+    assign subtotal = cart.total_price | money
+  endif
+-%}
+<dialog id="CartDrawer" class="drawer drawer--right color-{{ scheme_id }}" aria-labelledby="CartDrawerTitle">
+  <cart-drawer class="cart-drawer" data-cart-drawer-inner>
+    <div class="drawer__header">
+      <h2 id="CartDrawerTitle" class="drawer__title h4">
+        {{- 'cart.general.title' | t -}}
+        <span class="drawer__count">({{ cart.item_count }})</span>
+      </h2>
+      <button type="button" class="icon-button" data-dialog-close aria-label="{{ 'general.accessibility.close' | t }}">
+        {%- render 'icon', icon: 'close' -%}
+      </button>
+    </div>
+
+    <div class="drawer__body">
+      {% render 'cart-goals' %}
+
+      {%- if cart.item_count > 0 -%}
+        <ul class="cart-items" role="list" aria-label="{{ 'cart.general.items_label' | t }}">
+          {%- for item in cart.items -%}
+            {% render 'cart-line-item', item: item, index: forloop.index %}
+          {%- endfor -%}
+        </ul>
+      {%- else -%}
+        <div class="cart-drawer__empty">
+          <p class="h4">{{ 'cart.general.empty' | t }}</p>
+          <a href="{{ routes.all_products_collection_url }}" class="button">{{ 'cart.general.continue_shopping' | t }}</a>
+          {%- if shop.customer_accounts_enabled and customer == nil -%}
+            <p class="cart-drawer__login">
+              {{ 'cart.general.login_html' | t: link: routes.account_login_url }}
+            </p>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      {%- if settings.cart_upsell_collection != blank -%}
+        {%- capture upsell_items -%}
+          {%- assign shown = 0 -%}
+          {%- for upsell in settings.cart_upsell_collection.products limit: 12 -%}
+            {%- assign id_token = ',' | append: upsell.id | append: ',' -%}
+            {%- if upsell.available and shown < 3 -%}
+              {%- unless cart_ids contains id_token -%}
+                {%- assign shown = shown | plus: 1 -%}
+                <li class="upsell">
+                  <a href="{{ upsell.url }}" class="upsell__media" tabindex="-1" aria-hidden="true">
+                    {%- if upsell.featured_media -%}
+                      {{ upsell.featured_media.preview_image | image_url: width: 160 | image_tag: loading: 'lazy', alt: '', class: 'upsell__image' }}
+                    {%- endif -%}
+                  </a>
+                  <div class="upsell__info">
+                    <a href="{{ upsell.url }}" class="upsell__title">{{ upsell.title | escape }}</a>
+                    {% render 'price', product: upsell %}
+                  </div>
+                  {%- if upsell.has_only_default_variant -%}
+                    <product-form class="upsell__form">
+                      {%- assign upsell_form_id = 'upsell-' | append: upsell.id -%}
+                      {%- form 'product', upsell, id: upsell_form_id, novalidate: 'novalidate' -%}
+                        <input type="hidden" name="id" value="{{ upsell.selected_or_first_available_variant.id }}">
+                        <button type="submit" name="add" class="button button--small button--secondary">
+                          {{- 'cart.upsell.add' | t -}}
+                          <span class="visually-hidden">: {{ upsell.title | escape }}</span>
+                        </button>
+                      {%- endform -%}
+                    </product-form>
+                  {%- else -%}
+                    <button type="button" class="button button--small button--secondary" data-quick-view="{{ upsell.url }}" aria-haspopup="dialog">
+                      {{- 'cart.upsell.choose' | t -}}
+                      <span class="visually-hidden">: {{ upsell.title | escape }}</span>
+                    </button>
+                  {%- endif -%}
+                </li>
+              {%- endunless -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endcapture -%}
+        {%- if upsell_items != blank -%}
+          <div class="cart-upsell">
+            <h3 class="cart-upsell__heading">{{ settings.cart_upsell_heading | escape }}</h3>
+            <ul class="cart-upsell__list" role="list">{{ upsell_items }}</ul>
+          </div>
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+
+    {%- if cart.item_count > 0 -%}
+      <div class="drawer__footer">
+        {%- if settings.cart_show_note -%}
+          <details class="cart-note">
+            <summary>{{ 'cart.general.note' | t }} {% render 'icon', icon: 'chevron-down' %}</summary>
+            <label class="visually-hidden" for="CartDrawerNote">{{ 'cart.general.note' | t }}</label>
+            <textarea id="CartDrawerNote" class="field__input" name="note" rows="3" form="CartDrawerCheckout" data-cart-note>{{ cart.note }}</textarea>
+          </details>
+        {%- endif -%}
+
+        {%- if cart.cart_level_discount_applications.size > 0 -%}
+          <div class="cart-drawer__subtotal cart-drawer__subtotal--before">
+            <span>{{ 'cart.general.subtotal' | t }}</span>
+            <span>{%- if settings.currency_code_enabled -%}{{ cart.items_subtotal_price | money_with_currency }}{%- else -%}{{ cart.items_subtotal_price | money }}{%- endif -%}</span>
+          </div>
+          <ul class="cart-discounts" role="list">
+            {%- for discount in cart.cart_level_discount_applications -%}
+              <li>
+                {%- render 'icon', icon: 'tag' -%}
+                {{ discount.title | escape }}
+                <span>-{{ discount.total_allocated_amount | money }}</span>
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+
+        <div class="cart-drawer__subtotal">
+          <span>{%- if cart.cart_level_discount_applications.size > 0 -%}{{ 'cart.general.total' | t }}{%- else -%}{{ 'cart.general.subtotal' | t }}{%- endif -%}</span>
+          <span>{{ subtotal }}</span>
+        </div>
+        <p class="cart-drawer__note">
+          {%- if cart.taxes_included -%}
+            {{ 'cart.general.taxes_included_shipping_at_checkout' | t }}
+          {%- else -%}
+            {{ 'cart.general.taxes_and_shipping_at_checkout' | t }}
+          {%- endif -%}
+        </p>
+        <form action="{{ routes.cart_url }}" method="post" id="CartDrawerCheckout" class="cart-drawer__checkout">
+          <button type="submit" name="checkout" class="button button--full">
+            {%- render 'icon', icon: 'lock' -%}
+            {{ 'cart.general.checkout' | t }}
+          </button>
+        </form>
+        <a href="{{ routes.cart_url }}" class="link cart-drawer__view">{{ 'cart.general.view_cart' | t }}</a>
+      </div>
+    {%- endif -%}
+  </cart-drawer>
+</dialog>
+
+{% schema %}
+{
+  "name": "Cart drawer",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Cart drawer content is set in Theme settings > Cart."
+    }
+  ]
+}
+{% endschema %}

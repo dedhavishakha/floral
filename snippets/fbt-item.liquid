@@ -1,0 +1,52 @@
+{% doc %}
+  Renders one product row of the Frequently bought together block.
+
+  @param {product} item - The product
+  @param {string} check_id - Unique id for the checkbox
+  @param {boolean} [is_current] - Whether this is the product on the current page
+
+  @example
+  {% render 'fbt-item', item: product, check_id: 'fbt-1', is_current: true %}
+{% enddoc %}
+{%- assign item_variant = item.selected_or_first_available_variant -%}
+{%- if item.available -%}
+  <li class="fbt__item">
+    <input
+      type="checkbox"
+      class="fbt__check"
+      id="{{ check_id }}"
+      checked
+      data-fbt-check
+      data-variant-id="{{ item_variant.id }}"
+      data-price="{{ item_variant.price }}"
+    >
+    <label class="fbt__label" for="{{ check_id }}">
+      <span class="fbt__media media media--square">
+        {%- if item.featured_media -%}
+          {{ item.featured_media.preview_image | image_url: width: 160 | image_tag: widths: '80, 160', sizes: '64px', loading: 'lazy', alt: '' }}
+        {%- endif -%}
+      </span>
+      <span class="fbt__info">
+        <span class="fbt__title">
+          {%- if is_current -%}<span class="fbt__this">{{ 'products.fbt.this_item' | t }}</span> {% endif -%}
+          {{ item.title | escape }}
+        </span>
+        {% render 'price', product: item, use_variant: true %}
+      </span>
+    </label>
+    {%- unless item.has_only_default_variant -%}
+      {%- assign select_id = check_id | append: '-variant' -%}
+      <label class="visually-hidden" for="{{ select_id }}">{{ 'products.fbt.variant_label' | t: product: item.title }}</label>
+      <div class="select fbt__select">
+        <select id="{{ select_id }}" class="select__select" data-fbt-variant>
+          {%- for v in item.variants limit: 50 -%}
+            {%- if v.available -%}
+              <option value="{{ v.id }}" data-price="{{ v.price }}"{% if v.id == item_variant.id %} selected{% endif %}>{{ v.title | escape }}</option>
+            {%- endif -%}
+          {%- endfor -%}
+        </select>
+        {%- render 'icon', icon: 'chevron-down', class: 'select__icon' -%}
+      </div>
+    {%- endunless -%}
+  </li>
+{%- endif -%}

@@ -1,0 +1,121 @@
+{%- assign s = section.settings -%}
+<div
+  class="section before-after-section color-{{ s.color_scheme }}"
+  style="--pt: {{ s.padding_top }}px; --pb: {{ s.padding_bottom }}px;"
+>
+  <div class="page-width{% if s.full_width %} page-width--full page-width--flush{% endif %}">
+    {%- if s.eyebrow != blank or s.heading != blank or s.text != blank -%}
+      <div class="section-header{% if s.header_alignment == 'center' %} section-header--center{% endif %}{% if s.full_width %} page-width{% endif %}">
+        <div class="section-header__text">
+          {%- if s.eyebrow != blank -%}<p class="eyebrow">{{ s.eyebrow | escape }}</p>{%- endif -%}
+          {%- if s.heading != blank -%}<h2 class="h2">{{ s.heading }}</h2>{%- endif -%}
+          {%- if s.text != blank -%}<div class="rte">{{ s.text }}</div>{%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    <before-after class="before-after" style="--position: {{ s.start_position }}%;">
+      <div class="before-after__media media media--{{ s.image_ratio }} media--size-{{ s.image_size }}" style="--ratio: {{ s.image_before.aspect_ratio | default: s.image_after.aspect_ratio | default: 1.7778 }};">
+        <div class="before-after__image before-after__image--before">
+          {%- if s.image_before != blank -%}
+            {{ s.image_before | image_url: width: 2400 | image_tag: widths: '600, 900, 1200, 1600, 2000, 2400', sizes: '(min-width: 1200px) 1200px, 100vw', loading: 'lazy', alt: s.image_before.alt }}
+          {%- else -%}
+            {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg' }}
+          {%- endif -%}
+        </div>
+        <div class="before-after__image before-after__image--after">
+          {%- if s.image_after != blank -%}
+            {{ s.image_after | image_url: width: 2400 | image_tag: widths: '600, 900, 1200, 1600, 2000, 2400', sizes: '(min-width: 1200px) 1200px, 100vw', loading: 'lazy', alt: s.image_after.alt }}
+          {%- else -%}
+            {{ 'lifestyle-2' | placeholder_svg_tag: 'placeholder-svg' }}
+          {%- endif -%}
+        </div>
+        {%- if s.label_before != blank -%}
+          <span class="before-after__label before-after__label--before" aria-hidden="true">{{ s.label_before | escape }}</span>
+        {%- endif -%}
+        {%- if s.label_after != blank -%}
+          <span class="before-after__label before-after__label--after" aria-hidden="true">{{ s.label_after | escape }}</span>
+        {%- endif -%}
+        <div class="before-after__handle" aria-hidden="true">
+          <span class="before-after__knob">
+            {%- render 'icon', icon: 'chevron-left' -%}
+            {%- render 'icon', icon: 'chevron-right' -%}
+          </span>
+        </div>
+        <input
+          type="range"
+          class="before-after__range visually-hidden"
+          min="0"
+          max="100"
+          step="1"
+          value="{{ s.start_position }}"
+          aria-label="{{ 'sections.before_after.slider_label' | t }}"
+          aria-valuetext="{{ s.start_position }}%"
+        >
+      </div>
+    </before-after>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Before/after image",
+  "tag": "section",
+  "class": "section-before-after",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Up close" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "See the difference" },
+    { "type": "richtext", "id": "text", "label": "Text" },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "start", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "center"
+    },
+    { "type": "header", "content": "Images" },
+    { "type": "image_picker", "id": "image_before", "label": "Before image", "info": "Shown on the left. Use the same size and framing as the after image, e.g. 16:9 at 2400 x 1350 px." },
+    { "type": "image_picker", "id": "image_after", "label": "After image", "info": "Shown on the right. Same size and framing as the before image." },
+    { "type": "text", "id": "label_before", "label": "Before label", "default": "Before" },
+    { "type": "text", "id": "label_after", "label": "After label", "default": "After" },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        { "value": "wide", "label": "Wide 16:9" },
+        { "value": "landscape", "label": "Landscape 4:3" },
+        { "value": "square", "label": "Square 1:1" },
+        { "value": "portrait-45", "label": "Portrait 4:5" }
+      ],
+      "default": "wide"
+    },
+    {
+      "type": "select",
+      "id": "image_size",
+      "label": "Image size",
+      "options": [
+        { "value": "original", "label": "Original image ratio" },
+        { "value": "ratio", "label": "Use image ratio" },
+        { "value": "x-small", "label": "X-Small" },
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "ratio",
+      "info": "Original image ratio shows each image uncropped in its own shape. X-Small to Large set a fixed image height and crop to fit. Use image ratio keeps the shape chosen above."
+    },
+    { "type": "range", "id": "start_position", "label": "Starting position", "min": 10, "max": 90, "step": 5, "unit": "%", "default": 50 },
+    { "type": "checkbox", "id": "full_width", "label": "Full width", "default": false },
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "presets": [{ "name": "Before/after image" }],
+  "disabled_on": { "groups": ["header", "footer"] }
+}
+{% endschema %}

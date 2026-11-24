@@ -1,0 +1,114 @@
+{%- liquid
+  assign s = section.settings
+  assign cols_tablet = s.columns_desktop | at_most: 4
+  assign tile_vw = 100 | divided_by: s.columns_desktop
+  assign tile_sizes = '(min-width: 990px) ' | append: tile_vw | append: 'vw, 50vw'
+-%}
+<div
+  class="section social-gallery color-{{ s.color_scheme }}"
+  style="--pt: {{ s.padding_top }}px; --pb: {{ s.padding_bottom }}px;"
+>
+  <div class="page-width{% if s.full_width %} page-width--full page-width--flush{% endif %}">
+    <div class="section-header section-header--center{% if s.full_width %} page-width{% endif %}">
+      <div class="section-header__text">
+        {%- if s.eyebrow != blank -%}<p class="eyebrow">{{ s.eyebrow | escape }}</p>{%- endif -%}
+        {%- if s.heading != blank -%}<h2 class="h2">{{ s.heading }}</h2>{%- endif -%}
+      </div>
+      {%- if s.profile_link != blank and s.handle != blank -%}
+        <div class="section-header__actions">
+          <a href="{{ s.profile_link }}" class="link" target="_blank" rel="noopener">
+            {%- render 'icon', icon: 'instagram' -%}
+            {{ 'sections.social_gallery.follow' | t: handle: s.handle }}
+            <span class="visually-hidden">({{ 'general.accessibility.external_link' | t }})</span>
+          </a>
+        </div>
+      {%- endif -%}
+    </div>
+
+    <ul class="grid social-gallery__grid" role="list" style="--cols-desktop: {{ s.columns_desktop }}; --cols-tablet: {{ cols_tablet }}; --cols-mobile: {{ s.columns_mobile }}; column-gap: {{ s.gap }}px; row-gap: {{ s.gap }}px;">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign b = block.settings
+          assign placeholder_number = forloop.index | modulo: 2 | plus: 1
+          assign placeholder_name = 'lifestyle-' | append: placeholder_number
+          assign tile_link = b.link | default: s.profile_link
+        -%}
+        <li class="social-gallery__item reveal" style="--reveal-index: {{ forloop.index0 | modulo: 6 }};" {{ block.shopify_attributes }}>
+          <div class="social-gallery__media media media--square">
+            {%- if b.image != blank -%}
+              {%- assign tile_alt = b.image.alt | default: b.caption | escape -%}
+              {{ b.image | image_url: width: 900 | image_tag: widths: '200, 300, 450, 600, 900', sizes: tile_sizes, loading: 'lazy', alt: tile_alt }}
+            {%- else -%}
+              {{ placeholder_name | placeholder_svg_tag: 'placeholder-svg' }}
+            {%- endif -%}
+          </div>
+          {%- if tile_link != blank -%}
+            <a href="{{ tile_link }}" class="social-gallery__link" target="_blank" rel="noopener">
+              <span class="social-gallery__icon" aria-hidden="true">{% render 'icon', icon: 'instagram' %}</span>
+              <span class="visually-hidden">{{ b.caption | default: s.handle | escape }} ({{ 'general.accessibility.external_link' | t }})</span>
+            </a>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Social gallery",
+  "tag": "section",
+  "class": "section-social-gallery",
+  "max_blocks": 12,
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    {
+      "type": "paragraph",
+      "content": "Shows images you upload here. A live Instagram feed needs a compatible app; add its app block to an Apps section."
+    },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "Seen on you" },
+    { "type": "text", "id": "handle", "label": "Profile name", "default": "@yourbrand" },
+    { "type": "url", "id": "profile_link", "label": "Profile link" },
+    { "type": "range", "id": "columns_desktop", "label": "Desktop columns", "min": 3, "max": 8, "step": 1, "default": 6 },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Mobile columns",
+      "options": [
+        { "value": "2", "label": "2" },
+        { "value": "3", "label": "3" }
+      ],
+      "default": "2"
+    },
+    { "type": "range", "id": "gap", "label": "Space between images", "min": 0, "max": 24, "step": 2, "unit": "px", "default": 4 },
+    { "type": "checkbox", "id": "full_width", "label": "Full width", "default": true },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Image",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image", "info": "Recommended: 1:1 square, 1000 x 1000 px." },
+        { "type": "text", "id": "caption", "label": "Caption", "info": "Used as the link description for screen readers." },
+        { "type": "url", "id": "link", "label": "Link", "info": "Defaults to the profile link." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Social gallery",
+      "blocks": [
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,35 @@
+<div class="block-button{% if block.settings.full_width %} block-button--full{% endif %}" {{ block.shopify_attributes }}>
+  {%- if block.settings.label != blank -%}
+    <a
+      {% if block.settings.link != blank %}href="{{ block.settings.link }}"{% else %}role="link" aria-disabled="true"{% endif %}
+      {% if block.settings.new_tab %}target="_blank" rel="noopener"{% endif %}
+      class="{% case block.settings.style %}{% when 'secondary' %}button button--secondary{% when 'link' %}link{% else %}button{% endcase %}{% if block.settings.full_width and block.settings.style != 'link' %} button--full{% endif %}"
+    >
+      {{- block.settings.label | escape -}}
+    </a>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Button",
+  "settings": [
+    { "type": "text", "id": "label", "label": "Label", "default": "Shop now" },
+    { "type": "url", "id": "link", "label": "Link" },
+    { "type": "checkbox", "id": "new_tab", "label": "Open link in a new tab", "default": false },
+    {
+      "type": "select",
+      "id": "style",
+      "label": "Style",
+      "options": [
+        { "value": "primary", "label": "Solid" },
+        { "value": "secondary", "label": "Outline" },
+        { "value": "link", "label": "Text link" }
+      ],
+      "default": "primary"
+    },
+    { "type": "checkbox", "id": "full_width", "label": "Full width", "default": false }
+  ],
+  "presets": [{ "name": "Button" }]
+}
+{% endschema %}

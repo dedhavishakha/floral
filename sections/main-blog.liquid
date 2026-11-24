@@ -1,0 +1,159 @@
+{%- liquid
+  assign layout = section.settings.layout
+  assign cols_d = section.settings.columns_desktop
+  assign vw_desktop = 100 | divided_by: cols_d
+  assign card_sizes = '(min-width: 990px) ' | append: vw_desktop | append: 'vw, (min-width: 750px) 50vw, 100vw'
+-%}
+<div
+  class="section main-blog color-{{ section.settings.color_scheme }}{% unless section.settings.image_zoom %} zoom-off{% endunless %}"
+  style="--pt: {{ section.settings.padding_top }}px; --pb: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="page-width">
+    <header class="section-header section-header--center blog-header">
+      <div class="section-header__text">
+        <h1 class="h1">{{ blog.title | escape }}</h1>
+      </div>
+      {%- if section.settings.show_tags and blog.all_tags.size > 0 -%}
+        <nav class="section-header__actions blog-tags" aria-label="{{ 'blogs.general.tags_label' | t }}">
+          <ul class="chips" role="list">
+            <li>
+              <a class="chip" href="{{ blog.url }}" {% if current_tags == blank %}aria-current="page"{% endif %}>{{ 'blogs.general.all' | t }}</a>
+            </li>
+            {%- for tag in blog.all_tags -%}
+              <li>
+                <a class="chip" href="{{ blog.url }}/tagged/{{ tag | handleize }}" {% if current_tags contains tag %}aria-current="page"{% endif %}>{{ tag | escape }}</a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </nav>
+      {%- endif -%}
+    </header>
+
+    {%- paginate blog.articles by section.settings.articles_per_page -%}
+      {%- if blog.articles.size > 0 -%}
+        <ul class="blog-grid blog-grid--{{ layout }}" role="list" style="--cols-desktop: {{ cols_d }};">
+          {%- for article in blog.articles -%}
+            {%- liquid
+              assign featured = false
+              if layout == 'featured' and forloop.first and paginate.current_page == 1
+                assign featured = true
+              endif
+              assign sizes = card_sizes
+              if featured
+                assign sizes = '(min-width: 750px) 60vw, 100vw'
+              endif
+            -%}
+            <li class="blog-grid__item{% if featured %} blog-grid__item--featured{% endif %} reveal" style="--reveal-index: {{ forloop.index0 | modulo: cols_d }};">
+              <article class="article-card{% if featured %} article-card--featured{% endif %}" aria-labelledby="ArticleTitle-{{ article.id }}">
+                {%- if section.settings.show_image -%}
+                  <div class="article-card__media media media--{{ section.settings.image_ratio }} media--size-{{ section.settings.image_size }}" style="--ratio: {{ article.image.aspect_ratio | default: 1.5 }};">
+                    {%- if article.image -%}
+                      {{
+                        article.image
+                        | image_url: width: 2000
+                        | image_tag:
+                          widths: '400, 600, 800, 1200, 1600, 2000',
+                          sizes: sizes,
+                          loading: 'lazy',
+                          alt: article.image.alt
+                      }}
+                    {%- else -%}
+                      {%- assign placeholder_name = forloop.index | modulo: 3 | plus: 1 | prepend: 'blog-apparel-' -%}
+                      {{ placeholder_name | placeholder_svg_tag: 'placeholder-svg' }}
+                    {%- endif -%}
+                  </div>
+                {%- endif -%}
+                <div class="article-card__info">
+                  {%- if section.settings.show_date or section.settings.show_author -%}
+                    <p class="article-card__meta eyebrow">
+                      {%- if section.settings.show_date -%}
+                        {{- article.published_at | time_tag: format: 'date' -}}
+                      {%- endif -%}
+                      {%- if section.settings.show_date and section.settings.show_author -%}
+                        <span aria-hidden="true"> · </span>
+                      {%- endif -%}
+                      {%- if section.settings.show_author -%}
+                        <span>{{ article.author | escape }}</span>
+                      {%- endif -%}
+                    </p>
+                  {%- endif -%}
+                  <h2 id="ArticleTitle-{{ article.id }}" class="article-card__title {% if featured %}h2{% else %}h4{% endif %}">
+                    <a href="{{ article.url }}" class="article-card__link">{{ article.title | escape }}</a>
+                  </h2>
+                  {%- if section.settings.show_excerpt -%}
+                    {%- assign excerpt = article.excerpt_or_content | strip_html | truncatewords: 26 -%}
+                    {%- if excerpt != blank -%}
+                      <p class="article-card__excerpt text-muted">{{ excerpt }}</p>
+                    {%- endif -%}
+                  {%- endif -%}
+                  <span class="article-card__more link" aria-hidden="true">{{ 'blogs.article.read_more' | t }}</span>
+                </div>
+              </article>
+            </li>
+          {%- endfor -%}
+        </ul>
+        {% render 'pagination', paginate: paginate %}
+      {%- else -%}
+        <div class="blog-empty">
+          <p class="h4">{{ 'blogs.general.empty' | t }}</p>
+        </div>
+      {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Blog posts",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        { "value": "grid", "label": "Grid" },
+        { "value": "featured", "label": "Grid with featured first post" },
+        { "value": "list", "label": "List" }
+      ],
+      "default": "featured"
+    },
+    { "type": "range", "id": "columns_desktop", "label": "Desktop columns", "min": 2, "max": 4, "step": 1, "default": 3 },
+    { "type": "range", "id": "articles_per_page", "label": "Posts per page", "min": 3, "max": 24, "step": 3, "default": 12 },
+    { "type": "checkbox", "id": "show_tags", "label": "Show tag filter", "default": true },
+    { "type": "checkbox", "id": "show_image", "label": "Show featured image", "default": true },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        { "value": "portrait-45", "label": "Portrait" },
+        { "value": "landscape", "label": "Landscape" },
+        { "value": "square", "label": "Square" }
+      ],
+      "default": "landscape"
+    },
+    {
+      "type": "select",
+      "id": "image_size",
+      "label": "Image size",
+      "options": [
+        { "value": "original", "label": "Original image ratio" },
+        { "value": "ratio", "label": "Use image ratio" },
+        { "value": "x-small", "label": "X-Small" },
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "ratio",
+      "info": "Original image ratio shows each image uncropped in its own shape. X-Small to Large show every image at the same height and crop to fit. Use image ratio keeps the shape chosen above."
+    },
+    { "type": "checkbox", "id": "image_zoom", "label": "Zoom images on hover", "info": "Works when Theme settings > Animations > Image hover effect uses zoom.", "default": true },
+    { "type": "checkbox", "id": "show_date", "label": "Show date", "default": true },
+    { "type": "checkbox", "id": "show_author", "label": "Show author", "default": false },
+    { "type": "checkbox", "id": "show_excerpt", "label": "Show excerpt", "default": true },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 32 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,34 @@
+{% doc %}
+  Renders links to the social profiles set in Theme settings > Social media.
+
+  @param {string} [class] - Extra classes for the list
+
+  @example
+  {% render 'social-icons' %}
+{% enddoc %}
+{%- liquid
+  assign networks = 'instagram,tiktok,facebook,pinterest,youtube,twitter,snapchat,threads' | split: ','
+  assign any_set = false
+  for network in networks
+    assign key = 'social_' | append: network | append: '_link'
+    if settings[key] != blank
+      assign any_set = true
+    endif
+  endfor
+-%}
+{%- if any_set -%}
+  <ul class="social-icons{% if class != blank %} {{ class }}{% endif %}" role="list">
+    {%- for network in networks -%}
+      {%- assign key = 'social_' | append: network | append: '_link' -%}
+      {%- if settings[key] != blank -%}
+        {%- assign label_key = 'general.social.' | append: network -%}
+        <li>
+          <a href="{{ settings[key] }}" class="icon-button" target="_blank" rel="noopener">
+            {%- render 'icon', icon: network -%}
+            <span class="visually-hidden">{{ label_key | t }}</span>
+          </a>
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+{%- endif -%}

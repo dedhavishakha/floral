@@ -1,0 +1,53 @@
+{% doc %}
+  Renders the optional gift card recipient fields inside a product form for gift card products.
+  Follows Shopify's gift card recipient requirements: a flag checkbox, recipient fields and the timezone offset.
+
+  @param {object} form - The product form object
+  @param {string} section_id - The id of the section that renders the form
+
+  @example
+  {% render 'gift-card-recipient', form: form, section_id: section.id %}
+{% enddoc %}
+{%- liquid
+  assign show_fields = false
+  if form.errors or form.send_on
+    assign show_fields = true
+  endif
+-%}
+<div class="recipient">
+  <label class="checkbox recipient__toggle-label" for="Recipient-toggle-{{ section_id }}">
+    <input
+      type="checkbox"
+      class="recipient__toggle"
+      id="Recipient-toggle-{{ section_id }}"
+      name="properties[__shopify_send_gift_card_to_recipient]"
+      value="on"
+      aria-controls="Recipient-fields-{{ section_id }}"
+      {% if show_fields %}checked{% endif %}
+    >
+    <span>{{ 'recipient.form.checkbox' | t }}</span>
+  </label>
+  <div class="recipient__fields" id="Recipient-fields-{{ section_id }}">
+    <div class="field">
+      <label class="field__label" for="Recipient-email-{{ section_id }}">{{ 'recipient.form.email_label' | t }}</label>
+      <input class="field__input" type="email" id="Recipient-email-{{ section_id }}" name="properties[Recipient email]" value="{{ form.email }}" autocomplete="email" data-recipient-field="email">
+      <p class="field__error" data-recipient-error="email" hidden></p>
+    </div>
+    <div class="field">
+      <label class="field__label" for="Recipient-name-{{ section_id }}">{{ 'recipient.form.name_label' | t }}</label>
+      <input class="field__input" type="text" id="Recipient-name-{{ section_id }}" name="properties[Recipient name]" value="{{ form.name }}" autocomplete="name" data-recipient-field="name">
+      <p class="field__error" data-recipient-error="name" hidden></p>
+    </div>
+    <div class="field">
+      <label class="field__label" for="Recipient-message-{{ section_id }}">{{ 'recipient.form.message_label' | t }}</label>
+      <textarea class="field__input" id="Recipient-message-{{ section_id }}" name="properties[Message]" rows="3" maxlength="200" data-recipient-field="message">{{ form.message }}</textarea>
+      <p class="field__error" data-recipient-error="message" hidden></p>
+    </div>
+    <div class="field">
+      <label class="field__label" for="Recipient-date-{{ section_id }}">{{ 'recipient.form.send_on' | t }}</label>
+      <input class="field__input" type="date" id="Recipient-date-{{ section_id }}" name="properties[Send on]" value="{{ form.send_on }}" pattern="\d{4}-\d{2}-\d{2}" data-recipient-field="send_on">
+      <p class="field__error" data-recipient-error="send_on" hidden></p>
+    </div>
+    <input type="hidden" name="properties[__shopify_offset]" value="" data-recipient-offset>
+  </div>
+</div>

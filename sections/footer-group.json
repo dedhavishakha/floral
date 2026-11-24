@@ -1,0 +1,81 @@
+{
+  "type": "footer",
+  "name": "Footer group",
+  "sections": {
+    "footer": {
+      "type": "footer",
+      "blocks": {
+        "brand": {
+          "type": "brand",
+          "settings": {
+            "logo_width": 140,
+            "text": "<p>Considered clothing made in small runs, designed to be worn for years.</p>",
+            "show_social": true
+          }
+        },
+        "menu-shop": {
+          "type": "link_list",
+          "settings": {
+            "heading": "Shop",
+            "menu": "main-menu"
+          }
+        },
+        "menu-help": {
+          "type": "link_list",
+          "settings": {
+            "heading": "Help",
+            "menu": "footer"
+          }
+        },
+        "newsletter": {
+          "type": "newsletter",
+          "settings": {
+            "heading": "Join the list",
+            "text": "<p>New arrivals, restocks and early access to the sale.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "brand",
+        "menu-shop",
+        "menu-help",
+        "newsletter"
+      ],
+      "settings": {
+        "show_payment_icons": true,
+        "show_policies": true,
+        "show_country": true,
+        "show_language": true,
+        "copyright_text": "",
+        "show_powered_by": false,
+        "color_scheme": "scheme-3",
+        "padding_top": 64,
+        "padding_bottom": 32
+      }
+    },
+    "newsletter-popup": {
+      "type": "newsletter-popup",
+      "settings": {
+        "enable": true,
+        "show_on": "all",
+        "delay": 8,
+        "frequency": 14,
+        "exit_intent": true,
+        "show_on_mobile": true,
+        "image": "shopify://shop_images/home-newsletter.jpg",
+        "image_position": "start",
+        "eyebrow": "Join the list",
+        "heading": "Take 10% off your first order",
+        "text": "<p>New arrivals, restocks and early access to the sale, straight to your inbox.</p>",
+        "button_label": "Subscribe",
+        "discount_code": "",
+        "disclaimer": "<p>You can unsubscribe at any time.</p>",
+        "color_scheme": "scheme-1"
+      }
+    }
+  },
+  "order": [
+    "footer",
+    "newsletter-popup"
+  ]
+}

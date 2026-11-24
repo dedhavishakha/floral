@@ -1,0 +1,66 @@
+{%- assign b = block.settings -%}
+<div
+  class="block-group layout-stack layout-stack--{{ b.direction }}{% if b.use_color_scheme %} block-group--filled color-{{ b.color_scheme }}{% endif %}{% if b.wrap %} layout-stack--wrap{% endif %}"
+  style="--stack-gap: {{ b.gap }}px; --stack-align: {{ b.align_items }}; --stack-justify: {{ b.justify_content }}; --group-padding: {{ b.padding }}px; --block-width: {{ b.width }}%;"
+  {{ block.shopify_attributes }}
+>
+  {% content_for 'blocks' %}
+</div>
+
+{% schema %}
+{
+  "name": "Group",
+  "blocks": [{ "type": "@theme" }, { "type": "@app" }],
+  "settings": [
+    {
+      "type": "select",
+      "id": "direction",
+      "label": "Direction",
+      "options": [
+        { "value": "column", "label": "Vertical" },
+        { "value": "row", "label": "Horizontal" }
+      ],
+      "default": "column"
+    },
+    { "type": "checkbox", "id": "wrap", "label": "Wrap items onto new lines", "default": true },
+    {
+      "type": "select",
+      "id": "align_items",
+      "label": "Alignment",
+      "options": [
+        { "value": "flex-start", "label": "Start" },
+        { "value": "center", "label": "Center" },
+        { "value": "flex-end", "label": "End" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "flex-start"
+    },
+    {
+      "type": "select",
+      "id": "justify_content",
+      "label": "Distribution",
+      "options": [
+        { "value": "flex-start", "label": "Start" },
+        { "value": "center", "label": "Center" },
+        { "value": "flex-end", "label": "End" },
+        { "value": "space-between", "label": "Space between" }
+      ],
+      "default": "flex-start"
+    },
+    { "type": "range", "id": "gap", "label": "Gap", "min": 0, "max": 80, "step": 4, "unit": "px", "default": 16 },
+    { "type": "range", "id": "width", "label": "Width", "min": 20, "max": 100, "step": 5, "unit": "%", "default": 100 },
+    { "type": "range", "id": "padding", "label": "Inner padding", "min": 0, "max": 80, "step": 4, "unit": "px", "default": 0 },
+    { "type": "checkbox", "id": "use_color_scheme", "label": "Use a background color scheme", "default": false },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-2" }
+  ],
+  "presets": [
+    {
+      "name": "Group",
+      "blocks": [
+        { "type": "heading" },
+        { "type": "text" }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,94 @@
+{% doc %}
+  Renders the product form: hidden variant id, quantity selector, add to cart, dynamic checkout buttons
+  and Shop Pay Installments. Used by the product page and quick view.
+
+  @param {product} product - The product
+  @param {string} section_id - The id of the section that renders the form
+  @param {boolean} [show_quantity] - Show the quantity selector. Defaults to true
+  @param {boolean} [hide_quantity] - Hide the quantity selector because a separate quantity block renders it
+  @param {boolean} [show_dynamic_checkout] - Show dynamic checkout buttons such as Shop Pay
+  @param {boolean} [show_installments] - Show the Shop Pay Installments banner
+
+  @example
+  {% render 'buy-buttons', product: product, section_id: section.id, show_dynamic_checkout: true %}
+{% enddoc %}
+{%- liquid
+  assign variant = product.selected_or_first_available_variant
+  assign form_id = 'product-form-' | append: section_id
+  assign qty_on = true
+  if show_quantity == false or hide_quantity
+    assign qty_on = false
+  endif
+  assign gift_card_recipient = false
+  if product.gift_card?
+    assign gift_card_recipient = true
+  endif
+-%}
+<product-form class="product-form" data-section-id="{{ section_id }}">
+  {%- form 'product', product, id: form_id, class: 'product-form__form', novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
+    <input type="hidden" name="id" value="{{ variant.id }}" {% if variant.available != true %}disabled{% endif %} data-variant-id-input>
+
+    {%- if gift_card_recipient -%}
+      {% render 'gift-card-recipient', form: form, section_id: section_id %}
+    {%- endif -%}
+
+    {%- if show_installments -%}
+      <div class="product-form__installments">{{ form | payment_terms }}</div>
+    {%- endif -%}
+
+    <div class="product-form__row">
+      {%- if qty_on -%}
+        <quantity-input class="quantity">
+          <button type="button" class="quantity__button" name="minus" aria-label="{{ 'products.product.quantity.decrease' | t: product: product.title | escape }}">
+            {%- render 'icon', icon: 'minus' -%}
+          </button>
+          <label class="visually-hidden" for="Quantity-{{ section_id }}">{{ 'products.product.quantity.label' | t }}</label>
+          <input
+            class="quantity__input"
+            type="number"
+            name="quantity"
+            id="Quantity-{{ section_id }}"
+            value="{{ variant.quantity_rule.min }}"
+            min="{{ variant.quantity_rule.min }}"
+            step="{{ variant.quantity_rule.increment }}"
+            {% if variant.quantity_rule.max != null %}max="{{ variant.quantity_rule.max }}"{% endif %}
+            form="{{ form_id }}"
+            inputmode="numeric"
+          >
+          <button type="button" class="quantity__button" name="plus" aria-label="{{ 'products.product.quantity.increase' | t: product: product.title | escape }}">
+            {%- render 'icon', icon: 'plus' -%}
+          </button>
+        </quantity-input>
+      {%- endif -%}
+
+      <button
+        type="submit"
+        name="add"
+        class="button product-form__submit"
+        data-update="add-button"
+        {% if variant.available != true %}disabled{% endif %}
+      >
+        <span>
+          {%- if variant == blank -%}
+            {{- 'products.product.unavailable' | t -}}
+          {%- elsif variant.available -%}
+            {%- if product.selling_plan_groups.size > 0 and product.requires_selling_plan -%}
+              {{- 'products.product.subscribe' | t -}}
+            {%- else -%}
+              {{- 'products.product.add_to_cart' | t -}}
+            {%- endif -%}
+          {%- else -%}
+            {{- 'products.product.sold_out' | t -}}
+          {%- endif -%}
+        </span>
+        <span class="loading-spinner" aria-hidden="true"></span>
+      </button>
+    </div>
+
+    <p class="product-form__error" role="alert" data-form-error hidden></p>
+
+    {%- if show_dynamic_checkout and product.gift_card? == false -%}
+      <div class="product-form__dynamic">{{ form | payment_button }}</div>
+    {%- endif -%}
+  {%- endform -%}
+</product-form>

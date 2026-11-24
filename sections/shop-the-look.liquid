@@ -1,0 +1,214 @@
+{%- liquid
+  assign s = section.settings
+  assign variant_ids = ''
+  assign total = 0
+  assign available_count = 0
+  for block in section.blocks
+    assign p = block.settings.product
+    if p != blank and p.available
+      assign v = p.selected_or_first_available_variant
+      assign variant_ids = variant_ids | append: v.id | append: ','
+      assign total = total | plus: v.price
+      assign available_count = available_count | plus: 1
+    endif
+  endfor
+  assign variant_ids = variant_ids | remove_last: ','
+  if settings.currency_code_enabled
+    assign total_money = total | money_with_currency
+  else
+    assign total_money = total | money
+  endif
+  assign fallback_title = 'onboarding.product_title' | t
+-%}
+<div
+  class="section shop-the-look-section color-{{ s.color_scheme }}"
+  style="--pt: {{ s.padding_top }}px; --pb: {{ s.padding_bottom }}px;"
+>
+  <shop-the-look class="page-width stl stl--image-{{ s.image_position }}">
+    {%- capture stl_media -%}
+    <div class="stl__media-wrap reveal">
+      <div class="stl__media media media--natural media--size-{{ s.image_size }}" style="--ratio: {{ s.image.aspect_ratio | default: 1.25 }};">
+        {%- if s.image != blank -%}
+          {%- assign stl_alt = s.image.alt | escape -%}
+          {{ s.image | image_url: width: 2400 | image_tag: widths: '500, 800, 1100, 1500, 1900, 2400', sizes: '(min-width: 990px) 60vw, 100vw', loading: 'lazy', alt: stl_alt }}
+        {%- else -%}
+          {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg' }}
+        {%- endif -%}
+
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign b = block.settings
+            assign p = b.product
+            assign hotspot_title = p.title | default: fallback_title
+            assign side = 'right'
+            if b.x > 55
+              assign side = 'left'
+            endif
+          -%}
+          <button
+            type="button"
+            class="stl__hotspot"
+            style="--x: {{ b.x }}%; --y: {{ b.y }}%;"
+            aria-expanded="false"
+            aria-controls="Hotspot-{{ block.id }}"
+            data-hotspot="{{ forloop.index0 }}"
+            {{ block.shopify_attributes }}
+          >
+            <span class="visually-hidden">{{ 'sections.shop_the_look.hotspot' | t: product: hotspot_title }}</span>
+            {%- render 'icon', icon: 'plus' -%}
+          </button>
+          <div
+            class="stl__popover color-{{ s.popover_color_scheme }}"
+            id="Hotspot-{{ block.id }}"
+            style="--x: {{ b.x }}%; --y: {{ b.y }}%;"
+            data-side="{{ side }}"
+            data-hotspot-popover="{{ forloop.index0 }}"
+            hidden
+          >
+            <div class="stl__popover-media media media--{{ settings.product_image_ratio }}">
+              {%- if p.featured_media -%}
+                {{ p.featured_media.preview_image | image_url: width: 240 | image_tag: widths: '120, 180, 240', sizes: '80px', loading: 'lazy', alt: '' }}
+              {%- else -%}
+                {{ 'product-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+              {%- endif -%}
+            </div>
+            <div class="stl__popover-info">
+              <p class="stl__popover-title">{{ hotspot_title | escape }}</p>
+              {%- if p != blank -%}
+                {% render 'price', product: p %}
+                <div class="stl__popover-actions">
+                  <a href="{{ p.url }}" class="link">{{ 'sections.shop_the_look.view_product' | t }}</a>
+                  {%- if p.available -%}
+                    <button type="button" class="link" data-quick-view="{{ p.url }}" aria-haspopup="dialog">
+                      {{- 'products.card.quick_add' | t -}}
+                      <span class="visually-hidden">: {{ p.title | escape }}</span>
+                    </button>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+    {%- endcapture -%}
+    {%- capture stl_content -%}
+    <div class="stl__content reveal" style="--reveal-index: 1;">
+      {%- if s.eyebrow != blank -%}<p class="eyebrow">{{ s.eyebrow | escape }}</p>{%- endif -%}
+      {%- if s.heading != blank -%}<h2 class="h2">{{ s.heading }}</h2>{%- endif -%}
+      {%- if s.text != blank -%}<div class="rte text-muted">{{ s.text }}</div>{%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+        <ul class="stl__list" role="list">
+          {%- for block in section.blocks -%}
+            {%- assign p = block.settings.product -%}
+            <li class="stl__item" data-hotspot-item="{{ forloop.index0 }}">
+              <div class="stl__item-media media media--{{ settings.product_image_ratio }}">
+                {%- if p.featured_media -%}
+                  {{ p.featured_media.preview_image | image_url: width: 240 | image_tag: widths: '120, 180, 240', sizes: '72px', loading: 'lazy', alt: '' }}
+                {%- else -%}
+                  {{ 'product-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
+                {%- endif -%}
+              </div>
+              <div class="stl__item-info">
+                {%- if p != blank -%}
+                  <a href="{{ p.url }}" class="stl__item-title">{{ p.title | escape }}</a>
+                  {% render 'price', product: p %}
+                {%- else -%}
+                  <span class="stl__item-title">{{ fallback_title }}</span>
+                {%- endif -%}
+              </div>
+              {%- if p != blank and p.available -%}
+                <button type="button" class="icon-button icon-button--bordered stl__item-add" data-quick-view="{{ p.url }}" aria-haspopup="dialog" aria-label="{{ 'products.card.choose_options' | t }}: {{ p.title | escape }}">
+                  {%- render 'icon', icon: 'plus' -%}
+                </button>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+
+      {%- if s.show_add_all and available_count > 1 -%}
+        <button type="button" class="button button--full stl__add-all" data-add-all data-variant-ids="{{ variant_ids }}">
+          <span>{{ 'sections.shop_the_look.add_all' | t: price: total_money }}</span>
+          <span class="loading-spinner" aria-hidden="true"></span>
+        </button>
+        <p class="stl__note text-small text-muted">{{ 'sections.shop_the_look.add_all_note' | t }}</p>
+        <p class="form-message form-message--error" role="alert" data-add-all-error hidden></p>
+      {%- endif -%}
+    </div>
+    {%- endcapture -%}
+    {%- if s.image_position == 'right' -%}
+      {{ stl_content }}
+      {{ stl_media }}
+    {%- else -%}
+      {{ stl_media }}
+      {{ stl_content }}
+    {%- endif -%}
+  </shop-the-look>
+</div>
+
+{% schema %}
+{
+  "name": "Shop the look",
+  "tag": "section",
+  "class": "section-shop-the-look",
+  "max_blocks": 6,
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "image_picker", "id": "image", "label": "Image", "info": "Hotspot positions are a percentage of the image width and height. Any shape works; 4:5 or 2:3 portrait at 1600 px wide is recommended." },
+    {
+      "type": "select",
+      "id": "image_size",
+      "label": "Image size",
+      "options": [
+        { "value": "ratio", "label": "Original image ratio" },
+        { "value": "x-small", "label": "X-Small" },
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "ratio",
+      "info": "X-Small to Large set a fixed image height and crop to fit. Hotspots are placed on the image frame, so check their positions after changing the size."
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Image position",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Shop the look" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "Dressed for the weekend" },
+    { "type": "richtext", "id": "text", "label": "Text", "default": "<p>Tap a dot to see each piece, or add the whole outfit in one go.</p>" },
+    { "type": "checkbox", "id": "show_add_all", "label": "Show \"Add all to cart\" button", "info": "Adds the first available option of each product.", "default": true },
+    { "type": "color_scheme", "id": "popover_color_scheme", "label": "Product popover color scheme", "default": "scheme-2" },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "blocks": [
+    {
+      "type": "hotspot",
+      "name": "Product hotspot",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Product" },
+        { "type": "range", "id": "x", "label": "Horizontal position", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 50 },
+        { "type": "range", "id": "y", "label": "Vertical position", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 50 }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shop the look",
+      "blocks": [
+        { "type": "hotspot", "settings": { "x": 42, "y": 30 } },
+        { "type": "hotspot", "settings": { "x": 55, "y": 62 } },
+        { "type": "hotspot", "settings": { "x": 30, "y": 84 } }
+      ]
+    }
+  ]
+}
+{% endschema %}

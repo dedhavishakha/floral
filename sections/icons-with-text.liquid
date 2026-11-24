@@ -1,0 +1,130 @@
+{%- liquid
+  assign s = section.settings
+  assign cols = section.blocks.size | at_most: s.columns_desktop | at_least: 1
+  assign cols_tablet = cols | at_most: 2
+-%}
+<div
+  class="section icons-with-text color-{{ s.color_scheme }}{% if s.show_dividers %} icons-with-text--dividers{% endif %}"
+  style="--pt: {{ s.padding_top }}px; --pb: {{ s.padding_bottom }}px;"
+>
+  <div class="page-width">
+    {%- if s.heading != blank -%}
+      <div class="section-header section-header--center">
+        <div class="section-header__text"><h2 class="h2">{{ s.heading }}</h2></div>
+      </div>
+    {%- endif -%}
+    <ul class="grid icons-with-text__list icons-with-text__list--{{ s.alignment }}" role="list" style="--cols-desktop: {{ cols }}; --cols-tablet: {{ cols_tablet }}; --cols-mobile: {{ s.columns_mobile }};">
+      {%- for block in section.blocks -%}
+        {%- assign b = block.settings -%}
+        <li class="icon-text reveal" style="--reveal-index: {{ forloop.index0 }};" {{ block.shopify_attributes }}>
+          <span class="icon-text__icon">
+            {%- if b.image != blank -%}
+              {{ b.image | image_url: width: 96 | image_tag: loading: 'lazy', alt: '', width: 32, height: 32 }}
+            {%- else -%}
+              {%- render 'icon', icon: b.icon -%}
+            {%- endif -%}
+          </span>
+          <div class="icon-text__body">
+            {%- if b.title != blank -%}<h3 class="icon-text__title">{{ b.title | escape }}</h3>{%- endif -%}
+            {%- if b.text != blank -%}<div class="icon-text__text rte">{{ b.text }}</div>{%- endif -%}
+          </div>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Icons with text",
+  "tag": "section",
+  "class": "section-icons-with-text",
+  "max_blocks": 6,
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading" },
+    { "type": "range", "id": "columns_desktop", "label": "Desktop columns", "min": 2, "max": 6, "step": 1, "default": 4 },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Mobile columns",
+      "options": [
+        { "value": "1", "label": "1" },
+        { "value": "2", "label": "2" }
+      ],
+      "default": "2"
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Alignment",
+      "options": [
+        { "value": "start", "label": "Icon beside text" },
+        { "value": "center", "label": "Icon above text, centered" }
+      ],
+      "default": "center"
+    },
+    { "type": "checkbox", "id": "show_dividers", "label": "Show dividers", "default": true },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Item",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "truck", "label": "Delivery truck" },
+            { "value": "return", "label": "Returns" },
+            { "value": "lock", "label": "Secure payment" },
+            { "value": "shield", "label": "Guarantee" },
+            { "value": "leaf", "label": "Sustainable" },
+            { "value": "gift", "label": "Gift" },
+            { "value": "ruler", "label": "Size and fit" },
+            { "value": "scissors", "label": "Alterations" },
+            { "value": "washing", "label": "Care" },
+            { "value": "store", "label": "Store" },
+            { "value": "pin", "label": "Location" },
+            { "value": "clock", "label": "Time" },
+            { "value": "globe", "label": "Worldwide" },
+            { "value": "mail", "label": "Email" },
+            { "value": "heart", "label": "Heart" },
+            { "value": "star", "label": "Star" },
+            { "value": "sparkle", "label": "Sparkle" },
+            { "value": "tag", "label": "Price tag" },
+            { "value": "check", "label": "Check mark" }
+          ],
+          "default": "truck"
+        },
+        { "type": "image_picker", "id": "image", "label": "Custom icon", "info": "Replaces the icon. Recommended: 1:1 square, 160 x 160 px, transparent PNG or SVG." },
+        { "type": "text", "id": "title", "label": "Title", "default": "Free shipping" },
+        { "type": "richtext", "id": "text", "label": "Text", "default": "<p>On orders over $150.</p>" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Icons with text",
+      "blocks": [
+        { "type": "item", "settings": { "icon": "truck", "title": "Free shipping", "text": "<p>On orders over $150.</p>" } },
+        { "type": "item", "settings": { "icon": "return", "title": "30-day returns", "text": "<p>Free and easy, no questions asked.</p>" } },
+        { "type": "item", "settings": { "icon": "lock", "title": "Secure checkout", "text": "<p>Encrypted payments and trusted providers.</p>" } },
+        { "type": "item", "settings": { "icon": "leaf", "title": "Responsibly made", "text": "<p>Natural fibres from certified suppliers.</p>" } }
+      ]
+    },
+    {
+      "name": "Trust badges",
+      "settings": { "alignment": "start", "show_dividers": false, "padding_top": 32, "padding_bottom": 32 },
+      "blocks": [
+        { "type": "item", "settings": { "icon": "truck", "title": "Free shipping", "text": "<p>On orders over $150.</p>" } },
+        { "type": "item", "settings": { "icon": "return", "title": "Free returns", "text": "<p>Within 30 days.</p>" } },
+        { "type": "item", "settings": { "icon": "lock", "title": "Secure payment", "text": "<p>All major cards and wallets.</p>" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

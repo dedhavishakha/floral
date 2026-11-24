@@ -1,0 +1,150 @@
+{%- liquid
+  assign s = section.settings
+  assign cols_tablet = s.columns_desktop | at_most: 2
+-%}
+<div
+  class="section testimonials color-{{ s.color_scheme }}"
+  style="--pt: {{ s.padding_top }}px; --pb: {{ s.padding_bottom }}px;"
+>
+  <carousel-slider class="page-width carousel carousel--peek-{{ s.carousel_peek }}">
+    <div class="section-header{% if s.header_alignment == 'center' %} section-header--center{% endif %}">
+      <div class="section-header__text">
+        {%- if s.eyebrow != blank -%}<p class="eyebrow">{{ s.eyebrow | escape }}</p>{%- endif -%}
+        {%- if s.heading != blank -%}<h2 class="h2">{{ s.heading }}</h2>{%- endif -%}
+      </div>
+      {%- if s.layout == 'carousel' -%}
+        <div class="section-header__actions">
+          <div class="carousel__nav">
+            <button type="button" class="icon-button icon-button--bordered" data-carousel-prev aria-label="{{ 'general.accessibility.previous_slide' | t }}">
+              {%- render 'icon', icon: 'chevron-left' -%}
+            </button>
+            <button type="button" class="icon-button icon-button--bordered" data-carousel-next aria-label="{{ 'general.accessibility.next_slide' | t }}">
+              {%- render 'icon', icon: 'chevron-right' -%}
+            </button>
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+
+    <ul
+      class="{% if s.layout == 'carousel' %}carousel__track{% else %}grid{% endif %} testimonials__list"
+      {% if s.layout == 'carousel' %}data-carousel-track{% endif %}
+      role="list"
+      style="--cols-desktop: {{ s.columns_desktop }}; --cols-tablet: {{ cols_tablet }}; --cols-mobile: 1;"
+    >
+      {%- for block in section.blocks -%}
+        {%- assign b = block.settings -%}
+        <li class="testimonial{% if s.card_style == 'boxed' %} testimonial--boxed{% endif %} reveal" style="--reveal-index: {{ forloop.index0 | modulo: 4 }};" {{ block.shopify_attributes }}>
+          <figure class="testimonial__figure">
+            {%- if b.rating > 0 -%}
+              <div class="testimonial__rating" style="--rating: {{ b.rating | times: 20 }}%;">
+                <span class="rating__stars" aria-hidden="true">
+                  <span class="rating__bg">★★★★★</span>
+                  <span class="rating__fill">★★★★★</span>
+                </span>
+                <span class="visually-hidden">{{ 'general.accessibility.star_rating' | t: rating_value: b.rating, rating_max: 5 }}</span>
+              </div>
+            {%- endif -%}
+            <blockquote class="testimonial__quote">{{ b.quote }}</blockquote>
+            <figcaption class="testimonial__author">
+              {%- if b.avatar != blank -%}
+                {{ b.avatar | image_url: width: 120 | image_tag: loading: 'lazy', alt: '', class: 'testimonial__avatar', width: 48, height: 48 }}
+              {%- endif -%}
+              <span>
+                <span class="testimonial__name">{{ b.author | escape }}</span>
+                {%- if b.detail != blank -%}<span class="testimonial__detail">{{ b.detail | escape }}</span>{%- endif -%}
+              </span>
+            </figcaption>
+          </figure>
+          {%- if b.product != blank -%}
+            <a href="{{ b.product.url }}" class="testimonial__product">
+              {%- if b.product.featured_media -%}
+                <span class="testimonial__product-media media media--square">
+                  {{ b.product.featured_media.preview_image | image_url: width: 160 | image_tag: loading: 'lazy', alt: '' }}
+                </span>
+              {%- endif -%}
+              <span class="testimonial__product-title">{{ b.product.title | escape }}</span>
+              {%- render 'icon', icon: 'arrow-right' -%}
+            </a>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+    {%- if s.show_progress and s.layout == 'carousel' -%}
+      <div class="carousel__progress" aria-hidden="true"><span class="carousel__progress-bar"></span></div>
+    {%- endif -%}
+  </carousel-slider>
+</div>
+
+{% schema %}
+{
+  "name": "Testimonials",
+  "tag": "section",
+  "class": "section-testimonials",
+  "max_blocks": 12,
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-4" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Reviews" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "Worn and loved" },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "start", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "start"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Display as",
+      "options": [
+        { "value": "grid", "label": "Grid" },
+        { "value": "carousel", "label": "Carousel" }
+      ],
+      "default": "carousel"
+    },
+    { "type": "range", "id": "columns_desktop", "label": "Desktop columns", "min": 1, "max": 4, "step": 1, "default": 3 },
+    { "type": "checkbox", "id": "carousel_peek", "label": "Show part of the next item", "info": "Carousel only.", "default": true },
+    { "type": "checkbox", "id": "show_progress", "label": "Show progress bar", "info": "Carousel only.", "default": false },
+    {
+      "type": "select",
+      "id": "card_style",
+      "label": "Card style",
+      "options": [
+        { "value": "plain", "label": "Plain" },
+        { "value": "boxed", "label": "Boxed" }
+      ],
+      "default": "boxed"
+    },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Testimonial",
+      "settings": [
+        { "type": "range", "id": "rating", "label": "Star rating", "min": 0, "max": 5, "step": 1, "default": 5 },
+        { "type": "richtext", "id": "quote", "label": "Quote", "default": "<p>The fit is perfect and the fabric feels even better in person. I have worn it every week since it arrived.</p>" },
+        { "type": "text", "id": "author", "label": "Author", "default": "Customer name" },
+        { "type": "text", "id": "detail", "label": "Detail", "info": "For example the product or city of the reviewer." },
+        { "type": "image_picker", "id": "avatar", "label": "Photo", "info": "Recommended: 1:1 square, 200 x 200 px." },
+        { "type": "product", "id": "product", "label": "Product reviewed" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Testimonials",
+      "blocks": [
+        { "type": "testimonial", "settings": { "author": "Maya R." } },
+        { "type": "testimonial", "settings": { "author": "Jonas K.", "quote": "<p>Finally trousers that fit my waist and my legs. Ordered a second pair the same week.</p>" } },
+        { "type": "testimonial", "settings": { "author": "Priya S.", "quote": "<p>Fast delivery, beautiful packaging and the size guide was spot on.</p>" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,133 @@
+{
+  "sections": {
+    "campaign-hero": {
+      "type": "hero",
+      "settings": {
+        "layout": "editorial",
+        "overlay_opacity": 0,
+        "media_text": "dark",
+        "image_position": "left",
+        "eyebrow": "Limited edition",
+        "heading": "The winter capsule",
+        "heading_size": "h1",
+        "text": "Twelve pieces, one palette. Designed to mix, match and last for years.",
+        "button_label_1": "Shop the capsule",
+        "button_link_1": "shopify://collections/all",
+        "button_style_1": "primary",
+        "button_label_2": "",
+        "button_style_2": "secondary",
+        "content_position": "middle-left",
+        "text_alignment": "start",
+        "height": "large",
+        "mobile_height": "auto",
+        "color_scheme": "scheme-1",
+        "card_color_scheme": "scheme-2",
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "campaign-promo": {
+      "type": "promo-banner",
+      "settings": {
+        "layout": "text_only",
+        "eyebrow": "Launch offer",
+        "heading": "15% off the capsule this week",
+        "heading_size": "h2",
+        "text": "<p>Use the code at checkout. One use per customer.</p>",
+        "text_alignment": "center",
+        "show_countdown": true,
+        "end_date": "2026-12-31 23:59",
+        "countdown_label": "Offer ends in",
+        "expired_behavior": "show",
+        "discount_code": "CAPSULE15",
+        "button_label_1": "",
+        "full_width": true,
+        "color_scheme": "scheme-3",
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "campaign-products": {
+      "type": "featured-collection",
+      "settings": {
+        "source": "collection",
+        "products_to_show": 12,
+        "eyebrow": "The capsule",
+        "heading": "All twelve pieces",
+        "header_alignment": "center",
+        "show_view_all": false,
+        "view_all_label": "View all",
+        "layout": "grid",
+        "columns_desktop": 4,
+        "columns_mobile": "2",
+        "card_style": "inherit",
+        "image_ratio": "inherit",
+        "quick_add": "show",
+        "color_scheme": "scheme-1",
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "campaign-story": {
+      "type": "rich-text",
+      "blocks": {
+        "story-eyebrow": { "type": "eyebrow", "settings": { "text": "Why a capsule" } },
+        "story-heading": { "type": "heading", "settings": { "heading": "Fewer pieces, more outfits", "size": "h2" } },
+        "story-text": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Every piece in the capsule works with every other. Start with two and build from there.</p>",
+            "style": "large"
+          }
+        }
+      },
+      "block_order": ["story-eyebrow", "story-heading", "story-text"],
+      "settings": {
+        "content_width": "narrow",
+        "text_alignment": "center",
+        "color_scheme": "scheme-4",
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "campaign-faq": {
+      "type": "faq",
+      "blocks": {
+        "faq-1": {
+          "type": "question",
+          "settings": {
+            "question": "How long is the capsule available?",
+            "answer": "<p>The capsule is a limited run. Once a size sells out, it will not be restocked.</p>"
+          }
+        },
+        "faq-2": {
+          "type": "question",
+          "settings": {
+            "question": "Can I combine the offer with other discounts?",
+            "answer": "<p>The launch code cannot be combined with other discount codes.</p>"
+          }
+        },
+        "faq-3": {
+          "type": "question",
+          "settings": {
+            "question": "What if it doesn't fit?",
+            "answer": "<p>Return or exchange within 30 days. Exchanges ship free.</p>"
+          }
+        }
+      },
+      "block_order": ["faq-1", "faq-2", "faq-3"],
+      "settings": {
+        "layout": "side",
+        "eyebrow": "Questions",
+        "heading": "About the capsule",
+        "contact_label": "Contact us",
+        "open_first": true,
+        "structured_data": true,
+        "color_scheme": "scheme-1",
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    }
+  },
+  "order": ["campaign-hero", "campaign-promo", "campaign-products", "campaign-story", "campaign-faq"]
+}

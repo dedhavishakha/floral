@@ -1,0 +1,13 @@
+Title,Handle,Description,Rule
+Tops & Blouses,tops-blouses,"Easy shirts, fluid blouses and quiet tees in linen, cotton and silk, cut to layer, tuck or wear loose from early meetings to slow weekend lunches.",tag = tops-blouses
+Trousers,trousers,"Wide, tapered and straight trousers in wool, linen, cotton and silk. Considered rises and clean waistbands that sit comfortably all day and pair with everything in the collection.",tag = trousers
+Dresses,dresses,"Slip, shirt, sheath and maxi dresses in natural fibres, designed to feel effortless on, move with the body and carry you from a working day into the evening.",tag = dresses
+Sets & Loungewear,sets-loungewear,"Matching sets, robes and soft lounge pieces in breathable linen, cotton and silk, made for slow mornings at home and polished enough to wear out.",tag = sets-loungewear
+Knitwear & Layers,knitwear-layers,"Cashmere cardigans, unstructured blazers and a softly tailored wrap coat. The finishing layers that bring warmth, shape and quiet polish to every outfit in your wardrobe.",tag = knitwear-layers
+The Executive Foundation,the-executive-foundation,"Sharp tailoring, crisp shirts and refined silk for the working week. Considered pieces in calm neutrals that look composed in the boardroom and feel easy from first coffee to last call.",tag = edit-the-executive-foundation
+Quiet Afternoon Silhouettes,quiet-afternoon-silhouettes,"Relaxed linen and soft cotton shapes for unhurried days. Loose shirts, drawstring waists and breezy dresses that let you breathe, wander and linger a little longer.",tag = edit-quiet-afternoon-silhouettes
+Soft Evening Layers,soft-evening-layers,"Silk, cashmere and fluid drape for the hours after sunset. Gentle layers that move beautifully, feel luxurious against the skin and make an evening in or out feel special.",tag = edit-soft-evening-layers
+Polished Daytime Structures,polished-daytime-structures,"Clean lines and gentle structure for full, busy days. Tailored co-ords, crisp chinos and a cashmere coat that keep you looking pulled together from errands to dinner plans.",tag = edit-polished-daytime-structures
+New Arrivals,new-arrivals,"The latest pieces to join the collection, from soft linen shirts to cashmere layers. Fresh shapes in calm, earthy neutrals, added as soon as they arrive in the studio.","all products, newest first"
+Sale,sale,"Selected linen, cotton and cashmere pieces at reduced prices. The same quiet quality and considered design, available in limited sizes and colours while stock lasts.",compare-at price is set
+Bestsellers,bestsellers,"The pieces our customers return to again and again. Easy linen, fluid silk and soft cashmere favourites that have earned a permanent place in countless wardrobes.",tag = bestseller

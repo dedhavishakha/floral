@@ -1,0 +1,188 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "vendor": {
+          "type": "vendor",
+          "settings": {
+            "link_to_vendor": false
+          }
+        },
+        "title": {
+          "type": "title",
+          "settings": {
+            "heading_size": "h2"
+          }
+        },
+        "price": {
+          "type": "price",
+          "settings": {
+            "show_tax_note": true
+          }
+        },
+        "rating": {
+          "type": "rating",
+          "settings": {}
+        },
+        "variant_picker": {
+          "type": "variant_picker",
+          "settings": {
+            "picker_style": "buttons",
+            "show_swatches": true,
+            "size_guide_page": "size-guide"
+          }
+        },
+        "fit_info": {
+          "type": "fit_info",
+          "settings": {
+            "heading": "Size and fit",
+            "text": "<p>Relaxed fit. Our model is 175 cm and wears size S.</p>"
+          }
+        },
+        "inventory": {
+          "type": "inventory",
+          "settings": {
+            "low_stock_threshold": 5,
+            "show_count": true
+          }
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_quantity": true,
+            "show_dynamic_checkout": true,
+            "show_installments": true
+          }
+        },
+        "pickup": {
+          "type": "pickup_availability",
+          "settings": {}
+        },
+        "description": {
+          "type": "description",
+          "settings": {}
+        },
+        "materials": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "Materials and care",
+            "icon": "washing",
+            "content": "<p>100% European flax linen, pre-washed for softness.</p><p>Machine wash cold on a gentle cycle, line dry in the shade and iron while slightly damp.</p>",
+            "open": false
+          }
+        },
+        "shipping": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "Shipping and returns",
+            "icon": "truck",
+            "content": "<p>Free standard shipping on orders over ₹5,000, delivered in 3 to 5 working days. Free returns within 30 days of delivery.</p>",
+            "open": false
+          }
+        },
+        "complementary": {
+          "type": "complementary_products",
+          "settings": {
+            "heading": "Complete the look",
+            "product_limit": 3
+          }
+        },
+        "icons": {
+          "type": "icon_with_text",
+          "settings": {
+            "icon_1": "truck",
+            "text_1": "Free shipping and returns",
+            "icon_2": "return",
+            "text_2": "30-day returns",
+            "icon_3": "lock",
+            "text_3": "Secure checkout"
+          }
+        },
+        "share": {
+          "type": "share",
+          "settings": {
+            "label": "Share"
+          }
+        },
+        "fbt": {
+          "type": "bought_together",
+          "settings": {
+            "heading": "Frequently bought together",
+            "products": [
+              "relaxed-linen-shirt",
+              "wide-leg-pleated-trousers",
+              "cashmere-crewneck-cardigan"
+            ],
+            "use_recommendations": true
+          }
+        }
+      },
+      "block_order": [
+        "vendor",
+        "title",
+        "price",
+        "rating",
+        "variant_picker",
+        "fit_info",
+        "inventory",
+        "buy_buttons",
+        "pickup",
+        "fbt",
+        "description",
+        "materials",
+        "shipping",
+        "complementary",
+        "icons",
+        "share"
+      ],
+      "settings": {
+        "gallery_layout": "grid",
+        "media_size": "wide",
+        "enable_lightbox": true,
+        "enable_hover_zoom": false,
+        "group_media_by_color": false,
+        "sticky_info": true,
+        "sticky_atc": true,
+        "color_scheme": "scheme-1",
+        "padding_top": 32,
+        "padding_bottom": 64,
+        "fit_media_to_screen": true
+      }
+    },
+    "recommendations": {
+      "type": "product-recommendations",
+      "settings": {
+        "heading": "You may also like",
+        "heading_alignment": "start",
+        "products_to_show": 8,
+        "layout": "carousel",
+        "columns_desktop": 4,
+        "columns_mobile": "2",
+        "card_style": "inherit",
+        "image_ratio": "inherit",
+        "color_scheme": "scheme-1",
+        "padding_top": 0,
+        "padding_bottom": 64
+      }
+    },
+    "recently_viewed": {
+      "type": "recently-viewed",
+      "settings": {
+        "heading": "Recently viewed",
+        "heading_alignment": "start",
+        "products_to_show": 6,
+        "columns_desktop": 5,
+        "columns_mobile": "2",
+        "color_scheme": "scheme-1",
+        "padding_top": 0,
+        "padding_bottom": 64
+      }
+    }
+  },
+  "order": [
+    "main",
+    "recommendations",
+    "recently_viewed"
+  ]
+}

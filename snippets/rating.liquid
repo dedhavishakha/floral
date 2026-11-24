@@ -1,0 +1,33 @@
+{% doc %}
+  Renders a star rating from the standard reviews.rating product metafield written by review apps.
+  Outputs nothing when the product has no rating.
+
+  @param {product} product - The product
+  @param {boolean} [show_count] - Show the number of ratings
+
+  @example
+  {% render 'rating', product: product, show_count: true %}
+{% enddoc %}
+{%- if product.metafields.reviews.rating.value != blank -%}
+  {%- liquid
+    assign rating = product.metafields.reviews.rating.value
+    assign rating_value = rating.rating | round: 1
+    assign rating_max = rating.scale_max | default: 5
+    assign rating_percent = rating.rating | times: 100.0 | divided_by: rating_max | round: 1
+    assign rating_count = product.metafields.reviews.rating_count.value
+  -%}
+  <div class="rating">
+    <span class="rating__stars" style="--rating: {{ rating_percent }}%;" aria-hidden="true">
+      <span class="rating__bg">★★★★★</span>
+      <span class="rating__fill">★★★★★</span>
+    </span>
+    <span class="visually-hidden">{{ 'general.accessibility.star_rating' | t: rating_value: rating_value, rating_max: rating_max }}</span>
+    {%- if show_count and rating_count != blank -%}
+      <span class="rating__count">
+        {{ rating_value }}
+        <span aria-hidden="true">({{ rating_count }})</span>
+        <span class="visually-hidden">{{ 'general.accessibility.total_reviews' | t: count: rating_count }}</span>
+      </span>
+    {%- endif -%}
+  </div>
+{%- endif -%}

@@ -1,0 +1,23 @@
+{% doc %}
+  Outputs the hex colour set for a colour name in Theme settings > Buttons and forms > Swatch colours.
+  Outputs nothing when the name is not listed.
+
+  @param {string} name - The colour name, for example Oat
+
+  @example
+  {% capture hex %}{% render 'swatch-color', name: value.name %}{% endcapture %}
+{% enddoc %}
+{%- liquid
+  assign target = name | downcase | strip
+  assign lines = settings.swatch_colors | newline_to_br | split: '<br />'
+  for line in lines
+    assign pair = line | split: ':'
+    if pair.size > 1
+      assign label = pair.first | downcase | strip
+      if label == target
+        echo pair.last | strip
+        break
+      endif
+    endif
+  endfor
+-%}

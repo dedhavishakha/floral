@@ -1,0 +1,155 @@
+{% doc %}
+  Renders the variant picker used by the product page and quick view.
+  Colour options show swatches; other options show buttons or a dropdown. Changing a value re-renders the
+  parent section through the Section Rendering API using the option_values parameter.
+
+  @param {product} product - The product
+  @param {string} section_id - The id of the section that renders the picker
+  @param {string} [picker_style] - buttons or dropdown. Defaults to buttons
+  @param {boolean} [show_swatches] - Show colour swatches for colour options. Defaults to true
+  @param {boolean} [update_url] - Update the browser URL with the selected variant
+  @param {page} [size_guide_page] - Page shown in a modal from a link beside the size option
+
+  @example
+  {% render 'variant-picker', product: product, section_id: section.id, update_url: true %}
+{% enddoc %}
+{%- liquid
+  assign style = picker_style | default: 'buttons'
+  assign swatches_on = true
+  if show_swatches == false
+    assign swatches_on = false
+  endif
+-%}
+{%- unless product.has_only_default_variant -%}
+  <variant-picker
+    class="variant-picker"
+    data-section-id="{{ section_id }}"
+    data-product-url="{{ product.url | split: '?' | first }}"
+    data-update-url="{% if update_url %}true{% else %}false{% endif %}"
+    data-update="variant-picker"
+  >
+    {%- for option in product.options_with_values -%}
+      {%- liquid
+        assign option_name = option.name | downcase
+        assign is_color = false
+        if option_name contains 'color' or option_name contains 'colour' or option_name contains 'couleur' or option_name contains 'farbe'
+          assign is_color = true
+        endif
+        assign is_size = false
+        if option_name contains 'size' or option_name contains 'taille' or option_name contains 'größe'
+          assign is_size = true
+        endif
+        assign input_name = option.name | handleize | prepend: '-' | prepend: section_id | prepend: 'option-'
+      -%}
+      {%- if style == 'dropdown' and is_color == false -%}
+        <div class="variant-picker__option variant-picker__option--dropdown">
+          <div class="variant-picker__head">
+            <label class="variant-picker__legend" for="{{ input_name }}">{{ option.name | escape }}</label>
+            {%- if is_size and size_guide_page != blank -%}
+              <button type="button" class="link variant-picker__guide" data-modal-template="SizeGuide-{{ section_id }}" aria-haspopup="dialog">
+                {%- render 'icon', icon: 'ruler' -%}
+                {{- 'products.product.size_guide' | t -}}
+              </button>
+            {%- endif -%}
+          </div>
+          <div class="select">
+            <select id="{{ input_name }}" class="select__select" name="{{ option.name | escape }}">
+              {%- for value in option.values -%}
+                <option
+                  value="{{ value | escape }}"
+                  data-option-value-id="{{ value.id }}"
+                  {% if value.product_url %}data-product-url="{{ value.product_url }}"{% endif %}
+                  {% if value.selected %}selected{% endif %}
+                >
+                  {{- value -}}
+                  {%- unless value.available %} - {{ 'products.product.sold_out' | t }}{% endunless -%}
+                </option>
+              {%- endfor -%}
+            </select>
+            {%- render 'icon', icon: 'chevron-down', class: 'select__icon' -%}
+          </div>
+        </div>
+      {%- else -%}
+        <fieldset class="variant-picker__option{% if is_color and swatches_on %} variant-picker__option--swatch{% endif %}">
+          <legend class="variant-picker__legend">
+            {{- option.name | escape -}}:
+            <span class="variant-picker__selected" data-selected-value>{{ option.selected_value | escape }}</span>
+          </legend>
+          {%- if is_size and size_guide_page != blank -%}
+            <button type="button" class="link variant-picker__guide" data-modal-template="SizeGuide-{{ section_id }}" aria-haspopup="dialog">
+              {%- render 'icon', icon: 'ruler' -%}
+              {{- 'products.product.size_guide' | t -}}
+            </button>
+          {%- endif -%}
+          <div class="variant-picker__values">
+            {%- for value in option.values -%}
+              {%- liquid
+                assign value_id = input_name | append: '-' | append: forloop.index
+                assign swatch_style = ''
+                if is_color and swatches_on
+                  capture custom_hex
+                    render 'swatch-color', name: value.name
+                  endcapture
+                  assign custom_hex = custom_hex | strip
+                  if value.swatch.image
+                    assign swatch_url = value.swatch.image | image_url: width: 96
+                    assign swatch_style = 'background-image: url(' | append: swatch_url | append: ');'
+                  elsif value.swatch.color
+                    assign swatch_style = 'background-color: ' | append: value.swatch.color | append: ';'
+                  elsif custom_hex != blank
+                    assign swatch_style = 'background-color: ' | append: custom_hex | append: ';'
+                  elsif value.variant.featured_media
+                    assign swatch_url = value.variant.featured_media.preview_image | image_url: width: 96
+                    assign swatch_style = 'background-image: url(' | append: swatch_url | append: ');'
+                  else
+                    assign swatch_name = value.name | downcase | replace: ' ', ''
+                    assign swatch_style = 'background-color: ' | append: swatch_name | append: ';'
+                  endif
+                endif
+              -%}
+              <input
+                type="radio"
+                class="variant-option__input visually-hidden"
+                id="{{ value_id }}"
+                name="{{ input_name }}"
+                value="{{ value | escape }}"
+                data-option-value-id="{{ value.id }}"
+                {% if value.product_url %}data-product-url="{{ value.product_url }}"{% endif %}
+                {% if value.selected %}checked{% endif %}
+              >
+              {%- if is_color and swatches_on -%}
+                <label
+                  for="{{ value_id }}"
+                  class="variant-option variant-option--swatch{% unless value.available %} is-unavailable{% endunless %}"
+                  title="{{ value | escape }}"
+                >
+                  <span class="swatch swatch--large" style="{{ swatch_style | escape }}"></span>
+                  <span class="visually-hidden">
+                    {{- value | escape -}}
+                    {%- unless value.available %}, {{ 'products.product.sold_out' | t }}{% endunless -%}
+                  </span>
+                </label>
+              {%- else -%}
+                <label for="{{ value_id }}" class="variant-option variant-option--button{% unless value.available %} is-unavailable{% endunless %}">
+                  {{- value | escape -}}
+                  {%- unless value.available -%}
+                    <span class="visually-hidden">, {{ 'products.product.sold_out' | t }}</span>
+                  {%- endunless -%}
+                </label>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        </fieldset>
+      {%- endif -%}
+    {%- endfor -%}
+    <script type="application/json" data-selected-variant>
+      {{ product.selected_or_first_available_variant | json }}
+    </script>
+  </variant-picker>
+  {%- if size_guide_page != blank -%}
+    <template id="SizeGuide-{{ section_id }}">
+      <h2 id="PageModalTitle" class="h3">{{ size_guide_page.title | escape }}</h2>
+      {{ size_guide_page.content }}
+    </template>
+  {%- endif -%}
+{%- endunless -%}

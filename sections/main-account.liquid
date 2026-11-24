@@ -1,0 +1,85 @@
+<div
+  class="section customer customer--account color-{{ section.settings.color_scheme }}"
+  style="--pt: {{ section.settings.padding_top }}px; --pb: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="page-width">
+    <header class="section-header customer__header">
+      <div class="section-header__text">
+        <p class="eyebrow">{{ 'customer.account.eyebrow' | t }}</p>
+        {%- assign greeting_name = customer.first_name | default: customer.name -%}
+        <h1 class="h1">{{ 'customer.account.greeting' | t: name: greeting_name }}</h1>
+      </div>
+      <div class="section-header__actions">
+        <a href="{{ routes.account_logout_url }}" class="link">
+          {%- render 'icon', icon: 'account' -%}
+          {{ 'customer.account.log_out' | t }}
+        </a>
+      </div>
+    </header>
+
+    <div class="customer__grid">
+      <section class="customer__orders" aria-labelledby="OrderHistory-{{ section.id }}">
+        <h2 id="OrderHistory-{{ section.id }}" class="h4">{{ 'customer.orders.title' | t }}</h2>
+        {%- paginate customer.orders by 20 -%}
+          {%- if customer.orders.size > 0 -%}
+            <div class="table-wrap">
+              <table class="customer-table">
+                <caption class="visually-hidden">{{ 'customer.orders.title' | t }}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">{{ 'customer.orders.order_number' | t }}</th>
+                    <th scope="col">{{ 'customer.orders.date' | t }}</th>
+                    <th scope="col">{{ 'customer.orders.payment_status' | t }}</th>
+                    <th scope="col">{{ 'customer.orders.fulfillment_status' | t }}</th>
+                    <th scope="col">{{ 'customer.orders.total' | t }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {%- for order in customer.orders -%}
+                    <tr>
+                      <td data-label="{{ 'customer.orders.order_number' | t }}">
+                        <a href="{{ order.customer_url }}" class="link" aria-label="{{ 'customer.orders.order_link' | t: name: order.name }}">{{ order.name }}</a>
+                      </td>
+                      <td data-label="{{ 'customer.orders.date' | t }}">{{ order.created_at | time_tag: format: 'date' }}</td>
+                      <td data-label="{{ 'customer.orders.payment_status' | t }}">{{ order.financial_status_label }}</td>
+                      <td data-label="{{ 'customer.orders.fulfillment_status' | t }}">{{ order.fulfillment_status_label }}</td>
+                      <td data-label="{{ 'customer.orders.total' | t }}">{{ order.total_net_amount | money_with_currency }}</td>
+                    </tr>
+                  {%- endfor -%}
+                </tbody>
+              </table>
+            </div>
+            {% render 'pagination', paginate: paginate %}
+          {%- else -%}
+            <div class="customer__empty">
+              <p>{{ 'customer.orders.none' | t }}</p>
+              <a href="{{ routes.all_products_collection_url }}" class="button">{{ 'cart.general.continue_shopping' | t }}</a>
+            </div>
+          {%- endif -%}
+        {%- endpaginate -%}
+      </section>
+
+      <aside class="customer__details" aria-labelledby="AccountDetails-{{ section.id }}">
+        <h2 id="AccountDetails-{{ section.id }}" class="h4">{{ 'customer.account.details' | t }}</h2>
+        <p>{{ customer.name | escape }}<br>{{ customer.email | escape }}</p>
+        {%- if customer.default_address -%}
+          <address class="customer__address">{{ customer.default_address | format_address }}</address>
+        {%- endif -%}
+        <a href="{{ routes.account_addresses_url }}" class="button button--secondary">
+          {{ 'customer.account.view_addresses' | t: count: customer.addresses_count }}
+        </a>
+      </aside>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Customer account",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 32 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,96 @@
+{% doc %}
+  Renders the "Ask a question" link and its contact form dialog on the product page.
+  Messages arrive in the store's contact inbox with the product name and link.
+
+  @param {product} product - The product the question is about
+  @param {object} block - The block, for its settings and editor attributes
+  @param {string} [color_scheme] - Color scheme id for the dialog
+
+  @example
+  {% render 'product-ask-question', product: product, block: block, color_scheme: section.settings.color_scheme %}
+{% enddoc %}
+{%- liquid
+  assign base_scheme = 'scheme-1'
+  for scheme in settings.color_schemes
+    assign base_scheme = scheme.id
+    break
+  endfor
+-%}
+{%- liquid
+  assign ask_id = 'AskQuestion-' | append: block.id
+  assign form_id = 'AskQuestionForm-' | append: block.id
+  assign label = block.settings.label
+  if label == blank
+    assign label = 'products.ask.label' | t
+  endif
+-%}
+<div class="product__ask" {{ block.shopify_attributes }}>
+  <button type="button" class="link product__ask-button" data-dialog-open="{{ ask_id }}" aria-haspopup="dialog">
+    {%- render 'icon', icon: 'mail' -%}
+    <span>{{ label | escape }}</span>
+  </button>
+
+  <dialog id="{{ ask_id }}" class="modal modal--page modal--ask color-{{ color_scheme | default: base_scheme }}" aria-labelledby="{{ ask_id }}-title">
+    <button type="button" class="modal__close icon-button" data-dialog-close aria-label="{{ 'general.accessibility.close' | t }}">
+      {%- render 'icon', icon: 'close' -%}
+    </button>
+    <div class="modal__content">
+      <h2 id="{{ ask_id }}-title" class="h3">{{ label | escape }}</h2>
+      <p class="ask__product text-muted">{{ product.title | escape }}</p>
+      {%- if block.settings.text != blank -%}
+        <div class="rte ask__text">{{ block.settings.text }}</div>
+      {%- endif -%}
+
+      {%- form 'contact', id: form_id, class: 'contact-form ask__form' -%}
+        {%- if form.posted_successfully? -%}
+          <p class="form-message" role="status" tabindex="-1" data-ask-success>
+            {%- render 'icon', icon: 'check' -%}
+            {{ 'products.ask.success' | t }}
+          </p>
+        {%- else -%}
+          {%- if form.errors -%}
+            <p class="form-message form-message--error" role="alert">
+              {%- render 'icon', icon: 'info' -%}
+              {{ 'contact.form.error_heading' | t }}
+            </p>
+          {%- endif -%}
+          <input type="hidden" name="contact[{{ 'products.ask.product_field' | t }}]" value="{{ product.title | escape }} – {{ request.origin }}{{ product.url }}">
+          <div class="field">
+            <label class="field__label" for="{{ form_id }}-name">{{ 'contact.form.name' | t }}</label>
+            <input class="field__input" type="text" id="{{ form_id }}-name" name="contact[{{ 'contact.form.name' | t }}]" value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}" autocomplete="name">
+          </div>
+          <div class="field">
+            <label class="field__label" for="{{ form_id }}-email">{{ 'contact.form.email' | t }} <span aria-hidden="true">*</span></label>
+            <input
+              class="field__input"
+              type="email"
+              id="{{ form_id }}-email"
+              name="contact[email]"
+              value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}"
+              autocomplete="email"
+              autocapitalize="off"
+              spellcheck="false"
+              required
+              aria-required="true"
+              {% if form.errors contains 'email' %}aria-invalid="true" aria-describedby="{{ form_id }}-email-error"{% endif %}
+            >
+            {%- if form.errors contains 'email' -%}
+              <p class="field__error" id="{{ form_id }}-email-error">{{ form.errors.translated_fields.email | capitalize }} {{ form.errors.messages.email }}</p>
+            {%- endif -%}
+          </div>
+          {%- if block.settings.show_phone -%}
+            <div class="field">
+              <label class="field__label" for="{{ form_id }}-phone">{{ 'contact.form.phone' | t }}</label>
+              <input class="field__input" type="tel" id="{{ form_id }}-phone" name="contact[{{ 'contact.form.phone' | t }}]" value="{{ form.phone }}" autocomplete="tel" pattern="[0-9\-\+\s\(\)]*">
+            </div>
+          {%- endif -%}
+          <div class="field">
+            <label class="field__label" for="{{ form_id }}-body">{{ 'products.ask.question' | t }} <span aria-hidden="true">*</span></label>
+            <textarea class="field__input" id="{{ form_id }}-body" name="contact[body]" rows="5" required aria-required="true">{{ form.body }}</textarea>
+          </div>
+          <button type="submit" class="button button--full">{{ 'contact.form.send' | t }}</button>
+        {%- endif -%}
+      {%- endform -%}
+    </div>
+  </dialog>
+</div>

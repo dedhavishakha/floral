@@ -1,0 +1,283 @@
+{% doc %}
+  Renders the product card used across the theme. All four layouts share the same markup and behaviour:
+  minimal, standard (hover image and swatches), conversion (badges, swatches and quick add) and editorial.
+
+  @param {product} [product] - The product. Leave empty to render an onboarding placeholder card
+  @param {string} [card_style] - minimal, standard, conversion or editorial. Defaults to the global setting
+  @param {string} [image_ratio] - portrait, portrait-45, tall, square or natural. Defaults to the global setting
+  @param {string} [sizes] - The sizes attribute for the card image
+  @param {boolean} [eager] - Load the image eagerly, for cards above the fold
+  @param {boolean} [show_quick_add] - Override quick add visibility
+  @param {string} [swatches] - show, hide or inherit (layout default) for color swatches
+  @param {string} [badges] - show, hide or inherit (layout default) for badges
+  @param {number} [placeholder_index] - Which placeholder illustration to show when product is empty
+  @param {string} [section_id] - Id of the parent section, keeps form ids unique
+  @param {boolean} [excerpt] - Output a short description, shown only in the collection list view
+
+  Theme settings > Product cards > Image arrows lets shoppers browse a product's images on the card.
+
+  @example
+  {% render 'product-card', product: product, sizes: '(min-width: 990px) 25vw, 50vw' %}
+{% enddoc %}
+{%- liquid
+  assign style = card_style | default: settings.card_style
+  if style == 'inherit' or style == blank
+    assign style = settings.card_style
+  endif
+
+  assign ratio = image_ratio | default: settings.product_image_ratio
+  if ratio == 'inherit' or ratio == blank
+    assign ratio = settings.product_image_ratio
+  endif
+  if style == 'editorial' and ratio == 'portrait'
+    assign ratio = 'tall'
+  endif
+
+  assign image_sizes = sizes | default: '(min-width: 990px) 25vw, (min-width: 750px) 33vw, 50vw'
+  assign loading = 'lazy'
+  if eager
+    assign loading = 'eager'
+  endif
+
+  assign show_hover = true
+  assign show_swatches = false
+  assign show_badges = false
+  assign quick_add = false
+  case style
+    when 'minimal'
+      assign show_hover = false
+    when 'standard'
+      assign show_swatches = true
+    when 'conversion'
+      assign show_swatches = true
+      assign show_badges = true
+      assign quick_add = true
+  endcase
+  if show_quick_add == true
+    assign quick_add = true
+  elsif show_quick_add == false
+    assign quick_add = false
+  endif
+  if swatches == 'show'
+    assign show_swatches = true
+  elsif swatches == 'hide'
+    assign show_swatches = false
+  endif
+  if badges == 'show'
+    assign show_badges = true
+  elsif badges == 'hide'
+    assign show_badges = false
+  endif
+
+  assign show_vendor = false
+  if settings.card_show_vendor and style != 'editorial'
+    assign show_vendor = true
+  endif
+-%}
+
+{%- if product != blank -%}
+  {%- liquid
+    assign primary = product.featured_media.preview_image
+    assign slider = false
+    if product.media.size > 1
+      if settings.card_image_arrows or settings.card_image_arrows_mobile
+        assign slider = true
+      endif
+    endif
+    assign secondary = nil
+    if show_hover and product.media.size > 1 and settings.card_image_arrows == false
+      assign secondary = product.media[1].preview_image
+    endif
+    assign media_ratio = 1
+    if primary
+      assign media_ratio = primary.aspect_ratio
+    endif
+    assign primary_alt = primary.alt | default: product.title | escape
+    assign form_id = 'quick-add-' | append: section_id | append: '-' | append: product.id
+  -%}
+  <product-card
+    class="card card--{{ style }} card--align-{{ settings.card_text_align }}"
+    data-product-id="{{ product.id }}"
+    data-product-handle="{{ product.handle }}"
+  >
+    <div
+      class="card__media media media--{{ ratio }}{% if secondary %} card__media--has-hover{% endif %}{% if slider %} card__media--slider{% unless settings.card_image_arrows %} card__media--no-arrows-desktop{% endunless %}{% unless settings.card_image_arrows_mobile %} card__media--no-arrows-mobile{% endunless %}{% endif %}"
+      style="--ratio: {{ media_ratio }};"
+    >
+      <a href="{{ product.url }}" class="card__media-link" tabindex="-1" aria-hidden="true" data-card-link></a>
+      {%- if slider -%}
+        <div class="card__slides" data-card-slides>
+          {%- for media in product.media limit: settings.card_image_limit -%}
+            <div class="card__slide">
+              {%- if forloop.first -%}
+                {{
+                  media.preview_image
+                  | image_url: width: 1440
+                  | image_tag:
+                    widths: '240, 360, 540, 720, 900, 1080, 1440',
+                    sizes: image_sizes,
+                    loading: loading,
+                    class: 'card__image card__image--primary',
+                    alt: primary_alt
+                }}
+              {%- else -%}
+                {{
+                  media.preview_image
+                  | image_url: width: 1440
+                  | image_tag:
+                    widths: '240, 360, 540, 720, 900, 1080, 1440',
+                    sizes: image_sizes,
+                    loading: 'lazy',
+                    class: 'card__image',
+                    alt: ''
+                }}
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        </div>
+        <button type="button" class="card__arrow card__arrow--prev" data-card-arrow="-1" aria-label="{{ 'products.card.previous_image' | t }}, {{ product.title | escape }}">
+          {%- render 'icon', icon: 'chevron-left' -%}
+        </button>
+        <button type="button" class="card__arrow card__arrow--next" data-card-arrow="1" aria-label="{{ 'products.card.next_image' | t }}, {{ product.title | escape }}">
+          {%- render 'icon', icon: 'chevron-right' -%}
+        </button>
+        {%- if secondary -%}
+          {{
+            secondary
+            | image_url: width: 1440
+            | image_tag:
+              widths: '240, 360, 540, 720, 900, 1080, 1440',
+              sizes: image_sizes,
+              loading: 'lazy',
+              class: 'card__image card__image--secondary',
+              alt: ''
+          }}
+        {%- endif -%}
+      {%- elsif primary -%}
+        {{
+          primary
+          | image_url: width: 1440
+          | image_tag:
+            widths: '240, 360, 540, 720, 900, 1080, 1440',
+            sizes: image_sizes,
+            loading: loading,
+            class: 'card__image card__image--primary',
+            alt: primary_alt
+        }}
+        {%- if secondary -%}
+          {{
+            secondary
+            | image_url: width: 1440
+            | image_tag:
+              widths: '240, 360, 540, 720, 900, 1080, 1440',
+              sizes: image_sizes,
+              loading: 'lazy',
+              class: 'card__image card__image--secondary',
+              alt: ''
+          }}
+        {%- endif -%}
+      {%- else -%}
+        {{ 'product-apparel-1' | placeholder_svg_tag: 'card__image placeholder-svg' }}
+      {%- endif -%}
+
+      {%- if show_badges -%}
+        {% render 'badges', product: product, class: 'card__badges' %}
+      {%- endif -%}
+
+      {%- if settings.wishlist_enable and settings.wishlist_show_on_cards -%}
+        {% render 'wishlist-toggle', product: product, class: 'card__wishlist' %}
+      {%- endif -%}
+
+      {%- if quick_add and product.available -%}
+        <div class="card__quick-add">
+          {%- if product.has_only_default_variant -%}
+            <product-form class="card__quick-add-form">
+              {%- form 'product', product, id: form_id, novalidate: 'novalidate' -%}
+                <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+                <button type="submit" name="add" class="card__quick-add-button button button--small">
+                  {%- render 'icon', icon: 'plus' -%}
+                  <span>{{ 'products.card.quick_add' | t }}</span>
+                  <span class="visually-hidden">: {{ product.title | escape }}</span>
+                </button>
+              {%- endform -%}
+            </product-form>
+          {%- else -%}
+            <button
+              type="button"
+              class="card__quick-add-button button button--small"
+              data-quick-view="{{ product.url | split: '?' | first }}"
+              aria-haspopup="dialog"
+            >
+              {%- render 'icon', icon: 'plus' -%}
+              <span>{{ 'products.card.choose_options' | t }}</span>
+              <span class="visually-hidden">: {{ product.title | escape }}</span>
+            </button>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="card__info">
+      {%- if show_vendor -%}
+        <p class="card__vendor">
+          <span class="visually-hidden">{{ 'products.product.vendor' | t }}</span>
+          {{- product.vendor | escape -}}
+        </p>
+      {%- endif -%}
+      <h3 class="card__title">
+        <a href="{{ product.url }}" class="card__link" data-card-link>{{ product.title | escape }}</a>
+      </h3>
+      {% render 'price', product: product, class: 'card__price' %}
+      {%- if excerpt and product.description != blank -%}
+        <p class="card__excerpt">{{ product.description | strip_html | truncatewords: 26 }}</p>
+      {%- endif -%}
+      {%- if settings.card_show_rating and style != 'editorial' and style != 'minimal' -%}
+        {% render 'rating', product: product, show_count: true %}
+      {%- endif -%}
+      {%- if show_swatches -%}
+        {% render 'swatches', product: product %}
+      {%- endif -%}
+      {%- if settings.card_show_variant_info and style != 'minimal' -%}
+        {%- for option in product.options_with_values -%}
+          {%- assign option_name = option.name | downcase -%}
+          {%- if option_name contains 'size' or option_name contains 'taille' or option_name contains 'größe' -%}
+            {%- if option.values.size > 1 -%}
+              <p class="card__variant-info">{{ 'products.card.sizes' | t: count: option.values.size }}</p>
+            {%- endif -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+      {%- if settings.card_show_compare -%}
+        {%- assign compare_id = 'Compare-' | append: section_id | append: '-' | append: product.id -%}
+        {%- assign compare_image = product.featured_media.preview_image | image_url: width: 160 -%}
+        <compare-toggle
+          class="compare-toggle"
+          data-handle="{{ product.handle }}"
+          data-title="{{ product.title | escape }}"
+          data-image="{{ compare_image }}"
+        >
+          <input type="checkbox" class="compare-toggle__input" id="{{ compare_id }}">
+          <label class="compare-toggle__label" for="{{ compare_id }}">
+            {{- 'products.compare.toggle' | t -}}
+            <span class="visually-hidden">: {{ product.title | escape }}</span>
+          </label>
+        </compare-toggle>
+      {%- endif -%}
+    </div>
+  </product-card>
+{%- else -%}
+  {%- liquid
+    assign placeholder_number = placeholder_index | default: 1 | modulo: 4 | plus: 1
+    assign placeholder_name = 'product-apparel-' | append: placeholder_number
+  -%}
+  <div class="card card--{{ style }} card--align-{{ settings.card_text_align }} card--placeholder">
+    <div class="card__media media media--{{ ratio }}" style="--ratio: 0.75;">
+      {{ placeholder_name | placeholder_svg_tag: 'card__image placeholder-svg' }}
+    </div>
+    <div class="card__info">
+      <h3 class="card__title">{{ 'onboarding.product_title' | t }}</h3>
+      <div class="price"><span class="price__current">{{ 4900 | money }}</span></div>
+    </div>
+  </div>
+{%- endif -%}

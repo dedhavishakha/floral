@@ -1,0 +1,109 @@
+{%- liquid
+  assign s = section.settings
+  assign vendors = shop.vendors | sort_natural
+  assign alphabet = 'A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z' | split: ','
+  assign present = ''
+  for vendor in vendors
+    assign first = vendor | strip | slice: 0 | upcase
+    unless alphabet contains first
+      assign first = '#'
+    endunless
+    unless present contains first
+      assign present = present | append: first
+    endunless
+  endfor
+  assign heading = s.heading
+  if heading == blank and page
+    assign heading = page.title | escape
+  endif
+-%}
+<div class="section brands color-{{ s.color_scheme }}" style="--pt: {{ s.padding_top }}px; --pb: {{ s.padding_bottom }}px;">
+  <div class="page-width">
+    {%- if heading != blank or s.text != blank -%}
+      <header class="section-header section-header--center">
+        <div class="section-header__text">
+          {%- if heading != blank -%}
+            {%- if section.index == 1 -%}
+              <h1 class="h1">{{ heading }}</h1>
+            {%- else -%}
+              <h2 class="h2">{{ heading }}</h2>
+            {%- endif -%}
+          {%- endif -%}
+          {%- if s.text != blank -%}
+            <div class="rte">{{ s.text }}</div>
+          {%- endif -%}
+        </div>
+      </header>
+    {%- endif -%}
+
+    {%- if vendors.size > 0 -%}
+      <nav class="brands__nav{% if s.sticky_nav %} brands__nav--sticky{% endif %}" aria-label="{{ 'sections.brands.nav_label' | t }}">
+        <ul class="brands__letters" role="list">
+          {%- for letter in alphabet -%}
+            <li>
+              {%- if present contains letter -%}
+                <a href="#Brands-{{ section.id }}-{{ letter }}" class="brands__letter">{{ letter }}</a>
+              {%- else -%}
+                <span class="brands__letter brands__letter--empty" aria-hidden="true">{{ letter }}</span>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+          {%- if present contains '#' -%}
+            <li><a href="#Brands-{{ section.id }}-other" class="brands__letter">#</a></li>
+          {%- endif -%}
+        </ul>
+      </nav>
+
+      <div class="brands__groups">
+        {%- for letter in alphabet -%}
+          {%- if present contains letter -%}
+            <section class="brands__group" id="Brands-{{ section.id }}-{{ letter }}" aria-labelledby="Brands-{{ section.id }}-{{ letter }}-title">
+              <h2 class="brands__group-title h3" id="Brands-{{ section.id }}-{{ letter }}-title">{{ letter }}</h2>
+              <ul class="brands__list" role="list">
+                {%- for vendor in vendors -%}
+                  {%- assign first = vendor | strip | slice: 0 | upcase -%}
+                  {%- if first == letter -%}
+                    <li><a href="{{ vendor | url_for_vendor }}" class="brands__link">{{ vendor | escape }}</a></li>
+                  {%- endif -%}
+                {%- endfor -%}
+              </ul>
+            </section>
+          {%- endif -%}
+        {%- endfor -%}
+        {%- if present contains '#' -%}
+          <section class="brands__group" id="Brands-{{ section.id }}-other" aria-labelledby="Brands-{{ section.id }}-other-title">
+            <h2 class="brands__group-title h3" id="Brands-{{ section.id }}-other-title">#</h2>
+            <ul class="brands__list" role="list">
+              {%- for vendor in vendors -%}
+                {%- assign first = vendor | strip | slice: 0 | upcase -%}
+                {%- unless alphabet contains first -%}
+                  <li><a href="{{ vendor | url_for_vendor }}" class="brands__link">{{ vendor | escape }}</a></li>
+                {%- endunless -%}
+              {%- endfor -%}
+            </ul>
+          </section>
+        {%- endif -%}
+      </div>
+    {%- else -%}
+      <p class="text-muted brands__empty">{{ 'sections.brands.empty' | t }}</p>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Brands A–Z",
+  "class": "brands-section",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "paragraph", "content": "Lists every product vendor in your store, grouped by first letter. Each brand links to its products." },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "info": "Leave blank on a page to use the page title." },
+    { "type": "richtext", "id": "text", "label": "Text" },
+    { "type": "checkbox", "id": "sticky_nav", "label": "Keep letter navigation visible while scrolling", "default": true },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 80 }
+  ],
+  "presets": [{ "name": "Brands A–Z", "settings": { "heading": "Shop by brand" } }],
+  "disabled_on": { "groups": ["header", "footer"] }
+}
+{% endschema %}

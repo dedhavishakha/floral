@@ -1,0 +1,229 @@
+{%- liquid
+  assign share_url = request.origin | append: article.url | url_encode
+  assign share_title = article.title | url_encode
+-%}
+<div
+  class="section main-article color-{{ section.settings.color_scheme }}"
+  style="--pt: {{ section.settings.padding_top }}px; --pb: {{ section.settings.padding_bottom }}px;"
+>
+  <article class="article" aria-labelledby="ArticleTitle-{{ section.id }}">
+    <div class="page-width page-width--narrow">
+      <header class="section-header section-header--center article__header">
+        <div class="section-header__text">
+          <a href="{{ blog.url }}" class="article__back link link--plain">
+            {%- render 'icon', icon: 'arrow-left' -%}
+            {{- blog.title | escape -}}
+          </a>
+          <h1 id="ArticleTitle-{{ section.id }}" class="article__title h1">{{ article.title | escape }}</h1>
+          {%- if section.settings.show_date or section.settings.show_author -%}
+            <p class="article__meta eyebrow">
+              {%- if section.settings.show_date -%}
+                {{- article.published_at | time_tag: format: 'date' -}}
+              {%- endif -%}
+              {%- if section.settings.show_date and section.settings.show_author -%}
+                <span aria-hidden="true"> · </span>
+              {%- endif -%}
+              {%- if section.settings.show_author -%}
+                <span>{{ 'blogs.article.by_author' | t: author: article.author }}</span>
+              {%- endif -%}
+            </p>
+          {%- endif -%}
+        </div>
+      </header>
+    </div>
+
+    {%- if section.settings.show_image and article.image -%}
+      <div class="article__hero {% if section.settings.image_width == 'full' %}page-width page-width--full page-width--flush{% else %}page-width{% endif %}">
+        <div class="media media--{{ section.settings.image_ratio }} media--size-{{ section.settings.image_size }}" style="--ratio: {{ article.image.aspect_ratio | default: 1.7778 }};">
+          {{
+            article.image
+            | image_url: width: 3000
+            | image_tag:
+              widths: '750, 1100, 1500, 2000, 2500, 3000',
+              sizes: '100vw',
+              loading: 'eager',
+              fetchpriority: 'high',
+              alt: article.image.alt
+          }}
+        </div>
+      </div>
+    {%- endif -%}
+
+    <div class="article__body page-width page-width--narrow">
+      <div class="article__content rte">{{ article.content }}</div>
+
+      {%- if section.settings.show_tags and article.tags.size > 0 -%}
+        <ul class="chips article__tags" role="list" aria-label="{{ 'blogs.article.tags' | t }}">
+          {%- for tag in article.tags -%}
+            <li><a class="chip" href="{{ blog.url }}/tagged/{{ tag | handleize }}">{{ tag | escape }}</a></li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+
+      {%- if section.settings.show_share -%}
+        <div class="article__share">
+          <p class="eyebrow">{{ 'blogs.article.share' | t }}</p>
+          <ul class="article__share-list" role="list">
+            <li>
+              <a class="icon-button icon-button--bordered" href="https://www.facebook.com/sharer/sharer.php?u={{ share_url }}" target="_blank" rel="noopener">
+                {%- render 'icon', icon: 'facebook' -%}
+                <span class="visually-hidden">{{ 'blogs.article.share_on' | t: network: 'Facebook' }} ({{ 'general.accessibility.external_link' | t }})</span>
+              </a>
+            </li>
+            <li>
+              <a class="icon-button icon-button--bordered" href="https://x.com/intent/post?url={{ share_url }}&text={{ share_title }}" target="_blank" rel="noopener">
+                {%- render 'icon', icon: 'twitter' -%}
+                <span class="visually-hidden">{{ 'blogs.article.share_on' | t: network: 'X' }} ({{ 'general.accessibility.external_link' | t }})</span>
+              </a>
+            </li>
+            <li>
+              <a class="icon-button icon-button--bordered" href="https://pinterest.com/pin/create/button/?url={{ share_url }}{% if article.image %}&media={{ article.image | image_url: width: 1200 | prepend: 'https:' | url_encode }}{% endif %}&description={{ share_title }}" target="_blank" rel="noopener">
+                {%- render 'icon', icon: 'pinterest' -%}
+                <span class="visually-hidden">{{ 'blogs.article.share_on' | t: network: 'Pinterest' }} ({{ 'general.accessibility.external_link' | t }})</span>
+              </a>
+            </li>
+            <li>
+              <a class="icon-button icon-button--bordered" href="mailto:?subject={{ share_title }}&body={{ share_url }}">
+                {%- render 'icon', icon: 'mail' -%}
+                <span class="visually-hidden">{{ 'blogs.article.share_email' | t }}</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.show_navigation -%}
+        {%- if blog.previous_article or blog.next_article -%}
+          <nav class="article__nav" aria-label="{{ 'blogs.article.navigation' | t }}">
+            {%- if blog.previous_article -%}
+              <a href="{{ blog.previous_article.url }}" class="article__nav-link article__nav-link--prev">
+                <span class="eyebrow">{{ 'blogs.article.previous' | t }}</span>
+                <span class="h5">{{ blog.previous_article.title | escape }}</span>
+              </a>
+            {%- endif -%}
+            {%- if blog.next_article -%}
+              <a href="{{ blog.next_article.url }}" class="article__nav-link article__nav-link--next">
+                <span class="eyebrow">{{ 'blogs.article.next' | t }}</span>
+                <span class="h5">{{ blog.next_article.title | escape }}</span>
+              </a>
+            {%- endif -%}
+          </nav>
+        {%- endif -%}
+      {%- endif -%}
+
+      {%- if blog.comments_enabled? -%}
+        <section class="article__comments" aria-labelledby="CommentsTitle-{{ section.id }}">
+          <h2 id="CommentsTitle-{{ section.id }}" class="h3">{{ 'blogs.comments.title' | t: count: article.comments_count }}</h2>
+          {%- paginate article.comments by 10 -%}
+            {%- if article.comments.size > 0 -%}
+              <ul class="comments" role="list">
+                {%- for comment in article.comments -%}
+                  <li class="comment" id="comment-{{ comment.id }}">
+                    <div class="comment__content rte">{{ comment.content }}</div>
+                    <p class="comment__meta text-muted">
+                      {{ comment.author | escape }}, {{ comment.created_at | time_tag: format: 'date' }}
+                    </p>
+                  </li>
+                {%- endfor -%}
+              </ul>
+              {% render 'pagination', paginate: paginate, anchor: '#Comments' %}
+            {%- endif -%}
+          {%- endpaginate -%}
+
+          {%- form 'new_comment', article, id: 'Comments', class: 'comment-form' -%}
+            <h3 class="h4">{{ 'blogs.comments.form_title' | t }}</h3>
+            {%- if form.errors -%}
+              <div class="form-message form-message--error" role="alert">
+                {{ form.errors | default_errors }}
+              </div>
+            {%- elsif form.posted_successfully? -%}
+              <p class="form-message" role="status">
+                {%- render 'icon', icon: 'check' -%}
+                {%- if blog.moderated? -%}
+                  {{ 'blogs.comments.success_moderated' | t }}
+                {%- else -%}
+                  {{ 'blogs.comments.success' | t }}
+                {%- endif -%}
+              </p>
+            {%- endif -%}
+            <div class="comment-form__row">
+              <div class="field">
+                <label class="field__label" for="CommentAuthor-{{ section.id }}">{{ 'blogs.comments.name' | t }}</label>
+                <input class="field__input" type="text" id="CommentAuthor-{{ section.id }}" name="comment[author]" value="{{ form.author }}" autocomplete="name" required aria-required="true">
+              </div>
+              <div class="field">
+                <label class="field__label" for="CommentEmail-{{ section.id }}">{{ 'blogs.comments.email' | t }}</label>
+                <input class="field__input" type="email" id="CommentEmail-{{ section.id }}" name="comment[email]" value="{{ form.email }}" autocomplete="email" autocapitalize="off" spellcheck="false" required aria-required="true">
+              </div>
+            </div>
+            <div class="field">
+              <label class="field__label" for="CommentBody-{{ section.id }}">{{ 'blogs.comments.message' | t }}</label>
+              <textarea class="field__input" id="CommentBody-{{ section.id }}" name="comment[body]" rows="5" required aria-required="true">{{ form.body }}</textarea>
+            </div>
+            {%- if blog.moderated? -%}
+              <p class="text-muted text-small">{{ 'blogs.comments.moderated' | t }}</p>
+            {%- endif -%}
+            <button type="submit" class="button">{{ 'blogs.comments.post' | t }}</button>
+          {%- endform -%}
+        </section>
+      {%- endif -%}
+    </div>
+  </article>
+</div>
+
+<script type="application/ld+json">
+  {{ article | structured_data }}
+</script>
+
+{% schema %}
+{
+  "name": "Blog post",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "checkbox", "id": "show_image", "label": "Show featured image", "default": true },
+    {
+      "type": "select",
+      "id": "image_width",
+      "label": "Image width",
+      "options": [
+        { "value": "page", "label": "Page width" },
+        { "value": "full", "label": "Full width" }
+      ],
+      "default": "page"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        { "value": "wide", "label": "Wide 16:9" },
+        { "value": "landscape", "label": "Landscape 4:3" },
+        { "value": "natural", "label": "Original image ratio" }
+      ],
+      "default": "wide"
+    },
+    {
+      "type": "select",
+      "id": "image_size",
+      "label": "Image size",
+      "options": [
+        { "value": "original", "label": "Original image ratio" },
+        { "value": "ratio", "label": "Use image ratio" },
+        { "value": "x-small", "label": "X-Small" },
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "ratio",
+      "info": "Original image ratio shows each image uncropped in its own shape. X-Small to Large show every image at the same height and crop to fit. Use image ratio keeps the shape chosen above."
+    },
+    { "type": "checkbox", "id": "show_date", "label": "Show date", "default": true },
+    { "type": "checkbox", "id": "show_author", "label": "Show author", "default": true },
+    { "type": "checkbox", "id": "show_tags", "label": "Show tags", "default": true },
+    { "type": "checkbox", "id": "show_share", "label": "Show share links", "default": true },
+    { "type": "checkbox", "id": "show_navigation", "label": "Show previous and next posts", "default": true },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 32 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 }
+  ]
+}
+{% endschema %}

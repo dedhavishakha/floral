@@ -1,0 +1,414 @@
+{%- liquid
+  assign s = section.settings
+  assign cols_tablet = s.columns_desktop | at_most: 3
+  assign card_vw = 100 | divided_by: s.columns_desktop
+  assign card_sizes = '(min-width: 990px) ' | append: card_vw | append: 'vw, (min-width: 750px) 33vw, 60vw'
+  assign tab_label_fallback = 'onboarding.collection_title' | t
+-%}
+<div
+  class="section collection-tabs-section collection-tabs-section--arrows-{{ s.arrows_desktop }} collection-tabs-section--arrows-mobile-{{ s.arrows_mobile }} color-{{ s.color_scheme }}{% unless s.image_zoom %} zoom-off{% endunless %}"
+  style="--pt: {{ s.padding_top }}px; --pb: {{ s.padding_bottom }}px;"
+>
+  <collection-tabs class="page-width collection-tabs">
+    <div class="section-header{% if s.header_alignment == 'center' %} section-header--center{% endif %}">
+      <div class="section-header__text">
+        {%- if s.eyebrow != blank -%}<p class="eyebrow">{{ s.eyebrow | escape }}</p>{%- endif -%}
+        {%- if s.heading != blank -%}<h2 class="h2" id="TabsHeading-{{ section.id }}">{{ s.heading }}</h2>{%- endif -%}
+      </div>
+      {%- if section.blocks.size > 0 -%}
+        <div class="section-header__actions collection-tabs__controls">
+        <div class="collection-tabs__list" role="tablist" {% if s.heading != blank %}aria-labelledby="TabsHeading-{{ section.id }}"{% endif %}>
+          {%- for block in section.blocks -%}
+            {%- assign tab_collection = block.settings.collection -%}
+            <button
+              type="button"
+              class="collection-tabs__tab"
+              role="tab"
+              id="Tab-{{ section.id }}-{{ forloop.index }}"
+              aria-controls="TabPanel-{{ section.id }}-{{ forloop.index }}"
+              aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+              tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
+              data-tab
+              {{ block.shopify_attributes }}
+            >
+              {%- if block.settings.label != blank -%}
+                {{ block.settings.label | escape }}
+              {%- elsif tab_collection != blank -%}
+                {{ tab_collection.title | escape }}
+              {%- else -%}
+                {{ tab_label_fallback }}
+              {%- endif -%}
+            </button>
+          {%- endfor -%}
+        </div>
+          {%- if s.layout == 'carousel' -%}
+            <div class="carousel__nav collection-tabs__header-nav" data-tabs-nav>
+              <button type="button" class="icon-button icon-button--bordered" data-tabs-prev aria-label="{{ 'general.accessibility.previous_slide' | t }}">
+                {%- render 'icon', icon: 'chevron-left' -%}
+              </button>
+              <button type="button" class="icon-button icon-button--bordered" data-tabs-next aria-label="{{ 'general.accessibility.next_slide' | t }}">
+                {%- render 'icon', icon: 'chevron-right' -%}
+              </button>
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- for block in section.blocks -%}
+      {%- assign tab_collection = block.settings.collection -%}
+      <div
+        class="collection-tabs__panel"
+        role="tabpanel"
+        id="TabPanel-{{ section.id }}-{{ forloop.index }}"
+        aria-labelledby="Tab-{{ section.id }}-{{ forloop.index }}"
+        tabindex="0"
+        data-tab-panel
+        {% unless forloop.first %}hidden{% endunless %}
+      >
+        <carousel-slider class="carousel carousel--peek-{{ s.carousel_peek }}">
+          {%- if s.layout == 'carousel' -%}
+            <div class="carousel__nav collection-tabs__nav">
+              <button type="button" class="icon-button icon-button--bordered" data-carousel-prev aria-label="{{ 'general.accessibility.previous_slide' | t }}">
+                {%- render 'icon', icon: 'chevron-left' -%}
+              </button>
+              <button type="button" class="icon-button icon-button--bordered" data-carousel-next aria-label="{{ 'general.accessibility.next_slide' | t }}">
+                {%- render 'icon', icon: 'chevron-right' -%}
+              </button>
+            </div>
+          {%- endif -%}
+          <ul
+            class="{% if s.layout == 'carousel' %}carousel__track{% else %}grid{% endif %}"
+            {% if s.layout == 'carousel' %}data-carousel-track{% endif %}
+            role="list"
+            style="--cols-desktop: {{ s.columns_desktop }}; --cols-tablet: {{ cols_tablet }}; --cols-mobile: {{ s.columns_mobile }};"
+          >
+            {%- if tab_collection != blank and tab_collection.products_count > 0 -%}
+              {%- for product in tab_collection.products limit: s.products_to_show -%}
+                <li>
+                  {% render 'product-card',
+                    product: product,
+                    card_style: s.card_style,
+                    image_ratio: s.image_ratio,
+                    sizes: card_sizes,
+                    swatches: s.show_swatches,
+                    badges: s.show_badges,
+                    section_id: section.id
+                  %}
+                </li>
+              {%- endfor -%}
+            {%- else -%}
+              {%- for i in (1..4) -%}
+                <li>{% render 'product-card', card_style: s.card_style, image_ratio: s.image_ratio, placeholder_index: forloop.index %}</li>
+              {%- endfor -%}
+            {%- endif -%}
+          </ul>
+          {%- if s.show_progress and s.layout == 'carousel' -%}
+            <div class="carousel__progress" aria-hidden="true"><span class="carousel__progress-bar"></span></div>
+          {%- endif -%}
+        </carousel-slider>
+        {%- if tab_collection != blank and s.view_all_label != blank -%}
+          <div class="collection-tabs__footer">
+            <a href="{{ tab_collection.url }}" class="button button--secondary">
+              {{- s.view_all_label | escape -}}
+              <span class="visually-hidden">: {{ tab_collection.title | escape }}</span>
+            </a>
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endfor -%}
+  </collection-tabs>
+</div>
+
+{% schema %}
+{
+  "name": "Collection tabs",
+  "tag": "section",
+  "class": "section-collection-tabs",
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop the edit"
+    },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Heading alignment",
+      "options": [
+        {
+          "value": "start",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ],
+      "default": "start"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Products per tab",
+      "min": 2,
+      "max": 16,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Display as",
+      "options": [
+        {
+          "value": "grid",
+          "label": "Grid"
+        },
+        {
+          "value": "carousel",
+          "label": "Carousel"
+        }
+      ],
+      "default": "carousel"
+    },
+    {
+      "type": "select",
+      "id": "arrows_desktop",
+      "label": "Desktop arrows",
+      "info": "Carousel only.",
+      "options": [
+        { "value": "heading", "label": "Next to the heading" },
+        { "value": "inline", "label": "Next to the tabs" },
+        { "value": "below", "label": "Below the tabs" },
+        { "value": "hidden", "label": "Hidden" }
+      ],
+      "default": "below"
+    },
+    {
+      "type": "select",
+      "id": "arrows_mobile",
+      "label": "Mobile arrows",
+      "info": "Carousel only. Shoppers can also swipe.",
+      "options": [
+        { "value": "heading", "label": "Next to the heading" },
+        { "value": "inline", "label": "Next to the tabs" },
+        { "value": "below", "label": "Below the tabs" },
+        { "value": "hidden", "label": "Hidden" }
+      ],
+      "default": "heading"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Desktop columns",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Mobile columns",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        }
+      ],
+      "default": "2"
+    },
+    { "type": "checkbox", "id": "carousel_peek", "label": "Show part of the next item", "info": "Carousel only.", "default": true },
+    { "type": "checkbox", "id": "show_progress", "label": "Show progress bar", "info": "Carousel only.", "default": false },
+    {
+      "type": "select",
+      "id": "card_style",
+      "label": "Card layout",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use theme setting"
+        },
+        {
+          "value": "minimal",
+          "label": "Minimal"
+        },
+        {
+          "value": "standard",
+          "label": "Fashion standard"
+        },
+        {
+          "value": "conversion",
+          "label": "Conversion"
+        },
+        {
+          "value": "editorial",
+          "label": "Editorial"
+        }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "show_swatches",
+      "label": "Color swatches",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use card layout"
+        },
+        {
+          "value": "show",
+          "label": "Show"
+        },
+        {
+          "value": "hide",
+          "label": "Hide"
+        }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "show_badges",
+      "label": "Badges",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use card layout"
+        },
+        {
+          "value": "show",
+          "label": "Show"
+        },
+        {
+          "value": "hide",
+          "label": "Hide"
+        }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use theme setting"
+        },
+        {
+          "value": "portrait",
+          "label": "Portrait 3:4"
+        },
+        {
+          "value": "portrait-45",
+          "label": "Portrait 4:5"
+        },
+        {
+          "value": "tall",
+          "label": "Tall 2:3"
+        },
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "natural",
+          "label": "Natural"
+        }
+      ],
+      "default": "inherit"
+    },
+    { "type": "checkbox", "id": "image_zoom", "label": "Zoom images on hover", "info": "Works when Theme settings > Animations > Image hover effect uses zoom.", "default": true },
+    {
+      "type": "text",
+      "id": "view_all_label",
+      "label": "\"View all\" button label",
+      "default": "View all"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tab",
+      "name": "Tab",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Tab label",
+          "info": "Defaults to the collection title."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection tabs",
+      "blocks": [
+        {
+          "type": "tab",
+          "settings": {
+            "label": "New in"
+          }
+        },
+        {
+          "type": "tab",
+          "settings": {
+            "label": "Bestsellers"
+          }
+        },
+        {
+          "type": "tab",
+          "settings": {
+            "label": "Sale"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

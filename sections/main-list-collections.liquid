@@ -1,0 +1,141 @@
+{%- liquid
+  assign cols_d = section.settings.columns_desktop
+  assign cols_t = cols_d | at_most: 3
+  assign vw_desktop = 100 | divided_by: cols_d
+  assign tile_sizes = '(min-width: 990px) ' | append: vw_desktop | append: 'vw, 50vw'
+-%}
+<div
+  class="section main-list-collections color-{{ section.settings.color_scheme }}"
+  style="--pt: {{ section.settings.padding_top }}px; --pb: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="page-width">
+    <div class="section-header">
+      <div class="section-header__text">
+        <h1 class="h1">{{ section.settings.title | default: page_title | escape }}</h1>
+      </div>
+    </div>
+
+    {%- paginate collections by 24 -%}
+    {%- liquid
+      case section.settings.sort
+        when 'products_high', 'products_low'
+          assign sorted_collections = collections | sort: 'all_products_count'
+        when 'date', 'date_reversed'
+          assign sorted_collections = collections | sort: 'published_at'
+        else
+          assign sorted_collections = collections
+      endcase
+      if section.settings.sort == 'products_high' or section.settings.sort == 'date_reversed' or section.settings.sort == 'alphabetical_reversed'
+        assign sorted_collections = sorted_collections | reverse
+      endif
+    -%}
+    <ul class="grid collection-list" role="list" style="--cols-desktop: {{ cols_d }}; --cols-tablet: {{ cols_t }}; --cols-mobile: 2;">
+      {%- for item in sorted_collections -%}
+        <li class="reveal" style="--reveal-index: {{ forloop.index0 | modulo: cols_d }};">
+          <a href="{{ item.url }}" class="collection-tile">
+            {%- liquid
+              assign tile_image = item.products.first.featured_media.preview_image
+              if section.settings.image_source == 'collection' and item.image != blank
+                assign tile_image = item.image
+              endif
+              if tile_image == blank
+                assign tile_image = item.featured_image
+              endif
+            -%}
+            <span class="collection-tile__media media media--{{ section.settings.image_ratio }} media--size-{{ section.settings.image_size }}" style="--ratio: {{ tile_image.aspect_ratio | default: 0.75 }};">
+              {%- if tile_image -%}
+                {{
+                  tile_image
+                  | image_url: width: 1200
+                  | image_tag:
+                    widths: '300, 450, 600, 900, 1200',
+                    sizes: tile_sizes,
+                    loading: 'lazy',
+                    alt: ''
+                }}
+              {%- else -%}
+                {%- assign placeholder_name = forloop.index | modulo: 4 | plus: 1 | prepend: 'collection-apparel-' -%}
+                {{ placeholder_name | placeholder_svg_tag: 'placeholder-svg' }}
+              {%- endif -%}
+            </span>
+            <span class="collection-tile__info">
+              <span class="collection-tile__title h4">{{ item.title | escape }}</span>
+              {%- if section.settings.show_count -%}
+                <span class="collection-tile__count text-muted">{{ 'collections.general.product_count' | t: count: item.all_products_count }}</span>
+              {%- endif -%}
+            </span>
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
+    {%- if paginate.pages > 1 -%}
+      {% render 'pagination', paginate: paginate %}
+    {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Collections list",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "Collections" },
+    {
+      "type": "select",
+      "id": "sort",
+      "label": "Sort collections by",
+      "options": [
+        { "value": "alphabetical", "label": "Alphabetically, A-Z" },
+        { "value": "alphabetical_reversed", "label": "Alphabetically, Z-A" },
+        { "value": "date_reversed", "label": "Date, new to old" },
+        { "value": "date", "label": "Date, old to new" },
+        { "value": "products_high", "label": "Product count, high to low" },
+        { "value": "products_low", "label": "Product count, low to high" }
+      ],
+      "default": "alphabetical"
+    },
+    { "type": "range", "id": "columns_desktop", "label": "Desktop columns", "min": 2, "max": 5, "step": 1, "default": 4 },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        { "value": "portrait", "label": "Portrait 3:4" },
+        { "value": "tall", "label": "Tall 2:3" },
+        { "value": "square", "label": "Square" },
+        { "value": "landscape", "label": "Landscape" }
+      ],
+      "default": "portrait"
+    },
+    {
+      "type": "select",
+      "id": "image_size",
+      "label": "Image size",
+      "options": [
+        { "value": "original", "label": "Original image ratio" },
+        { "value": "ratio", "label": "Use image ratio" },
+        { "value": "x-small", "label": "X-Small" },
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "ratio",
+      "info": "Original image ratio shows each image uncropped in its own shape. X-Small to Large show every image at the same height and crop to fit. Use image ratio keeps the shape chosen above."
+    },
+    {
+      "type": "select",
+      "id": "image_source",
+      "label": "Collection image",
+      "options": [
+        { "value": "product", "label": "First product's image" },
+        { "value": "collection", "label": "Collection image, then first product" }
+      ],
+      "default": "product"
+    },
+    { "type": "checkbox", "id": "show_count", "label": "Show product count", "default": true },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 32 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 }
+  ]
+}
+{% endschema %}

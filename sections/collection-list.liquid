@@ -1,0 +1,221 @@
+{%- liquid
+  assign s = section.settings
+  assign cols_tablet = s.columns_desktop | at_most: 3
+  assign card_vw = 100 | divided_by: s.columns_desktop
+  assign card_sizes = '(min-width: 990px) ' | append: card_vw | append: 'vw, (min-width: 750px) 33vw, 70vw'
+  assign fallback_title = 'onboarding.collection_title' | t
+-%}
+<div
+  class="section collection-list color-{{ s.color_scheme }}{% unless s.image_zoom %} zoom-off{% endunless %}"
+  style="--pt: {{ s.padding_top }}px; --pb: {{ s.padding_bottom }}px;"
+>
+  <carousel-slider class="page-width carousel carousel--peek-{{ s.carousel_peek }}">
+    {%- if s.heading != blank or s.eyebrow != blank or s.layout == 'carousel' -%}
+      <div class="section-header{% if s.header_alignment == 'center' %} section-header--center{% endif %}">
+        <div class="section-header__text">
+          {%- if s.eyebrow != blank -%}<p class="eyebrow">{{ s.eyebrow | escape }}</p>{%- endif -%}
+          {%- if s.heading != blank -%}<h2 class="h2">{{ s.heading }}</h2>{%- endif -%}
+        </div>
+        {%- if s.layout == 'carousel' -%}
+          <div class="section-header__actions">
+            <div class="carousel__nav">
+              <button type="button" class="icon-button icon-button--bordered" data-carousel-prev aria-label="{{ 'general.accessibility.previous_slide' | t }}">
+                {%- render 'icon', icon: 'chevron-left' -%}
+              </button>
+              <button type="button" class="icon-button icon-button--bordered" data-carousel-next aria-label="{{ 'general.accessibility.next_slide' | t }}">
+                {%- render 'icon', icon: 'chevron-right' -%}
+              </button>
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <ul
+      class="{% if s.layout == 'carousel' %}carousel__track{% else %}grid{% endif %} collection-list__items"
+      {% if s.layout == 'carousel' %}data-carousel-track{% endif %}
+      role="list"
+      style="--cols-desktop: {{ s.columns_desktop }}; --cols-tablet: {{ cols_tablet }}; --cols-mobile: {{ s.columns_mobile }};"
+    >
+      {%- liquid
+        assign title_pos = s.title_position
+        if title_pos == 'overlay'
+          assign title_pos = 'bottom-left'
+        endif
+        assign title_layout = 'overlay'
+        if title_pos == 'below'
+          assign title_layout = 'below'
+        endif
+      -%}
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign c = block.settings.collection
+          assign first_product_image = c.products.first.featured_media.preview_image
+          if block.settings.image != blank
+            assign tile_image = block.settings.image
+          elsif s.image_source == 'collection' and c.image != blank
+            assign tile_image = c.image
+          elsif first_product_image
+            assign tile_image = first_product_image
+          else
+            assign tile_image = c.featured_image
+          endif
+          assign tile_title = block.settings.title | default: c.title | default: fallback_title
+          assign placeholder_number = forloop.index | modulo: 4 | plus: 1
+          assign placeholder_name = 'collection-apparel-' | append: placeholder_number
+        -%}
+        <li class="collection-tile collection-tile--{{ title_layout }} collection-tile--pos-{{ title_pos }} reveal" style="--reveal-index: {{ forloop.index0 | modulo: 6 }};" {{ block.shopify_attributes }}>
+          <div class="collection-tile__media media media--{{ s.image_ratio }} media--size-{{ s.image_size }}" style="--ratio: {{ tile_image.aspect_ratio | default: 0.75 }};">
+            {%- if tile_image != blank -%}
+              {%- assign tile_alt = tile_image.alt | default: tile_title | escape -%}
+              {{ tile_image | image_url: width: 1400 | image_tag: widths: '300, 450, 600, 800, 1000, 1400', sizes: card_sizes, loading: 'lazy', alt: tile_alt, class: 'collection-tile__image' }}
+            {%- else -%}
+              {{ placeholder_name | placeholder_svg_tag: 'collection-tile__image placeholder-svg' }}
+            {%- endif -%}
+          </div>
+          <div class="collection-tile__info">
+            <h3 class="collection-tile__title h4">
+              <a href="{{ c.url | default: routes.collections_url }}" class="collection-tile__link">{{ tile_title | escape }}</a>
+            </h3>
+            {%- if s.show_count and c != blank -%}
+              <p class="collection-tile__count">{{ 'sections.collection_list.product_count' | t: count: c.products_count }}</p>
+            {%- endif -%}
+          </div>
+        </li>
+      {%- endfor -%}
+    </ul>
+    {%- if s.layout == 'carousel' -%}
+      {%- if s.show_progress -%}<div class="carousel__progress" aria-hidden="true"><span class="carousel__progress-bar"></span></div>{%- endif -%}
+    {%- endif -%}
+  </carousel-slider>
+</div>
+
+{% schema %}
+{
+  "name": "Collection list",
+  "tag": "section",
+  "class": "section-collection-list",
+  "max_blocks": 12,
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "Shop by category" },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "start", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "start"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Display as",
+      "options": [
+        { "value": "grid", "label": "Grid" },
+        { "value": "carousel", "label": "Carousel" }
+      ],
+      "default": "grid"
+    },
+    { "type": "range", "id": "columns_desktop", "label": "Desktop columns", "min": 2, "max": 6, "step": 1, "default": 4 },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Mobile columns",
+      "options": [
+        { "value": "1", "label": "1" },
+        { "value": "2", "label": "2" }
+      ],
+      "default": "2"
+    },
+    { "type": "checkbox", "id": "carousel_peek", "label": "Show part of the next item", "info": "Carousel only.", "default": true },
+    { "type": "checkbox", "id": "show_progress", "label": "Show progress bar", "info": "Carousel only.", "default": true },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        { "value": "portrait", "label": "Portrait 3:4" },
+        { "value": "tall", "label": "Tall 2:3" },
+        { "value": "square", "label": "Square" },
+        { "value": "landscape", "label": "Landscape 4:3" },
+        { "value": "natural", "label": "Original image ratio" }
+      ],
+      "default": "portrait"
+    },
+    {
+      "type": "select",
+      "id": "image_size",
+      "label": "Image size",
+      "options": [
+        { "value": "original", "label": "Original image ratio" },
+        { "value": "ratio", "label": "Use image ratio" },
+        { "value": "x-small", "label": "X-Small" },
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "ratio",
+      "info": "Original image ratio shows each image uncropped in its own shape. X-Small to Large show every image at the same height and crop to fit. Use image ratio keeps the shape chosen above."
+    },
+    { "type": "checkbox", "id": "image_zoom", "label": "Zoom images on hover", "info": "Works when Theme settings > Animations > Image hover effect uses zoom.", "default": true },
+    {
+      "type": "select",
+      "id": "image_source",
+      "label": "Collection image",
+      "info": "A block's own image always wins.",
+      "options": [
+        { "value": "product", "label": "First product's image" },
+        { "value": "collection", "label": "Collection image, then first product" }
+      ],
+      "default": "product"
+    },
+    {
+      "type": "select",
+      "id": "title_position",
+      "label": "Title position",
+      "options": [
+        { "value": "below", "label": "Below image" },
+        { "value": "top-left", "label": "On image, top left" },
+        { "value": "top-center", "label": "On image, top center" },
+        { "value": "top-right", "label": "On image, top right" },
+        { "value": "middle-left", "label": "On image, middle left" },
+        { "value": "middle-center", "label": "On image, center" },
+        { "value": "middle-right", "label": "On image, middle right" },
+        { "value": "bottom-left", "label": "On image, bottom left" },
+        { "value": "bottom-center", "label": "On image, bottom center" },
+        { "value": "bottom-right", "label": "On image, bottom right" }
+      ],
+      "default": "bottom-left"
+    },
+    { "type": "checkbox", "id": "show_count", "label": "Show product count", "default": false },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection",
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "Collection" },
+        { "type": "image_picker", "id": "image", "label": "Image", "info": "Optional. Defaults to the first product's image or the collection image. Recommended: match the section's Image ratio, e.g. 2:3 at 1200 x 1800 px." },
+        { "type": "text", "id": "title", "label": "Title", "info": "Optional. Defaults to the collection title." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection list",
+      "blocks": [
+        { "type": "collection", "settings": { "title": "Dresses" } },
+        { "type": "collection", "settings": { "title": "Knitwear" } },
+        { "type": "collection", "settings": { "title": "Outerwear" } },
+        { "type": "collection", "settings": { "title": "Accessories" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

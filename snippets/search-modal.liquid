@@ -1,0 +1,69 @@
+{% doc %}
+  Renders the search drawer with predictive search results and popular searches.
+  It slides in from the side like the cart and wishlist drawers.
+
+  @example
+  {% render 'search-modal' %}
+{% enddoc %}
+{%- liquid
+  assign base_scheme = 'scheme-1'
+  for scheme in settings.color_schemes
+    assign base_scheme = scheme.id
+    break
+  endfor
+-%}
+<dialog id="SearchModal" class="drawer drawer--right search-modal color-{{ settings.search_color_scheme | default: base_scheme }}" aria-labelledby="SearchModalTitle">
+  <predictive-search class="search-modal__inner" data-enabled="{{ settings.predictive_search }}">
+    <div class="drawer__header">
+      <h2 id="SearchModalTitle" class="drawer__title h4">{{ 'search.general.title' | t }}</h2>
+      <button type="button" class="icon-button" data-dialog-close aria-label="{{ 'general.accessibility.close' | t }}">
+        {%- render 'icon', icon: 'close' -%}
+      </button>
+    </div>
+
+    <div class="drawer__body search-modal__body">
+      <form action="{{ routes.search_url }}" method="get" role="search" class="search-modal__form">
+        <label class="visually-hidden" for="SearchModalInput">{{ 'search.general.label' | t }}</label>
+        {%- render 'icon', icon: 'search', class: 'search-modal__icon' -%}
+        <input
+          id="SearchModalInput"
+          class="search-modal__input"
+          type="search"
+          name="q"
+          value="{{ search.terms | escape }}"
+          placeholder="{{ 'search.general.placeholder' | t }}"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          role="combobox"
+          aria-expanded="false"
+          aria-controls="PredictiveResults"
+          aria-autocomplete="list"
+        >
+        <input type="hidden" name="options[prefix]" value="last">
+        <button type="reset" class="link search-modal__reset" data-search-reset hidden>{{ 'search.general.reset' | t }}</button>
+        <button type="button" class="icon-button search-modal__close" data-dialog-close aria-label="{{ 'general.accessibility.close' | t }}">
+          {%- render 'icon', icon: 'close' -%}
+        </button>
+      </form>
+
+      {%- assign popular = settings.search_popular | split: ',' -%}
+      {%- if popular.size > 0 -%}
+        <div class="search-modal__popular" data-search-popular>
+          <h3 class="predictive-search__heading">{{ 'search.general.popular' | t }}</h3>
+          <ul class="chips" role="list">
+            {%- for term in popular -%}
+              {%- assign clean_term = term | strip -%}
+              {%- if clean_term != blank -%}
+                <li><a class="chip" href="{{ routes.search_url }}?q={{ clean_term | url_encode }}">{{ clean_term | escape }}</a></li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        </div>
+      {%- endif -%}
+
+      <div id="PredictiveResults" class="search-modal__results" data-predictive-container aria-live="polite"></div>
+    </div>
+  </predictive-search>
+</dialog>

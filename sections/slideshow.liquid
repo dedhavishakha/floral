@@ -1,0 +1,368 @@
+{%- liquid
+  assign s = section.settings
+  assign slide_count = section.blocks.size
+  assign first_loading = 'lazy'
+  assign first_priority = 'auto'
+  if section.index == 1 or section.index == 2
+    assign first_loading = 'eager'
+    assign first_priority = 'high'
+  endif
+  assign heading_tag = 'h2'
+  if section.index == 1 and template.name != 'index'
+    assign heading_tag = 'h1'
+  endif
+  assign autoplay_on = false
+  if s.autoplay and slide_count > 1
+    assign autoplay_on = true
+  endif
+-%}
+<div
+  class="section slideshow-section hero--h-{{ s.height }} hero--mh-{{ s.mobile_height }} color-{{ s.color_scheme }}"
+  style="--pt: {{ s.padding_top }}px; --pb: {{ s.padding_bottom }}px; --hero-ratio: {{ section.blocks.first.settings.image.aspect_ratio | default: 1.7778 }}; --hero-ratio-mobile: {{ section.blocks.first.settings.image_mobile.aspect_ratio | default: section.blocks.first.settings.image.aspect_ratio | default: 0.8 }};"
+>
+  <slide-show
+    class="slideshow slideshow--dots-{{ s.dots_style }} slideshow--controls-{{ s.controls_position }} slideshow--align-{{ s.controls_alignment }} slideshow--arrows-{{ s.arrows_position }}{% if s.slide_zoom %} slideshow--zoom{% endif %}"
+    data-autoplay="{{ autoplay_on }}"
+    data-interval="{{ s.interval }}"
+    role="region"
+    aria-roledescription="carousel"
+    aria-label="{{ s.accessibility_label | escape }}"
+  >
+    <div class="slideshow__track" data-slideshow-track aria-live="{% if autoplay_on %}off{% else %}polite{% endif %}">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign b = block.settings
+          assign slide_loading = 'lazy'
+          assign slide_priority = 'auto'
+          if forloop.first
+            assign slide_loading = first_loading
+            assign slide_priority = first_priority
+          endif
+          assign overlay = b.overlay_opacity | divided_by: 100.0
+          assign primary_class = 'button button--light'
+          assign secondary_class = 'button button--outline-light'
+          if b.text_color == 'dark'
+            assign primary_class = 'button'
+            assign secondary_class = 'button button--secondary'
+          endif
+        -%}
+        <div
+          class="slideshow__slide hero--text-{{ b.text_color }} hero--focus-{{ b.image_focus }}{% if forloop.first %} is-active{% endif %}"
+          role="group"
+          aria-roledescription="slide"
+          aria-label="{{ 'sections.slideshow.slide_label' | t: index: forloop.index, count: slide_count }}"
+          data-slide
+          {% unless forloop.first %}inert{% endunless %}
+          style="--hero-overlay: {{ overlay }};"
+          {{ block.shopify_attributes }}
+        >
+          <div class="hero__media">
+            {%- if b.image != blank -%}
+              <picture{% if b.image_mobile != blank %} class="has-mobile-focal" style="--mobile-focal: {{ b.image_mobile.presentation.focal_point }};"{% endif %}>
+                {%- if b.image_mobile != blank -%}
+                  <source
+                    media="(max-width: 749px)"
+                    srcset="{{ b.image_mobile | image_url: width: 750 }} 750w, {{ b.image_mobile | image_url: width: 1100 }} 1100w, {{ b.image_mobile | image_url: width: 1500 }} 1500w"
+                    sizes="100vw"
+                    width="{{ b.image_mobile.width }}"
+                    height="{{ b.image_mobile.height }}"
+                  >
+                {%- endif -%}
+                {%- assign slide_alt = b.image.alt | escape -%}
+                {{
+                  b.image
+                  | image_url: width: 3840
+                  | image_tag:
+                    widths: '600, 900, 1200, 1600, 2000, 2600, 3200, 3840',
+                    sizes: '100vw',
+                    loading: slide_loading,
+                    fetchpriority: slide_priority,
+                    class: 'hero__img',
+                    alt: slide_alt
+                }}
+              </picture>
+            {%- else -%}
+              {%- assign placeholder_number = forloop.index | modulo: 3 | plus: 1 -%}
+              {%- assign placeholder_name = 'hero-apparel-' | append: placeholder_number -%}
+              {{ placeholder_name | placeholder_svg_tag: 'hero__img placeholder-svg' }}
+            {%- endif -%}
+            <span class="hero__overlay" aria-hidden="true"></span>
+          </div>
+          <div class="hero__overlay-content page-width hero__pos-{{ b.content_position }}">
+            <div class="hero__content hero__align-{{ b.text_alignment }}">
+              {%- if b.eyebrow != blank -%}
+                <p class="eyebrow hero__eyebrow">{{ b.eyebrow | escape }}</p>
+              {%- endif -%}
+              {%- if b.heading != blank -%}
+                {%- if forloop.first -%}
+                  <{{ heading_tag }} class="hero__heading {{ s.heading_size }}">{{ b.heading }}</{{ heading_tag }}>
+                {%- else -%}
+                  <h2 class="hero__heading {{ s.heading_size }}">{{ b.heading }}</h2>
+                {%- endif -%}
+              {%- endif -%}
+              {%- if b.text != blank -%}
+                <div class="hero__text rte">{{ b.text }}</div>
+              {%- endif -%}
+              {%- if b.button_label != blank or b.button_label_2 != blank -%}
+                <div class="hero__buttons">
+                  {%- if b.button_label != blank -%}
+                    <a {% if b.button_link != blank %}href="{{ b.button_link }}"{% else %}role="link" aria-disabled="true"{% endif %} class="{{ primary_class }}">
+                      {{- b.button_label | escape -}}
+                    </a>
+                  {%- endif -%}
+                  {%- if b.button_label_2 != blank -%}
+                    <a {% if b.button_link_2 != blank %}href="{{ b.button_link_2 }}"{% else %}role="link" aria-disabled="true"{% endif %} class="{{ secondary_class }}">
+                      {{- b.button_label_2 | escape -}}
+                    </a>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            </div>
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+
+    {%- if slide_count > 1 -%}
+      {%- liquid
+        assign arrows_in_bar = false
+        assign arrows_on_sides = false
+        if s.show_arrows
+          if s.arrows_position == 'sides'
+            assign arrows_on_sides = true
+          else
+            assign arrows_in_bar = true
+          endif
+        endif
+      -%}
+      {%- if arrows_on_sides -%}
+        <div class="slideshow__side-arrows">
+          <button type="button" class="icon-button slideshow__button slideshow__prev" data-slideshow-prev aria-label="{{ 'general.accessibility.previous_slide' | t }}">
+            {%- render 'icon', icon: 'chevron-left' -%}
+          </button>
+          <button type="button" class="icon-button slideshow__button slideshow__next" data-slideshow-next aria-label="{{ 'general.accessibility.next_slide' | t }}">
+            {%- render 'icon', icon: 'chevron-right' -%}
+          </button>
+        </div>
+      {%- endif -%}
+      <div class="slideshow__controls page-width">
+        {%- if arrows_in_bar -%}
+          <button type="button" class="icon-button slideshow__button slideshow__prev" data-slideshow-prev aria-label="{{ 'general.accessibility.previous_slide' | t }}">
+            {%- render 'icon', icon: 'chevron-left' -%}
+          </button>
+        {%- endif -%}
+        {%- if s.show_dots -%}
+          <div class="slideshow__dots" role="group" aria-label="{{ 'sections.slideshow.choose_slide' | t }}">
+            {%- for block in section.blocks -%}
+              <button
+                type="button"
+                class="slideshow__dot"
+                data-slide-to="{{ forloop.index0 }}"
+                aria-label="{{ 'sections.slideshow.go_to' | t: index: forloop.index }}"
+                {% if forloop.first %}aria-current="true"{% endif %}
+              >
+                {%- if s.dots_style == 'numbers' -%}
+                  <span class="slideshow__dot-number" aria-hidden="true">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
+                {%- endif -%}
+              </button>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+        {%- if arrows_in_bar -%}
+          <button type="button" class="icon-button slideshow__button slideshow__next" data-slideshow-next aria-label="{{ 'general.accessibility.next_slide' | t }}">
+            {%- render 'icon', icon: 'chevron-right' -%}
+          </button>
+        {%- endif -%}
+        {%- if autoplay_on and s.show_pause -%}
+          <button type="button" class="icon-button slideshow__button slideshow__pause" data-slideshow-toggle aria-pressed="false" data-label-pause="{{ 'general.accessibility.pause' | t }}" data-label-play="{{ 'general.accessibility.play' | t }}" aria-label="{{ 'general.accessibility.pause' | t }}">
+            <span class="slideshow__icon-pause">{% render 'icon', icon: 'pause' %}</span>
+            <span class="slideshow__icon-play">{% render 'icon', icon: 'play' %}</span>
+          </button>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </slide-show>
+</div>
+
+{% schema %}
+{
+  "name": "Slideshow",
+  "tag": "section",
+  "class": "section-slideshow",
+  "max_blocks": 6,
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-3" },
+    { "type": "checkbox", "id": "autoplay", "label": "Auto-rotate slides", "default": true },
+    { "type": "range", "id": "interval", "label": "Change slides every", "min": 3, "max": 10, "step": 1, "unit": "s", "default": 6 },
+    { "type": "checkbox", "id": "show_pause", "label": "Show pause button", "info": "Recommended for accessibility. Auto-rotate always pauses on hover and keyboard focus.", "default": false },
+    { "type": "header", "content": "Indicators and arrows" },
+    { "type": "checkbox", "id": "show_dots", "label": "Show slide indicators", "default": true },
+    {
+      "type": "select",
+      "id": "dots_style",
+      "label": "Indicator style",
+      "options": [
+        { "value": "dashes", "label": "Dashes" },
+        { "value": "dots", "label": "Dots" },
+        { "value": "numbers", "label": "Numbers" }
+      ],
+      "default": "dashes"
+    },
+    {
+      "type": "select",
+      "id": "controls_position",
+      "label": "Indicator position",
+      "options": [
+        { "value": "on", "label": "On the image" },
+        { "value": "below", "label": "Below the image" }
+      ],
+      "default": "on"
+    },
+    {
+      "type": "select",
+      "id": "controls_alignment",
+      "label": "Indicator alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    { "type": "checkbox", "id": "show_arrows", "label": "Show arrows", "default": true },
+    {
+      "type": "select",
+      "id": "arrows_position",
+      "label": "Arrow position",
+      "options": [
+        { "value": "bottom", "label": "With the indicators" },
+        { "value": "sides", "label": "On the sides, centered" }
+      ],
+      "default": "bottom",
+      "info": "With the indicators: left alignment puts the arrows at the opposite end, center places them either side of the indicators."
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        { "value": "h0", "label": "Display" },
+        { "value": "h1", "label": "Extra large" },
+        { "value": "h2", "label": "Large" }
+      ],
+      "default": "h1"
+    },
+    {
+      "type": "select",
+      "id": "height",
+      "label": "Image size",
+      "options": [
+        { "value": "original", "label": "Original image ratio" },
+        { "value": "x-small", "label": "X-Small" },
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" },
+        { "value": "full", "label": "Full screen" }
+      ],
+      "default": "large",
+      "info": "Original image ratio shows the whole image without cropping."
+    },
+    {
+      "type": "select",
+      "id": "mobile_height",
+      "label": "Mobile image size",
+      "options": [
+        { "value": "original", "label": "Original image ratio" },
+        { "value": "x-small", "label": "X-Small" },
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" },
+        { "value": "full", "label": "Full screen" }
+      ],
+      "default": "large",
+      "info": "Original image ratio uses the mobile image, or the main image, at its own shape."
+    },
+    { "type": "checkbox", "id": "slide_zoom", "label": "Zoom effect on slide change", "info": "Each image starts slightly zoomed in and settles as its slide appears.", "default": true },
+    { "type": "text", "id": "accessibility_label", "label": "Slideshow description", "info": "Read by screen readers.", "default": "Featured campaigns" },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 0 }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image", "info": "Recommended: 16:9 landscape, 2400 x 1350 px. Keep faces away from the edges, or use Image focus." },
+        { "type": "image_picker", "id": "image_mobile", "label": "Mobile image", "info": "Optional. Shown on screens under 750px. Recommended: 4:5 portrait, 1080 x 1350 px." },
+        {
+          "type": "select",
+          "id": "image_focus",
+          "label": "Image focus",
+          "info": "The part of the image kept in view when the screen crops it, such as faces near the top.",
+          "options": [
+            { "value": "top", "label": "Top" },
+            { "value": "center", "label": "Center" },
+            { "value": "bottom", "label": "Bottom" }
+          ],
+          "default": "center"
+        },
+        { "type": "range", "id": "overlay_opacity", "label": "Image overlay", "min": 0, "max": 80, "step": 5, "unit": "%", "default": 20 },
+        { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Just in" },
+        { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "Slide heading" },
+        { "type": "inline_richtext", "id": "text", "label": "Text", "default": "Tell customers about this campaign." },
+        { "type": "text", "id": "button_label", "label": "First button label", "default": "Shop now" },
+        { "type": "url", "id": "button_link", "label": "First button link" },
+        { "type": "text", "id": "button_label_2", "label": "Second button label" },
+        { "type": "url", "id": "button_link_2", "label": "Second button link" },
+        {
+          "type": "select",
+          "id": "content_position",
+          "label": "Content position",
+          "options": [
+            { "value": "top-left", "label": "Top left" },
+            { "value": "top-center", "label": "Top center" },
+            { "value": "top-right", "label": "Top right" },
+            { "value": "middle-left", "label": "Middle left" },
+            { "value": "middle-center", "label": "Middle center" },
+            { "value": "middle-right", "label": "Middle right" },
+            { "value": "bottom-left", "label": "Bottom left" },
+            { "value": "bottom-center", "label": "Bottom center" },
+            { "value": "bottom-right", "label": "Bottom right" }
+          ],
+          "default": "bottom-left"
+        },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Text alignment",
+          "options": [
+            { "value": "start", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "end", "label": "Right" }
+          ],
+          "default": "start"
+        },
+        {
+          "type": "select",
+          "id": "text_color",
+          "label": "Text color",
+          "options": [
+            { "value": "light", "label": "Light" },
+            { "value": "dark", "label": "Dark" }
+          ],
+          "default": "light"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Slideshow",
+      "blocks": [
+        { "type": "slide", "settings": { "heading": "Layers for the cold", "eyebrow": "Outerwear" } },
+        { "type": "slide", "settings": { "heading": "Knitwear, reworked", "eyebrow": "New in", "content_position": "middle-center", "text_alignment": "center" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

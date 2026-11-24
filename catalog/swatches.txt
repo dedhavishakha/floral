@@ -1,0 +1,9 @@
+Ivory: #F5F0E6
+Oat: #E3D9C6
+Sand: #D6C3A1
+Taupe: #A8988A
+Clay: #B57A5E
+Camel: #C19A6B
+Stone: #9E9A91
+Slate: #5F6B73
+Espresso: #4B3A2F

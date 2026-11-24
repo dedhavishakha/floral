@@ -1,0 +1,33 @@
+{% doc %}
+  Renders the button that saves a product to the built-in wishlist. Outputs nothing when the wishlist is turned off.
+
+  @param {product} product - The product to save
+  @param {string} [style] - icon (heart only, default) or text (heart with a label)
+  @param {string} [class] - Extra classes for the wrapper
+
+  @example
+  {% render 'wishlist-toggle', product: product, class: 'card__wishlist' %}
+{% enddoc %}
+{%- if settings.wishlist_enable -%}
+{%- assign wishlist_image = product.featured_media.preview_image | image_url: width: 240 -%}
+<wishlist-toggle
+  class="wishlist-toggle wishlist-toggle--{{ style | default: 'icon' }}{% if class != blank %} {{ class }}{% endif %}"
+  data-handle="{{ product.handle }}"
+  data-title="{{ product.title | escape }}"
+  data-image="{{ wishlist_image }}"
+  data-style="{{ style | default: 'icon' }}"
+>
+  {%- if style == 'text' -%}
+    <button type="button" class="button button--secondary button--full wishlist-toggle__button">
+      {%- render 'icon', icon: 'heart' -%}
+      <span class="wishlist-toggle__label wishlist-toggle__label--add">{{ 'products.wishlist.add' | t }}</span>
+      <span class="wishlist-toggle__label wishlist-toggle__label--saved">{{ 'products.wishlist.saved' | t }}</span>
+    </button>
+  {%- else -%}
+    <button type="button" class="icon-button wishlist-toggle__button" aria-pressed="false">
+      {%- render 'icon', icon: 'heart' -%}
+      <span class="visually-hidden">{{ 'products.wishlist.save_product' | t: product: product.title | escape }}</span>
+    </button>
+  {%- endif -%}
+</wishlist-toggle>
+{%- endif -%}

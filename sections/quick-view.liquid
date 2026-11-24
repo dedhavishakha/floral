@@ -1,0 +1,53 @@
+{%- liquid
+  assign variant = product.selected_or_first_available_variant
+  assign ratio = settings.product_image_ratio
+-%}
+<div class="quick-view" data-product-root data-section-id="{{ section.id }}">
+  <div class="quick-view__media">
+    <div class="quick-view__slider" data-quick-view-slider data-initial-media="{{ variant.featured_media.id }}">
+      {%- for media in product.media limit: 8 -%}
+        <div class="quick-view__slide" data-media-id="{{ media.id }}">
+          {% render 'product-media',
+            media: media,
+            product_title: product.title,
+            ratio: ratio,
+            sizes: '(min-width: 750px) 45vw, 90vw',
+            index: forloop.index,
+            lightbox: false,
+            hover_zoom: false
+          %}
+        </div>
+      {%- else -%}
+        <div class="quick-view__slide media media--{{ ratio }}">
+          {{ 'product-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+        </div>
+      {%- endfor -%}
+    </div>
+    {%- assign models = product.media | where: 'media_type', 'model' -%}
+    {%- if models.size > 0 -%}
+      <script type="application/json" data-product-models>{{ models | json }}</script>
+    {%- endif -%}
+  </div>
+
+  <div class="quick-view__info">
+    {%- if settings.card_show_vendor -%}
+      <p class="product-vendor">{{ product.vendor | escape }}</p>
+    {%- endif -%}
+    <h2 class="quick-view__title h3">{{ product.title | escape }}</h2>
+    <div data-update="price">{% render 'price', product: product, use_variant: true, class: 'price--large' %}</div>
+    {% render 'rating', product: product, show_count: true %}
+    {% render 'variant-picker', product: product, section_id: section.id, update_url: false %}
+    {% render 'buy-buttons', product: product, section_id: section.id, show_dynamic_checkout: true %}
+    <a href="{{ product.url }}" class="link quick-view__details">
+      {{- 'products.quick_view.view_details' | t -}}
+      {%- render 'icon', icon: 'arrow-right' -%}
+    </a>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Quick view",
+  "settings": []
+}
+{% endschema %}

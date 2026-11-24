@@ -1,0 +1,97 @@
+{%- liquid
+  assign s = section.settings
+  assign overlay = s.overlay_opacity | divided_by: 100.0
+-%}
+<div
+  class="section custom-section color-{{ s.color_scheme }}{% if s.background_image != blank %} custom-section--has-bg{% endif %}"
+  style="--pt: {{ s.padding_top }}px; --pb: {{ s.padding_bottom }}px; --custom-min-height: {{ s.min_height }}vh; --hero-overlay: {{ overlay }};"
+>
+  {%- if s.background_image != blank -%}
+    <div class="custom-section__bg" aria-hidden="true">
+      {{ s.background_image | image_url: width: 3000 | image_tag: widths: '750, 1100, 1500, 2000, 3000', sizes: '100vw', loading: 'lazy', alt: '' }}
+      <span class="hero__overlay"></span>
+    </div>
+  {%- endif -%}
+  <div class="page-width page-width--{{ s.content_width }}">
+    <div
+      class="layout-stack layout-stack--{{ s.direction }}"
+      style="--stack-gap: {{ s.gap }}px; --stack-align: {{ s.align_items }}; --stack-justify: {{ s.justify_content }};"
+    >
+      {% content_for 'blocks' %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Custom section",
+  "tag": "section",
+  "class": "section-custom",
+  "blocks": [{ "type": "@theme" }, { "type": "@app" }],
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    {
+      "type": "select",
+      "id": "direction",
+      "label": "Direction",
+      "options": [
+        { "value": "column", "label": "Vertical" },
+        { "value": "row", "label": "Horizontal" }
+      ],
+      "default": "column"
+    },
+    {
+      "type": "select",
+      "id": "align_items",
+      "label": "Alignment",
+      "options": [
+        { "value": "flex-start", "label": "Start" },
+        { "value": "center", "label": "Center" },
+        { "value": "flex-end", "label": "End" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "justify_content",
+      "label": "Distribution",
+      "options": [
+        { "value": "flex-start", "label": "Start" },
+        { "value": "center", "label": "Center" },
+        { "value": "flex-end", "label": "End" },
+        { "value": "space-between", "label": "Space between" }
+      ],
+      "default": "center"
+    },
+    { "type": "range", "id": "gap", "label": "Gap", "min": 0, "max": 80, "step": 4, "unit": "px", "default": 20 },
+    {
+      "type": "select",
+      "id": "content_width",
+      "label": "Content width",
+      "options": [
+        { "value": "narrow", "label": "Narrow" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "default", "label": "Page width" },
+        { "value": "full", "label": "Full width" }
+      ],
+      "default": "default"
+    },
+    { "type": "range", "id": "min_height", "label": "Minimum height", "min": 0, "max": 100, "step": 5, "unit": "vh", "default": 0 },
+    { "type": "image_picker", "id": "background_image", "label": "Background image", "info": "Recommended: 16:9 landscape, 2400 x 1350 px." },
+    { "type": "range", "id": "overlay_opacity", "label": "Background overlay", "min": 0, "max": 80, "step": 5, "unit": "%", "default": 30 },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "presets": [
+    {
+      "name": "Custom section",
+      "blocks": [
+        { "type": "heading" },
+        { "type": "text" },
+        { "type": "button" }
+      ]
+    }
+  ]
+}
+{% endschema %}

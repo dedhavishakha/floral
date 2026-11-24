@@ -1,0 +1,97 @@
+{%- liquid
+  assign cols_desktop = section.settings.columns_desktop
+  assign cols_tablet = cols_desktop | at_most: 3
+  assign cols_mobile = section.settings.columns_mobile
+  assign current_handle = ''
+  if product != blank
+    assign current_handle = product.handle
+  endif
+-%}
+<recently-viewed
+  class="section recently-viewed color-{{ section.settings.color_scheme }}{% unless section.settings.image_zoom %} zoom-off{% endunless %}"
+  style="--pt: {{ section.settings.padding_top }}px; --pb: {{ section.settings.padding_bottom }}px;"
+  data-limit="{{ section.settings.products_to_show }}"
+  data-exclude="{{ current_handle }}"
+  data-root-url="{{ routes.root_url }}"
+  {% unless request.design_mode %}hidden{% endunless %}
+>
+  <div class="page-width">
+    <carousel-slider class="carousel carousel--peek-{{ section.settings.carousel_peek }}">
+      <div class="section-header{% if section.settings.heading_alignment == 'center' %} section-header--center{% endif %}">
+        <div class="section-header__text">
+          {%- if section.settings.heading != blank -%}
+            <h2 class="h2">{{ section.settings.heading | escape }}</h2>
+          {%- endif -%}
+        </div>
+        <div class="section-header__actions">
+          <div class="carousel__nav">
+            <button type="button" class="icon-button icon-button--bordered" data-carousel-prev aria-label="{{ 'general.accessibility.previous_slide' | t }}">
+              {%- render 'icon', icon: 'chevron-left' -%}
+            </button>
+            <button type="button" class="icon-button icon-button--bordered" data-carousel-next aria-label="{{ 'general.accessibility.next_slide' | t }}">
+              {%- render 'icon', icon: 'chevron-right' -%}
+            </button>
+          </div>
+        </div>
+      </div>
+      {%- if request.design_mode -%}
+        <p class="recently-viewed__empty text-muted" data-recently-viewed-empty>{{ 'products.recently_viewed.empty' | t }}</p>
+      {%- endif -%}
+      <ul
+        class="carousel__track"
+        data-carousel-track
+        data-recently-viewed-list
+        role="list"
+        aria-live="polite"
+        style="--cols-desktop: {{ cols_desktop }}; --cols-tablet: {{ cols_tablet }}; --cols-mobile: {{ cols_mobile }};"
+      ></ul>
+      {%- if section.settings.show_progress -%}
+        <div class="carousel__progress" aria-hidden="true"><span class="carousel__progress-bar"></span></div>
+      {%- endif -%}
+    </carousel-slider>
+  </div>
+</recently-viewed>
+
+{% schema %}
+{
+  "name": "Recently viewed",
+  "tag": "section",
+  "class": "section-recently-viewed",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "paragraph", "content": "Shows products the shopper viewed on this device. Hidden until they have viewed at least one other product." },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Recently viewed" },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "start", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "start"
+    },
+    { "type": "range", "id": "products_to_show", "label": "Maximum products", "min": 2, "max": 12, "step": 1, "default": 6 },
+    { "type": "range", "id": "columns_desktop", "label": "Desktop columns", "min": 2, "max": 6, "step": 1, "default": 5 },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Mobile columns",
+      "options": [
+        { "value": "1", "label": "1" },
+        { "value": "2", "label": "2" }
+      ],
+      "default": "2"
+    },
+    { "type": "checkbox", "id": "carousel_peek", "label": "Show part of the next item", "default": true },
+    { "type": "checkbox", "id": "show_progress", "label": "Show progress bar", "default": false },
+    { "type": "checkbox", "id": "image_zoom", "label": "Zoom images on hover", "info": "Works when Theme settings > Animations > Image hover effect uses zoom.", "default": true },
+    { "type": "header", "content": "Section" },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "presets": [
+    { "name": "Recently viewed" }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,81 @@
+{%- liquid
+  assign base_scheme = 'scheme-1'
+  for scheme in settings.color_schemes
+    assign base_scheme = scheme.id
+    break
+  endfor
+-%}
+{%- assign pick_up_availabilities = product_variant.store_availabilities | where: 'pick_up_enabled', true -%}
+<div class="pickup__content" data-pickup-content>
+  {%- if pick_up_availabilities.size > 0 -%}
+    {%- assign closest = pick_up_availabilities.first -%}
+    <div class="pickup__summary">
+      {%- if closest.available -%}
+        {%- render 'icon', icon: 'check', class: 'pickup__icon pickup__icon--available' -%}
+      {%- else -%}
+        {%- render 'icon', icon: 'close', class: 'pickup__icon pickup__icon--unavailable' -%}
+      {%- endif -%}
+      <div class="pickup__text">
+        {%- if closest.available -%}
+          <p>{{ 'products.pickup.available_at_html' | t: location: closest.location.name }}</p>
+          <p class="pickup__time">{{ closest.pick_up_time }}</p>
+        {%- else -%}
+          <p>{{ 'products.pickup.unavailable_at_html' | t: location: closest.location.name }}</p>
+        {%- endif -%}
+        <button type="button" class="link pickup__open" data-dialog-open="PickupDrawer-{{ product_variant.id }}" aria-haspopup="dialog">
+          {%- if pick_up_availabilities.size > 1 -%}
+            {{- 'products.pickup.check_other' | t -}}
+          {%- else -%}
+            {{- 'products.pickup.view_store' | t -}}
+          {%- endif -%}
+        </button>
+      </div>
+    </div>
+
+    <dialog id="PickupDrawer-{{ product_variant.id }}" class="drawer drawer--right pickup-drawer color-{{ base_scheme }}" aria-labelledby="PickupDrawerTitle-{{ product_variant.id }}">
+      <div class="drawer__header">
+        <div>
+          <h2 id="PickupDrawerTitle-{{ product_variant.id }}" class="drawer__title h4">{{ product_variant.product.title | escape }}</h2>
+          {%- unless product_variant.product.has_only_default_variant -%}
+            <p class="pickup-drawer__variant">{{ product_variant.title | escape }}</p>
+          {%- endunless -%}
+        </div>
+        <button type="button" class="icon-button" data-dialog-close aria-label="{{ 'general.accessibility.close' | t }}">
+          {%- render 'icon', icon: 'close' -%}
+        </button>
+      </div>
+      <div class="drawer__body">
+        <ul class="pickup-drawer__list" role="list">
+          {%- for availability in pick_up_availabilities -%}
+            <li class="pickup-drawer__store">
+              <h3 class="pickup-drawer__name h5">{{ availability.location.name | escape }}</h3>
+              <p class="pickup-drawer__status">
+                {%- if availability.available -%}
+                  {%- render 'icon', icon: 'check', class: 'pickup__icon pickup__icon--available' -%}
+                  {{ availability.pick_up_time }}
+                {%- else -%}
+                  {%- render 'icon', icon: 'close', class: 'pickup__icon pickup__icon--unavailable' -%}
+                  {{ 'products.pickup.unavailable' | t }}
+                {%- endif -%}
+              </p>
+              {%- assign address = availability.location.address -%}
+              <address class="pickup-drawer__address">
+                {{ address | format_address }}
+              </address>
+              {%- if address.phone.size > 0 -%}
+                <p class="pickup-drawer__phone"><a href="tel:{{ address.phone | remove: ' ' }}" class="link">{{ address.phone }}</a></p>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    </dialog>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Pickup availability",
+  "settings": []
+}
+{% endschema %}

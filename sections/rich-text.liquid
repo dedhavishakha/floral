@@ -1,0 +1,130 @@
+{%- assign s = section.settings -%}
+<div
+  class="section rich-text color-{{ s.color_scheme }}"
+  style="--pt: {{ s.padding_top }}px; --pb: {{ s.padding_bottom }}px;"
+>
+  <div class="page-width page-width--{{ s.content_width }}">
+    <div class="rich-text__content rich-text__align-{{ s.text_alignment }} reveal">
+      {%- for block in section.blocks -%}
+        {%- assign b = block.settings -%}
+        {%- case block.type -%}
+          {%- when 'eyebrow' -%}
+            <p class="eyebrow" {{ block.shopify_attributes }}>{{ b.text | escape }}</p>
+          {%- when 'heading' -%}
+            <h2 class="rich-text__heading {{ b.size }}" {{ block.shopify_attributes }}>{{ b.heading }}</h2>
+          {%- when 'text' -%}
+            <div class="rich-text__text rte{% if b.style == 'large' %} text-large{% elsif b.style == 'muted' %} text-muted{% endif %}" {{ block.shopify_attributes }}>{{ b.text }}</div>
+          {%- when 'buttons' -%}
+            {%- if b.label_1 != blank or b.label_2 != blank -%}
+              <div class="rich-text__buttons" {{ block.shopify_attributes }}>
+                {%- if b.label_1 != blank -%}
+                  <a {% if b.link_1 != blank %}href="{{ b.link_1 }}"{% else %}role="link" aria-disabled="true"{% endif %} class="button">{{ b.label_1 | escape }}</a>
+                {%- endif -%}
+                {%- if b.label_2 != blank -%}
+                  <a {% if b.link_2 != blank %}href="{{ b.link_2 }}"{% else %}role="link" aria-disabled="true"{% endif %} class="button button--secondary">{{ b.label_2 | escape }}</a>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          {%- when '@app' -%}
+            {% render block %}
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Rich text",
+  "tag": "section",
+  "class": "section-rich-text",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    {
+      "type": "select",
+      "id": "content_width",
+      "label": "Content width",
+      "options": [
+        { "value": "narrow", "label": "Narrow" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "default", "label": "Page width" }
+      ],
+      "default": "narrow"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        { "value": "start", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "center"
+    },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "blocks": [
+    {
+      "type": "eyebrow",
+      "name": "Eyebrow",
+      "settings": [{ "type": "text", "id": "text", "label": "Text", "default": "The journal" }]
+    },
+    {
+      "type": "heading",
+      "name": "Heading",
+      "settings": [
+        { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "Designed to be worn, not stored" },
+        {
+          "type": "select",
+          "id": "size",
+          "label": "Size",
+          "options": [
+            { "value": "h0", "label": "Display" },
+            { "value": "h1", "label": "Extra large" },
+            { "value": "h2", "label": "Large" },
+            { "value": "h3", "label": "Medium" }
+          ],
+          "default": "h1"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        { "type": "richtext", "id": "text", "label": "Text", "default": "<p>Share a message with your customers: a new collection, a promise or what makes your brand different.</p>" },
+        {
+          "type": "select",
+          "id": "style",
+          "label": "Style",
+          "options": [
+            { "value": "body", "label": "Body" },
+            { "value": "large", "label": "Large" },
+            { "value": "muted", "label": "Muted" }
+          ],
+          "default": "large"
+        }
+      ]
+    },
+    {
+      "type": "buttons",
+      "name": "Buttons",
+      "limit": 2,
+      "settings": [
+        { "type": "text", "id": "label_1", "label": "First button label", "default": "Shop the collection" },
+        { "type": "url", "id": "link_1", "label": "First button link" },
+        { "type": "text", "id": "label_2", "label": "Second button label" },
+        { "type": "url", "id": "link_2", "label": "Second button link" }
+      ]
+    },
+    { "type": "@app" }
+  ],
+  "presets": [
+    {
+      "name": "Rich text",
+      "blocks": [{ "type": "eyebrow" }, { "type": "heading" }, { "type": "text" }, { "type": "buttons" }]
+    }
+  ]
+}
+{% endschema %}

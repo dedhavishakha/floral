@@ -1,0 +1,186 @@
+{%- liquid
+  assign s = section.settings
+  assign has_image = false
+  if s.image != blank
+    assign has_image = true
+  endif
+  assign show_timer = false
+  if s.show_countdown and s.end_date != blank
+    assign show_timer = true
+  endif
+  assign primary_class = 'button'
+  assign secondary_class = 'button button--secondary'
+  if s.layout == 'background'
+    assign primary_class = 'button button--light'
+    assign secondary_class = 'button button--outline-light'
+  endif
+  assign overlay = s.overlay_opacity | divided_by: 100.0
+-%}
+<div
+  class="section promo-banner-section color-{{ s.color_scheme }}"
+  style="--pt: {{ s.padding_top }}px; --pb: {{ s.padding_bottom }}px;"
+  {% if show_timer and s.expired_behavior == 'hide' %}data-countdown-container{% endif %}
+>
+  <div class="page-width{% if s.full_width %} page-width--full page-width--flush{% endif %}">
+    <div class="promo promo--{{ s.layout }} promo--size-{{ s.image_size }}{% if has_image %} promo--has-image{% endif %}" style="--hero-overlay: {{ overlay }}; --promo-ratio: {{ s.image.aspect_ratio | default: 1.5 }}; --promo-ratio-mobile: {{ s.image_mobile.aspect_ratio | default: s.image.aspect_ratio | default: 0.8 }};">
+      {%- if has_image or s.layout == 'background' -%}
+        <div class="promo__media">
+          {%- if has_image -%}
+            <picture>
+              {%- if s.image_mobile != blank -%}
+                <source
+                  media="(max-width: 749px)"
+                  srcset="{{ s.image_mobile | image_url: width: 750 }} 750w, {{ s.image_mobile | image_url: width: 1100 }} 1100w, {{ s.image_mobile | image_url: width: 1500 }} 1500w"
+                  sizes="100vw"
+                  width="{{ s.image_mobile.width }}"
+                  height="{{ s.image_mobile.height }}"
+                >
+              {%- endif -%}
+              {%- assign promo_alt = s.image.alt | escape -%}
+              {{ s.image | image_url: width: 2800 | image_tag: widths: '500, 800, 1100, 1500, 2000, 2800', sizes: '(min-width: 750px) 50vw, 100vw', loading: 'lazy', alt: promo_alt, class: 'promo__img' }}
+            </picture>
+          {%- else -%}
+            {{ 'lifestyle-2' | placeholder_svg_tag: 'promo__img placeholder-svg' }}
+          {%- endif -%}
+          {%- if s.layout == 'background' -%}<span class="hero__overlay" aria-hidden="true"></span>{%- endif -%}
+        </div>
+      {%- endif -%}
+
+      <div class="promo__content promo__align-{{ s.text_alignment }} reveal">
+        {%- if s.eyebrow != blank -%}<p class="eyebrow promo__eyebrow">{{ s.eyebrow | escape }}</p>{%- endif -%}
+        {%- if s.heading != blank -%}<h2 class="promo__heading {{ s.heading_size }}">{{ s.heading }}</h2>{%- endif -%}
+        {%- if s.text != blank -%}<div class="promo__text rte">{{ s.text }}</div>{%- endif -%}
+
+        {%- if show_timer -%}
+          <div class="promo__timer">
+            {%- if s.countdown_label != blank -%}
+              <p class="promo__timer-label">{{ s.countdown_label | escape }}</p>
+            {%- endif -%}
+            <countdown-timer class="countdown" data-end="{{ s.end_date | escape }}" data-expired="{{ s.expired_behavior }}" role="timer" aria-live="off">
+              <span class="countdown__unit"><span class="countdown__value" data-days>00</span><span class="countdown__label">{{ 'general.countdown.days' | t }}</span></span>
+              <span class="countdown__sep" aria-hidden="true">:</span>
+              <span class="countdown__unit"><span class="countdown__value" data-hours>00</span><span class="countdown__label">{{ 'general.countdown.hours' | t }}</span></span>
+              <span class="countdown__sep" aria-hidden="true">:</span>
+              <span class="countdown__unit"><span class="countdown__value" data-minutes>00</span><span class="countdown__label">{{ 'general.countdown.minutes' | t }}</span></span>
+              <span class="countdown__sep" aria-hidden="true">:</span>
+              <span class="countdown__unit"><span class="countdown__value" data-seconds>00</span><span class="countdown__label">{{ 'general.countdown.seconds' | t }}</span></span>
+              <span class="countdown__expired">{{ 'general.countdown.expired' | t }}</span>
+            </countdown-timer>
+          </div>
+        {%- endif -%}
+
+        {%- if s.discount_code != blank -%}
+          <copy-code class="promo__code" data-code="{{ s.discount_code | escape }}" data-copied="{{ 'sections.promo.copied' | t }}">
+            <span class="promo__code-label">{{ 'sections.promo.use_code' | t }}</span>
+            <code class="promo__code-value">{{ s.discount_code | escape }}</code>
+            <button type="button" class="link promo__code-copy" data-copy-button>
+              {{- 'sections.promo.copy' | t -}}
+              <span class="visually-hidden">: {{ s.discount_code | escape }}</span>
+            </button>
+          </copy-code>
+        {%- endif -%}
+
+        {%- if s.button_label_1 != blank or s.button_label_2 != blank -%}
+          <div class="promo__buttons">
+            {%- if s.button_label_1 != blank -%}
+              <a {% if s.button_link_1 != blank %}href="{{ s.button_link_1 }}"{% else %}role="link" aria-disabled="true"{% endif %} class="{{ primary_class }}">{{ s.button_label_1 | escape }}</a>
+            {%- endif -%}
+            {%- if s.button_label_2 != blank -%}
+              <a {% if s.button_link_2 != blank %}href="{{ s.button_link_2 }}"{% else %}role="link" aria-disabled="true"{% endif %} class="{{ secondary_class }}">{{ s.button_label_2 | escape }}</a>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Promotional banner",
+  "tag": "section",
+  "class": "section-promo-banner",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-3" },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        { "value": "image_left", "label": "Image left" },
+        { "value": "image_right", "label": "Image right" },
+        { "value": "background", "label": "Image behind text" },
+        { "value": "text_only", "label": "Text only" }
+      ],
+      "default": "image_left"
+    },
+    { "type": "image_picker", "id": "image", "label": "Image", "info": "Image left or right: 4:5 portrait, 1200 x 1500 px. Background: 16:9 landscape, 2400 x 1350 px." },
+    { "type": "image_picker", "id": "image_mobile", "label": "Mobile image", "info": "Optional. Shown on phones. Recommended: 4:5 portrait, 1080 x 1350 px." },
+    {
+      "type": "select",
+      "id": "image_size",
+      "label": "Image size",
+      "options": [
+        { "value": "original", "label": "Original image ratio" },
+        { "value": "ratio", "label": "Default" },
+        { "value": "x-small", "label": "X-Small" },
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "ratio",
+      "info": "Original image ratio shows each image uncropped in its own shape. X-Small to Large set a fixed image height and crop to fit. With the background layout it sets the banner height."
+    },
+    { "type": "range", "id": "overlay_opacity", "label": "Image overlay", "info": "Image behind text layout.", "min": 0, "max": 80, "step": 5, "unit": "%", "default": 35 },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Limited time" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "Up to 40% off the winter edit" },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        { "value": "h0", "label": "Display" },
+        { "value": "h1", "label": "Extra large" },
+        { "value": "h2", "label": "Large" }
+      ],
+      "default": "h1"
+    },
+    { "type": "richtext", "id": "text", "label": "Text", "default": "<p>Selected coats, knitwear and boots. While stocks last.</p>" },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        { "value": "start", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "start"
+    },
+    { "type": "header", "content": "Countdown" },
+    { "type": "checkbox", "id": "show_countdown", "label": "Show countdown", "default": true },
+    { "type": "text", "id": "end_date", "label": "Offer ends", "info": "Format YYYY-MM-DD HH:MM in your visitor's local time, for example 2026-12-31 23:59.", "default": "2026-12-31 23:59" },
+    { "type": "text", "id": "countdown_label", "label": "Countdown label", "default": "Offer ends in" },
+    {
+      "type": "select",
+      "id": "expired_behavior",
+      "label": "When the offer ends",
+      "options": [
+        { "value": "hide", "label": "Hide this section" },
+        { "value": "show", "label": "Show \"offer has ended\"" }
+      ],
+      "default": "hide"
+    },
+    { "type": "header", "content": "Discount" },
+    { "type": "text", "id": "discount_code", "label": "Discount code", "info": "Create the code in Discounts first. Customers can copy it with one tap.", "default": "WINTER40" },
+    { "type": "header", "content": "Buttons" },
+    { "type": "text", "id": "button_label_1", "label": "First button label", "default": "Shop the sale" },
+    { "type": "url", "id": "button_link_1", "label": "First button link" },
+    { "type": "text", "id": "button_label_2", "label": "Second button label" },
+    { "type": "url", "id": "button_link_2", "label": "Second button link" },
+    { "type": "checkbox", "id": "full_width", "label": "Full width", "default": false },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "presets": [{ "name": "Promotional banner" }]
+}
+{% endschema %}

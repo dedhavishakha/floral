@@ -1,0 +1,68 @@
+{% doc %}
+  Renders one product media item for the product gallery: image, Shopify-hosted video, external video or 3D model.
+
+  @param {media} media - The product media
+  @param {string} product_title - The product title, used as fallback alt text
+  @param {string} ratio - Media frame ratio class: portrait, portrait-45, tall, square or natural
+  @param {string} sizes - The sizes attribute for images
+  @param {number} index - The 1-based position of the media in the gallery
+  @param {boolean} [eager] - Load the image eagerly with high fetch priority
+  @param {boolean} [lightbox] - Make images open the full-screen viewer
+  @param {boolean} [hover_zoom] - Enable zoom on hover for images
+
+  @example
+  {% render 'product-media', media: media, product_title: product.title, ratio: 'portrait', sizes: '50vw', index: 1 %}
+{% enddoc %}
+{%- liquid
+  assign media_ratio = media.preview_image.aspect_ratio | default: 1
+  assign alt = media.alt | default: product_title | escape
+  assign widths = '360, 540, 720, 900, 1080, 1296, 1512, 1728, 2048'
+-%}
+{%- case media.media_type -%}
+  {%- when 'image' -%}
+    <div class="gallery__media media media--{{ ratio }}{% if hover_zoom %} gallery__zoomable{% endif %}" style="--ratio: {{ media_ratio }};">
+      {%- if eager -%}
+        {{ media | image_url: width: 2048 | image_tag: widths: widths, sizes: sizes, loading: 'eager', fetchpriority: 'high', alt: alt, class: 'gallery__image' }}
+      {%- else -%}
+        {{ media | image_url: width: 2048 | image_tag: widths: widths, sizes: sizes, loading: 'lazy', alt: alt, class: 'gallery__image' }}
+      {%- endif -%}
+      {%- if lightbox -%}
+        <button
+          type="button"
+          class="gallery__open"
+          data-lightbox-open="{{ media.id }}"
+          aria-haspopup="dialog"
+          aria-label="{{ 'products.gallery.open_lightbox' | t: index: index }}"
+        >
+          <span class="gallery__open-icon">{%- render 'icon', icon: 'zoom' -%}</span>
+        </button>
+      {%- endif -%}
+    </div>
+  {%- when 'video' -%}
+    <div class="gallery__media media media--{{ ratio }} gallery__media--video" style="--ratio: {{ media_ratio }};">
+      {{ media | video_tag: image_size: '1600x', controls: true, preload: 'none', playsinline: true, class: 'gallery__video' }}
+    </div>
+  {%- when 'external_video' -%}
+    <div class="gallery__media media media--{{ ratio }} gallery__media--video" style="--ratio: {{ media_ratio }};">
+      {{ media | external_video_url: rel: '0', enablejsapi: '1' | external_video_tag: class: 'gallery__iframe', loading: 'lazy' }}
+    </div>
+  {%- when 'model' -%}
+    <div class="gallery__media media media--{{ ratio }} gallery__media--model" style="--ratio: {{ media_ratio }};">
+      {{ media | model_viewer_tag: image_size: '1600x', reveal: 'interaction', toggleable: true, data-model-id: media.id }}
+    </div>
+    <button
+      type="button"
+      class="button button--secondary button--small gallery__xr"
+      data-shopify-xr
+      data-shopify-model3d-id="{{ media.id }}"
+      data-shopify-title="{{ product_title | escape }}"
+      data-shopify-xr-hidden
+    >
+      {%- render 'icon', icon: 'sparkle' -%}
+      {{ 'products.gallery.view_in_space' | t }}
+    </button>
+  {%- else -%}
+    <div class="gallery__media media media--{{ ratio }}" style="--ratio: {{ media_ratio }};">
+      {{ media | media_tag }}
+    </div>
+{%- endcase -%}
