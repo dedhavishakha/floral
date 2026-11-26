@@ -1,0 +1,218 @@
+{%- liquid
+  assign s = section.settings
+  assign cols_tablet = s.columns_desktop | at_most: 6
+  assign item_vw = 100 | divided_by: s.columns_desktop
+  assign img_sizes = '(min-width: 990px) ' | append: item_vw | append: 'vw, (min-width: 750px) 18vw, 30vw'
+  assign fallback_title = 'onboarding.collection_title' | t
+  assign count = section.blocks.size
+
+  # Near the top of the page the images load straight away
+  assign loading = 'lazy'
+  if section.index <= 3
+    assign loading = 'eager'
+  endif
+-%}
+<div
+  class="section category-circles category-circles--{{ s.shape }} category-circles--border-{{ s.border }} category-circles--focus-{{ s.image_focus }} category-circles--label-{{ s.label_size }} category-circles--m-{{ s.mobile_layout }}{% if s.label_uppercase %} category-circles--uppercase{% endif %}{% if count <= s.columns_desktop %} category-circles--fits-desktop{% endif %}{% if count <= s.columns_mobile %} category-circles--fits-mobile{% endif %} color-{{ s.color_scheme }}{% unless s.image_zoom %} zoom-off{% endunless %}"
+  style="--pt: {{ s.padding_top }}px; --pb: {{ s.padding_bottom }}px;"
+>
+  <carousel-slider class="page-width carousel carousel--peek-{{ s.carousel_peek }}">
+    {%- if s.heading != blank or s.eyebrow != blank -%}
+      <div class="section-header{% if s.header_alignment == 'center' %} section-header--center{% endif %}">
+        <div class="section-header__text">
+          {%- if s.eyebrow != blank -%}<p class="eyebrow">{{ s.eyebrow | escape }}</p>{%- endif -%}
+          {%- if s.heading != blank -%}<h2 class="h2">{{ s.heading }}</h2>{%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    <div
+      class="category-circles__viewport"
+      style="--cols-desktop: {{ s.columns_desktop }}; --cols-tablet: {{ cols_tablet }}; --cols-mobile: {{ s.columns_mobile }};"
+    >
+      {%- if s.show_arrows -%}
+        <div class="carousel__nav category-circles__nav">
+          <button type="button" class="icon-button icon-button--surface category-circles__arrow" data-carousel-prev aria-label="{{ 'general.accessibility.previous_slide' | t }}">
+            {%- render 'icon', icon: 'chevron-left' -%}
+          </button>
+          <button type="button" class="icon-button icon-button--surface category-circles__arrow" data-carousel-next aria-label="{{ 'general.accessibility.next_slide' | t }}">
+            {%- render 'icon', icon: 'chevron-right' -%}
+          </button>
+        </div>
+      {%- endif -%}
+
+      <ul class="carousel__track category-circles__track" data-carousel-track role="list">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign c = block.settings.collection
+            if block.settings.image != blank
+              assign circle_image = block.settings.image
+            elsif s.image_source == 'collection' and c.image != blank
+              assign circle_image = c.image
+            elsif c.products.first.featured_media
+              assign circle_image = c.products.first.featured_media.preview_image
+            else
+              assign circle_image = c.featured_image
+            endif
+            assign circle_title = block.settings.title | default: c.title | default: fallback_title
+            assign circle_link = block.settings.link | default: c.url | default: routes.collections_url
+            assign placeholder_number = forloop.index | modulo: 4 | plus: 1
+            assign placeholder_name = 'collection-apparel-' | append: placeholder_number
+          -%}
+          <li class="category-circle reveal" style="--reveal-index: {{ forloop.index0 | modulo: 8 }};" {{ block.shopify_attributes }}>
+            <a href="{{ circle_link }}" class="category-circle__link">
+              <span class="category-circle__media">
+                <span class="category-circle__frame">
+                  {%- if circle_image != blank -%}
+                    {{ circle_image | image_url: width: 600 | image_tag: widths: '150, 225, 300, 450, 600', sizes: img_sizes, loading: loading, alt: '', class: 'category-circle__image' }}
+                  {%- else -%}
+                    {{ placeholder_name | placeholder_svg_tag: 'category-circle__image placeholder-svg' }}
+                  {%- endif -%}
+                </span>
+              </span>
+              <span class="category-circle__title">{{ circle_title | escape }}</span>
+              {%- if s.show_count and c != blank -%}
+                <span class="category-circle__count">{{ 'sections.collection_list.product_count' | t: count: c.products_count }}</span>
+              {%- endif -%}
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
+
+    {%- if s.show_progress -%}
+      <div class="carousel__progress" aria-hidden="true"><span class="carousel__progress-bar"></span></div>
+    {%- endif -%}
+  </carousel-slider>
+</div>
+
+{% schema %}
+{
+  "name": "Category circles",
+  "tag": "section",
+  "class": "section-category-circles",
+  "max_blocks": 20,
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "Shop by category" },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "start", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "center"
+    },
+    { "type": "header", "content": "Images" },
+    {
+      "type": "select",
+      "id": "shape",
+      "label": "Shape",
+      "options": [
+        { "value": "circle", "label": "Circle" },
+        { "value": "rounded", "label": "Rounded square" },
+        { "value": "square", "label": "Square" }
+      ],
+      "default": "circle"
+    },
+    {
+      "type": "select",
+      "id": "border",
+      "label": "Border",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "thin", "label": "Thin line" },
+        { "value": "ring", "label": "Ring with a gap" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "select",
+      "id": "image_source",
+      "label": "Image",
+      "options": [
+        { "value": "collection", "label": "Collection image" },
+        { "value": "product", "label": "First product's image" }
+      ],
+      "default": "collection",
+      "info": "A category's own image, if you add one, is always used first."
+    },
+    {
+      "type": "select",
+      "id": "image_focus",
+      "label": "Image focus",
+      "options": [
+        { "value": "top", "label": "Top" },
+        { "value": "center", "label": "Center" },
+        { "value": "bottom", "label": "Bottom" }
+      ],
+      "default": "top",
+      "info": "The part of the image kept in view when it is cropped to the shape. Top keeps faces in model photos."
+    },
+    { "type": "checkbox", "id": "image_zoom", "label": "Zoom images on hover", "info": "Works when Theme settings > Animations > Image hover effect uses zoom.", "default": true },
+    { "type": "header", "content": "Layout" },
+    { "type": "range", "id": "columns_desktop", "label": "Categories per row on desktop", "min": 3, "max": 10, "step": 1, "default": 7 },
+    { "type": "range", "id": "columns_mobile", "label": "Categories per row on mobile", "min": 2, "max": 5, "step": 1, "default": 3 },
+    {
+      "type": "select",
+      "id": "mobile_layout",
+      "label": "Mobile layout",
+      "options": [
+        { "value": "carousel", "label": "Swipe sideways" },
+        { "value": "grid", "label": "Wrap into rows" }
+      ],
+      "default": "carousel"
+    },
+    { "type": "checkbox", "id": "show_arrows", "label": "Show arrows on hover", "info": "Desktop, when there are more categories than fit in a row.", "default": true },
+    { "type": "checkbox", "id": "carousel_peek", "label": "Show part of the next item", "default": true },
+    { "type": "checkbox", "id": "show_progress", "label": "Show progress bar", "default": false },
+    { "type": "header", "content": "Labels" },
+    {
+      "type": "select",
+      "id": "label_size",
+      "label": "Label size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "small"
+    },
+    { "type": "checkbox", "id": "label_uppercase", "label": "Uppercase labels", "default": true },
+    { "type": "checkbox", "id": "show_count", "label": "Show product count", "default": false },
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 32 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 32 }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category",
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "Collection" },
+        { "type": "image_picker", "id": "image", "label": "Image", "info": "Optional. Replaces the collection image. Square 1:1, at least 400 x 400 px. Portrait photos are cropped using Image focus." },
+        { "type": "text", "id": "title", "label": "Label", "info": "Optional. Replaces the collection title." },
+        { "type": "url", "id": "link", "label": "Link", "info": "Optional. Replaces the collection link." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Category circles",
+      "blocks": [
+        { "type": "category" },
+        { "type": "category" },
+        { "type": "category" },
+        { "type": "category" },
+        { "type": "category" },
+        { "type": "category" },
+        { "type": "category" }
+      ]
+    }
+  ],
+  "disabled_on": { "groups": ["header", "footer"] }
+}
+{% endschema %}

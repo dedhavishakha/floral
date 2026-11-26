@@ -3130,3 +3130,245 @@ a.brands__letter:focus-visible {
     aspect-ratio: var(--promo-ratio, 1.5);
   }
 }
+
+/* Category circles: round collection images with labels below; a swipeable row on phones.
+   --circle-size repeats the carousel column formula so the arrows sit at the middle of the circles. */
+.category-circles__viewport {
+  --gap-x: 0.875rem;
+  --circle-size: calc((100cqi - var(--gap-x) * (var(--cols-mobile, 4) - 1)) / (var(--cols-mobile, 4) + var(--carousel-peek, 0.3)));
+  position: relative;
+  container-type: inline-size;
+}
+
+/* Room for the focus outline (the list reset sets padding: 0, hence the extra class) */
+.category-circles .category-circles__track {
+  padding-block: 4px;
+}
+
+.category-circles--circle {
+  --circle-radius: 50%;
+}
+
+.category-circles--rounded {
+  --circle-radius: 18%;
+}
+
+.category-circles--square {
+  --circle-radius: var(--media-radius, 0px);
+}
+
+.category-circles--label-small {
+  --circle-label: 0.75rem;
+}
+
+.category-circles--label-medium {
+  --circle-label: 0.875rem;
+}
+
+.category-circles--label-large {
+  --circle-label: 1rem;
+}
+
+/* Everything fits: centre the row and drop the peek (server-side, so nothing shifts) */
+.category-circles carousel-slider[data-overflow='false'] .category-circles__track {
+  justify-content: center;
+}
+
+@media (max-width: 749px) {
+  .category-circles--fits-mobile {
+    --carousel-peek: 0;
+  }
+
+  .category-circles--fits-mobile .category-circles__track {
+    justify-content: center;
+  }
+
+  /* Wrap into rows */
+  .category-circles--m-grid {
+    --carousel-peek: 0;
+  }
+
+  .category-circles--m-grid .category-circles__track {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(var(--cols-mobile, 4), minmax(0, 1fr));
+    grid-auto-columns: auto;
+    row-gap: 1.25rem;
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+
+  .category-circles--m-grid .carousel__progress {
+    display: none;
+  }
+}
+
+@media (min-width: 750px) {
+  .category-circles__viewport {
+    --gap-x: 1.25rem;
+    --circle-size: calc((100cqi - var(--gap-x) * (var(--cols-tablet, 5) - 1)) / (var(--cols-tablet, 5) + var(--carousel-peek-tablet, 0.2)));
+  }
+
+  .category-circles--label-small {
+    --circle-label: 0.8125rem;
+  }
+
+  .category-circles--label-medium {
+    --circle-label: 0.9375rem;
+  }
+
+  .category-circles--label-large {
+    --circle-label: 1.0625rem;
+  }
+}
+
+@media (min-width: 990px) {
+  .category-circles__viewport {
+    --gap-x: 1.75rem;
+    --circle-size: calc((100cqi - var(--gap-x) * (var(--cols-desktop, 7) - 1)) / (var(--cols-desktop, 7) + var(--carousel-peek-desktop, 0.3)));
+  }
+
+  .category-circles--fits-desktop {
+    --carousel-peek-desktop: 0;
+  }
+
+  .category-circles--fits-desktop .category-circles__track {
+    justify-content: center;
+  }
+}
+
+.category-circle {
+  min-width: 0;
+}
+
+.category-circle__link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.625rem;
+  color: inherit;
+  text-align: center;
+  text-decoration: none;
+}
+
+.category-circle__link:focus-visible {
+  outline: none;
+}
+
+.category-circle__link:focus-visible .category-circle__media {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.category-circle__media {
+  display: block;
+  width: 100%;
+  border-radius: var(--circle-radius, 50%);
+}
+
+.category-circles--border-thin .category-circle__media {
+  border: 1px solid var(--color-border-strong);
+}
+
+.category-circles--border-ring .category-circle__media {
+  padding: 4px;
+  border: 1.5px solid var(--color-foreground);
+}
+
+.category-circle__frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: var(--circle-radius, 50%);
+  background: var(--color-surface);
+  isolation: isolate;
+}
+
+.category-circle__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: scale 1.2s var(--ease-out);
+}
+
+.category-circles--focus-top .category-circle__image {
+  object-position: 50% 12%;
+}
+
+.category-circles--focus-bottom .category-circle__image {
+  object-position: 50% 88%;
+}
+
+@media (hover: hover) {
+  .category-circle__link:hover .category-circle__image {
+    scale: var(--hover-zoom, 1);
+  }
+
+  .category-circle__link:hover .category-circle__title {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+  }
+}
+
+/* Labels may use the gap beside the circle, so a long single word is never split mid-word */
+.category-circle__title {
+  display: -webkit-box;
+  width: calc(100% + var(--gap-x, 0.875rem));
+  overflow: hidden;
+  font-size: var(--circle-label, 0.75rem);
+  font-weight: var(--font-body-weight-medium, 500);
+  line-height: 1.3;
+  overflow-wrap: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.category-circles--uppercase .category-circle__title {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.category-circle__count {
+  margin-top: -0.375rem;
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
+/* Arrows: on hover, centred on the circles, hidden at the ends and on touch screens */
+.category-circles__nav {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(4px + var(--circle-size) / 2);
+  z-index: 2;
+  justify-content: space-between;
+  translate: 0 -50%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.category-circles__viewport:hover .category-circles__nav,
+.category-circles__nav:focus-within {
+  opacity: 1;
+}
+
+.category-circles__arrow {
+  width: 2.5rem;
+  height: 2.5rem;
+  pointer-events: auto;
+}
+
+.category-circles__arrow[disabled] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (hover: none) {
+  .category-circles__nav {
+    display: none;
+  }
+}
