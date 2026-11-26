@@ -333,7 +333,7 @@
       "settings": {
         "color_scheme": "scheme-1",
         "eyebrow": "Shop by category",
-        "heading": "Find your next favorite",
+        "heading": "Find your favorite",
         "header_alignment": "start",
         "layout": "carousel",
         "columns_desktop": 3,
@@ -451,7 +451,7 @@
         "heading": "Shop the video",
         "description": "",
         "header_alignment": "start",
-        "columns_desktop": 4,
+        "columns_desktop": 5,
         "carousel_peek": true,
         "show_progress": false,
         "autoplay": true,
