@@ -17,6 +17,7 @@
           "settings": {
             "position": 7,
             "wide": true,
+            "image": "shopify://shop_images/mf-social-4.jpg",
             "eyebrow": "Campaign",
             "heading": "The new season edit",
             "text": "<p>Soft tailoring, easy knits and pieces made to layer.</p>",
