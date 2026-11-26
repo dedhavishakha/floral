@@ -93,43 +93,6 @@
         "padding_bottom": 0
       }
     },
-    "hero": {
-      "type": "hero",
-      "disabled": true,
-      "settings": {
-        "color_scheme": "scheme-1",
-        "layout": "full",
-        "image": "shopify://shop_images/home-hero.jpg",
-        "image_mobile": "shopify://shop_images/home-hero-mobile.jpg",
-        "image_focus": "top",
-        "overlay_opacity": 0,
-        "media_text": "dark",
-        "image_position": "left",
-        "eyebrow": "The new season",
-        "heading": "The art of ease",
-        "heading_size": "h0",
-        "text": "Relaxed tailoring, fluid silk and soft cashmere in natural fibres, cut to move with you from morning to evening.",
-        "button_label_1": "Shop new arrivals",
-        "button_link_1": "shopify://collections/new-arrivals",
-        "button_style_1": "primary",
-        "button_label_2": "Explore collections",
-        "button_link_2": "shopify://collections",
-        "button_style_2": "secondary",
-        "content_position": "bottom-left",
-        "text_alignment": "start",
-        "panel_1_title": "Women",
-        "panel_1_label": "Shop now",
-        "panel_1_link": "",
-        "panel_2_title": "Men",
-        "panel_2_label": "Shop now",
-        "panel_2_link": "",
-        "height": "full",
-        "mobile_height": "large",
-        "card_color_scheme": "",
-        "padding_top": 0,
-        "padding_bottom": 0
-      }
-    },
     "marquee": {
       "type": "scrolling-text",
       "blocks": {
@@ -179,6 +142,153 @@
         "show_borders": false,
         "padding_top": 0,
         "padding_bottom": 0
+      }
+    },
+    "hero": {
+      "type": "hero",
+      "disabled": true,
+      "settings": {
+        "color_scheme": "scheme-1",
+        "layout": "full",
+        "image": "shopify://shop_images/home-hero.jpg",
+        "image_mobile": "shopify://shop_images/home-hero-mobile.jpg",
+        "image_focus": "top",
+        "overlay_opacity": 0,
+        "media_text": "dark",
+        "image_position": "left",
+        "eyebrow": "The new season",
+        "heading": "The art of ease",
+        "heading_size": "h0",
+        "text": "Relaxed tailoring, fluid silk and soft cashmere in natural fibres, cut to move with you from morning to evening.",
+        "button_label_1": "Shop new arrivals",
+        "button_link_1": "shopify://collections/new-arrivals",
+        "button_style_1": "primary",
+        "button_label_2": "Explore collections",
+        "button_link_2": "shopify://collections",
+        "button_style_2": "secondary",
+        "content_position": "bottom-left",
+        "text_alignment": "start",
+        "panel_1_title": "Women",
+        "panel_1_label": "Shop now",
+        "panel_1_link": "",
+        "panel_2_title": "Men",
+        "panel_2_label": "Shop now",
+        "panel_2_link": "",
+        "height": "full",
+        "mobile_height": "large",
+        "card_color_scheme": "",
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "category-circles": {
+      "type": "category-circles",
+      "blocks": {
+        "category-1": {
+          "type": "category",
+          "settings": {
+            "collection": "new-arrivals",
+            "title": "New in",
+            "link": ""
+          }
+        },
+        "category-2": {
+          "type": "category",
+          "settings": {
+            "collection": "bestsellers",
+            "title": "Bestsellers",
+            "link": ""
+          }
+        },
+        "category-3": {
+          "type": "category",
+          "settings": {
+            "collection": "dresses",
+            "title": "Dresses",
+            "link": ""
+          }
+        },
+        "category-4": {
+          "type": "category",
+          "settings": {
+            "collection": "tops-blouses",
+            "title": "Tops",
+            "link": ""
+          }
+        },
+        "category-5": {
+          "type": "category",
+          "settings": {
+            "collection": "trousers",
+            "title": "Trousers",
+            "link": ""
+          }
+        },
+        "category-6": {
+          "type": "category",
+          "settings": {
+            "collection": "the-executive-foundation",
+            "title": "Tailoring",
+            "link": ""
+          }
+        },
+        "category-7": {
+          "type": "category",
+          "settings": {
+            "collection": "knitwear-layers",
+            "title": "Knitwear",
+            "link": ""
+          }
+        },
+        "category-8": {
+          "type": "category",
+          "settings": {
+            "collection": "sets-loungewear",
+            "title": "Loungewear",
+            "link": ""
+          }
+        },
+        "category-9": {
+          "type": "category",
+          "settings": {
+            "collection": "sale",
+            "title": "Sale",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "category-1",
+        "category-2",
+        "category-3",
+        "category-4",
+        "category-5",
+        "category-6",
+        "category-7",
+        "category-8",
+        "category-9"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "eyebrow": "",
+        "heading": "",
+        "header_alignment": "center",
+        "shape": "circle",
+        "border": "none",
+        "image_source": "collection",
+        "image_focus": "top",
+        "image_zoom": true,
+        "columns_desktop": 7,
+        "columns_mobile": 3,
+        "mobile_layout": "carousel",
+        "show_arrows": true,
+        "carousel_peek": true,
+        "show_progress": false,
+        "label_size": "small",
+        "label_uppercase": true,
+        "show_count": false,
+        "padding_top": 32,
+        "padding_bottom": 24
       }
     },
     "categories": {
@@ -1329,114 +1439,13 @@
         "padding_top": 64,
         "padding_bottom": 64
       }
-    },
-    "category-circles": {
-      "type": "category-circles",
-      "blocks": {
-        "category-1": {
-          "type": "category",
-          "settings": {
-            "collection": "new-arrivals",
-            "title": "New in"
-          }
-        },
-        "category-2": {
-          "type": "category",
-          "settings": {
-            "collection": "bestsellers",
-            "title": "Bestsellers"
-          }
-        },
-        "category-3": {
-          "type": "category",
-          "settings": {
-            "collection": "dresses",
-            "title": "Dresses"
-          }
-        },
-        "category-4": {
-          "type": "category",
-          "settings": {
-            "collection": "tops-blouses",
-            "title": "Tops"
-          }
-        },
-        "category-5": {
-          "type": "category",
-          "settings": {
-            "collection": "trousers",
-            "title": "Trousers"
-          }
-        },
-        "category-6": {
-          "type": "category",
-          "settings": {
-            "collection": "the-executive-foundation",
-            "title": "Tailoring"
-          }
-        },
-        "category-7": {
-          "type": "category",
-          "settings": {
-            "collection": "knitwear-layers",
-            "title": "Knitwear"
-          }
-        },
-        "category-8": {
-          "type": "category",
-          "settings": {
-            "collection": "sets-loungewear",
-            "title": "Loungewear"
-          }
-        },
-        "category-9": {
-          "type": "category",
-          "settings": {
-            "collection": "sale",
-            "title": "Sale"
-          }
-        }
-      },
-      "block_order": [
-        "category-1",
-        "category-2",
-        "category-3",
-        "category-4",
-        "category-5",
-        "category-6",
-        "category-7",
-        "category-8",
-        "category-9"
-      ],
-      "settings": {
-        "color_scheme": "scheme-1",
-        "eyebrow": "",
-        "heading": "",
-        "header_alignment": "center",
-        "shape": "circle",
-        "border": "none",
-        "image_source": "collection",
-        "image_focus": "top",
-        "image_zoom": true,
-        "columns_desktop": 7,
-        "columns_mobile": 3,
-        "mobile_layout": "carousel",
-        "show_arrows": true,
-        "carousel_peek": true,
-        "show_progress": false,
-        "label_size": "small",
-        "label_uppercase": true,
-        "show_count": false,
-        "padding_top": 32,
-        "padding_bottom": 24
-      }
     }
   },
   "order": [
     "slideshow",
+    "marquee",
     "hero",
     "category-circles",
-    "marquee",
     "categories",
     "tabs",
     "shoppable-videos",
