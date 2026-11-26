@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
@@ -12,6 +21,7 @@
             "heading": "The new season edit",
             "text": "<p>Soft tailoring, easy knits and pieces made to layer.</p>",
             "link_label": "Discover",
+            "link": "",
             "color_scheme": "scheme-3"
           }
         }
@@ -20,6 +30,7 @@
         "promo"
       ],
       "settings": {
+        "color_scheme": "scheme-1",
         "show_banner": true,
         "banner_layout": "minimal",
         "show_image": true,
@@ -29,13 +40,15 @@
         "columns_desktop": 4,
         "columns_mobile": "2",
         "card_style": "inherit",
+        "show_swatches": "inherit",
+        "show_badges": "inherit",
         "image_ratio": "inherit",
-        "pagination_type": "load_more",
+        "image_zoom": true,
+        "pagination_type": "infinite",
         "enable_filtering": true,
         "filter_layout": "sidebar",
         "enable_sorting": true,
         "show_column_switcher": true,
-        "color_scheme": "scheme-1",
         "padding_top": 32,
         "padding_bottom": 64
       }
